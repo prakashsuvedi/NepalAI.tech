@@ -5,6 +5,8 @@ export interface Translations {
     caseStudies: string;
     services: string;
     toolsDirectory: string;
+    automation: string;
+    dailyTools: string;
     studio: string;
     stackCalculator: string;
     bookConsultation: string;
@@ -109,6 +111,29 @@ export interface Translations {
     visitOfficial: string;
     toolsFound: string;
   };
+  dailyTools: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    tabLetter: string;
+    tabUnicode: string;
+    tabTax: string;
+    tabMarket: string;
+    tabWorkflow: string;
+  };
+  automation: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    pipelineSimulatorTitle: string;
+    workflowPills: {
+      whatsappCrm: string;
+      docOcr: string;
+      meetingVoice: string;
+      marketAlerts: string;
+      citizenGov: string;
+    };
+  };
   faq: {
     badge: string;
     title: string;
@@ -180,6 +205,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       caseStudies: 'Case Studies',
       services: 'Consulting',
       toolsDirectory: 'AI Tools Directory',
+      automation: 'AI Automation',
+      dailyTools: 'Daily AI Tools',
       studio: 'NepalAI Studio',
       stackCalculator: 'Stack Calculator',
       bookConsultation: 'Book Consultation',
@@ -295,6 +322,31 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       visitOfficial: 'Official Site',
       toolsFound: 'tools available',
     },
+    dailyTools: {
+      badge: 'Essential Daily AI Utilities',
+      title: 'Practical AI Tools for Daily Nepali Life',
+      subtitle:
+        'Instant, browser-ready utilities crafted for citizens, freelancers, students, and businesses in Nepal — with zero setup required.',
+      tabLetter: 'Formal Letter Builder',
+      tabUnicode: 'Devanagari Polish',
+      tabTax: 'Dollar Card & Tax',
+      tabMarket: 'Kalimati Produce',
+      tabWorkflow: 'Automation Blueprint',
+    },
+    automation: {
+      badge: 'Smart Workflow Automation',
+      title: 'Automated AI Pipelines for Nepal Workflows',
+      subtitle:
+        'Eliminate repetitive manual tasks across WhatsApp, Nepali document OCR, voice meeting minutes, and financial alerts with zero-code AI triggers.',
+      pipelineSimulatorTitle: 'Interactive Nepal Workflow Simulator',
+      workflowPills: {
+        whatsappCrm: 'WhatsApp / Viber Order Bot',
+        docOcr: 'Nagarikta & Bill OCR to Sheets',
+        meetingVoice: 'Nepali Voice-to-Action Items',
+        marketAlerts: 'Kalimati & NEPSE Auto-Broadcaster',
+        citizenGov: 'Sarkari Sahayata Checklist Bot',
+      },
+    },
     faq: {
       badge: 'Clear Answers for Nepal',
       title: 'Frequently Asked Questions',
@@ -371,6 +423,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       caseStudies: 'केस स्टडीज',
       services: 'परामर्श सेवाहरू',
       toolsDirectory: 'टुल्स डाइरेक्टरी',
+      automation: 'अटोमेसन',
+      dailyTools: 'दैनिक टुल्स',
       studio: 'नेपाल एआई स्टुडियो',
       stackCalculator: 'स्ट्याक क्याल्कुलेटर',
       bookConsultation: 'निःशुल्क परामर्श',
@@ -485,6 +539,31 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewStack: 'स्ट्याक समीक्षा गर्नुहोस्',
       visitOfficial: 'आधिकारिक साइट',
       toolsFound: 'टुल्स उपलब्ध',
+    },
+    dailyTools: {
+      badge: 'दैनिक जीवनका अत्यावश्यक एआई टुल्स',
+      title: 'नेपाली जनजीवनका लागि व्यावहारिक एआई उपकरणहरू',
+      subtitle:
+        'नागरिक, विद्यार्थी, फ्रिलान्सर र व्यवसायीहरूका लागि तुरुन्तै चलाउन सकिने व्यावहारिक नेपाली एआई टुल्स।',
+      tabLetter: 'नेपाली निवेदन र सिफारिस',
+      tabUnicode: 'देवनागरी व्याकरण शुद्धिकरण',
+      tabTax: 'डलर कार्ड र कर क्याल्कुलेटर',
+      tabMarket: 'कालिमाटी तरकारी भाउ',
+      tabWorkflow: 'अटोमेसन रेसिपी जेनेरेटर',
+    },
+    automation: {
+      badge: 'स्मार्ट कार्यतालिका अटोमेसन',
+      title: 'नेपाली परिवेशका लागि निर्मित एआई अटोमेसन पाइपलाइन',
+      subtitle:
+        'ह्वाट्सएप अर्डर, देवनागरी कागजात ओसीआर, अडियो माइन्युट र बजार मूल्य प्रसारणलाई स्वचालित बनाउनुहोस्।',
+      pipelineSimulatorTitle: 'अटोमेसन पाइपलाइन सिमुलेटर',
+      workflowPills: {
+        whatsappCrm: 'ह्वाट्सएप / भाइबर अर्डर बोट',
+        docOcr: 'नागरिकता तथा बिल ओसीआर',
+        meetingVoice: 'नेपाली अडियो माइन्युट विश्लेषण',
+        marketAlerts: 'कालिमाटी र नेप्से अटो-अलर्ट',
+        citizenGov: 'सरकारी सेवा सहयात्री गाइड',
+      },
     },
     faq: {
       badge: 'नेपालका लागि स्पष्ट उत्तरहरू',

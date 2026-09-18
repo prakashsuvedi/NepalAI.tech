@@ -168,5 +168,61 @@ export const NEPAL_AI_TOOLS: NepalAITool[] = [
     popularityInNepal: 'Essential',
     officialUrl: 'https://canva.com',
     keyCapability: 'Social media graphics, presentations, Nepali fonts'
+  },
+  {
+    id: 'n8n-automation',
+    name: 'n8n On-Premise Workflow AI',
+    category: 'Automation',
+    description: 'Self-hostable, fair-code workflow automation engine with native AI agents, LangChain nodes, and zero data export fees.',
+    worksInNepal: 'direct',
+    nepalPaymentStatus: 'free-tier-available',
+    paymentDetails: '100% Free self-hosted on local Ubuntu/Docker in Nepal. Cloud version payable via Dollar Card.',
+    monthlyPriceUsd: 0,
+    freeTierAvailable: true,
+    popularityInNepal: 'Top 1%',
+    officialUrl: 'https://n8n.io',
+    keyCapability: 'Air-gapped enterprise automation, custom webhooks, zero subscription cost'
+  },
+  {
+    id: 'zapier-ai',
+    name: 'Zapier Central & AI Tables',
+    category: 'Automation',
+    description: 'Autonomous AI bots executing actions across 6,000+ apps, Google Workspace, and CRM databases.',
+    worksInNepal: 'direct',
+    nepalPaymentStatus: 'dollar-card-only',
+    paymentDetails: 'Free plan with 100 tasks/mo. Starter plan $19.99/mo payable with NRB Dollar Card.',
+    monthlyPriceUsd: 20,
+    freeTierAvailable: true,
+    popularityInNepal: 'Essential',
+    officialUrl: 'https://zapier.com',
+    keyCapability: 'Cross-app automated triggers, Google Sheets sync, lead routing'
+  },
+  {
+    id: 'deepseek-r1',
+    name: 'DeepSeek R1 / V3',
+    category: 'LLM & Writing',
+    description: 'Ultra-low cost high-reasoning open model with near-zero latency, exceptional math and Devanagari logic.',
+    worksInNepal: 'direct',
+    nepalPaymentStatus: 'free-tier-available',
+    paymentDetails: 'Completely free chat web interface in Nepal. API billed at fraction of standard token prices.',
+    monthlyPriceUsd: 0,
+    freeTierAvailable: true,
+    popularityInNepal: 'Trending',
+    officialUrl: 'https://chat.deepseek.com',
+    keyCapability: 'Complex math/logic reasoning, ultra-fast coding, open model API'
+  },
+  {
+    id: 'ollama-local',
+    name: 'Ollama Sovereign Runner',
+    category: 'Coding',
+    description: 'Run Llama 3.3, Mistral, and DeepSeek locally on your Mac/Linux/Windows machine without internet or subscriptions.',
+    worksInNepal: 'direct',
+    nepalPaymentStatus: 'free-tier-available',
+    paymentDetails: '100% Free and Open Source. Runs completely offline in Nepal with zero API charges.',
+    monthlyPriceUsd: 0,
+    freeTierAvailable: true,
+    popularityInNepal: 'Top 1%',
+    officialUrl: 'https://ollama.com',
+    keyCapability: '100% offline private inference, sovereign Nepali data security'
   }
 ];

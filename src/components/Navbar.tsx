@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop Navigation */}
         <nav
-          className="hidden lg:flex items-center gap-5 text-xs"
+          className="hidden xl:flex items-center gap-4 text-xs font-medium"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="https://studio.nepalai.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all shadow-sm group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shadow-xs group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
               isDark
                 ? 'border-indigo-500/40 bg-indigo-950/40 text-indigo-200 hover:border-indigo-400 hover:text-white'
                 : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:border-indigo-500 hover:bg-indigo-100'
@@ -81,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <a
             href="#about"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to About section"
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <a
             href="#case-studies"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to Case Studies section"
@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <a
             href="#consulting"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to AI Consulting Services section"
@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <a
             href="#tools-directory"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to Verified AI Tools Directory"
@@ -120,8 +120,28 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
           <a
+            href="#automation"
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
+              isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to AI Automation Section"
+          >
+            {t.nav.automation}
+          </a>
+
+          <a
+            href="#daily-tools"
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
+              isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to Daily Essential AI Tools"
+          >
+            {t.nav.dailyTools}
+          </a>
+
+          <a
             href="#faq"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to FAQ section"
@@ -131,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <a
             href="#contact"
-            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
             } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Navigate to Contact section"
@@ -141,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         {/* Action Controls, Language Toggle & Theme Toggle */}
-        <div className="hidden lg:flex items-center gap-2.5">
+        <div className="hidden xl:flex items-center gap-2">
           
           {/* LANGUAGE SEGMENTED SWITCHER */}
           <div
@@ -262,7 +282,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Controls */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex xl:hidden items-center gap-2">
           {/* Mobile Language Switcher Button */}
           <button
             type="button"
@@ -329,7 +349,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileOpen && (
         <div
           id="mobile-nav-menu"
-          className={`border-b px-4 py-4 md:hidden space-y-3 text-xs ${
+          className={`border-b px-4 py-4 xl:hidden space-y-3 text-xs ${
             isDark ? 'border-white/10 bg-[#07090e] text-slate-200' : 'border-slate-200 bg-white text-slate-800'
           }`}
           role="region"
@@ -424,6 +444,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="View AI Tools Directory"
           >
             {t.nav.toolsDirectory}
+          </a>
+
+          <a
+            href="#automation"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View AI Automation Workflows"
+          >
+            {t.automation?.title || 'Automation'}
+          </a>
+
+          <a
+            href="#daily-tools"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View Daily Essential Utilities"
+          >
+            {t.dailyTools?.title || 'Daily Utilities'}
           </a>
 
           <a

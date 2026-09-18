@@ -11,6 +11,8 @@ import { StudioBanner } from './components/StudioBanner';
 import { CaseStudiesSection } from './components/CaseStudiesSection';
 import { ConsultingSection } from './components/ConsultingSection';
 import { NepalToolsDirectory } from './components/NepalToolsDirectory';
+import { AutomationSection } from './components/AutomationSection';
+import { DailyEssentialTools } from './components/DailyEssentialTools';
 import { FAQSection } from './components/FAQSection';
 import { ContactSection } from './components/ContactSection';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
@@ -252,13 +254,27 @@ export default function App() {
           onOpenAdminPricing={() => setIsAdminPanelOpen(true)}
         />
 
-        {/* Section: Verified AI Tools Directory & Payment Guide for Nepal */}
+        {/* Section: Verified AI Tools Directory & Payment Guide for Nepal with Tooltip Overlays */}
         <NepalToolsDirectory
           theme={theme}
           language={language}
           selectedStack={selectedStack}
           onToggleStack={handleToggleStack}
           onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
+        />
+
+        {/* Section: AI Automation Workflows for Nepal Businesses */}
+        <AutomationSection
+          theme={theme}
+          language={language}
+          onOpenConsultation={handleOpenConsultation}
+        />
+
+        {/* Section: Essential Daily AI Utilities (Letter Builder, Unicode, Tax, Market) */}
+        <DailyEssentialTools
+          theme={theme}
+          language={language}
+          onOpenConsultation={handleOpenConsultation}
         />
 
         {/* Section: FAQ Accordion (eSewa/Khalti, Dollar Card, Consulting, Devanagari OCR) */}
