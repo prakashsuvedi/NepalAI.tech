@@ -120,6 +120,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
           <a
+            href="#free-ai-tools"
+            className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
+              isDark ? 'text-emerald-400 hover:text-emerald-300 font-semibold' : 'text-emerald-700 hover:text-emerald-800 font-semibold'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to Free AI Tools, APIs and Data Extraction Guide"
+          >
+            {t.nav.freeTools}
+          </a>
+
+          <a
             href="#automation"
             className={`transition-colors whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
               isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
@@ -444,6 +454,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="View AI Tools Directory"
           >
             {t.nav.toolsDirectory}
+          </a>
+
+          <a
+            href="#free-ai-tools"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 text-emerald-400 font-semibold hover:text-emerald-300 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View Free AI Tools, APIs and Data Extraction Guide"
+          >
+            {t.nav.freeTools}
           </a>
 
           <a

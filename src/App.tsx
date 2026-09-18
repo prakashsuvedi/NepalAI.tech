@@ -11,6 +11,7 @@ import { StudioBanner } from './components/StudioBanner';
 import { CaseStudiesSection } from './components/CaseStudiesSection';
 import { ConsultingSection } from './components/ConsultingSection';
 import { NepalToolsDirectory } from './components/NepalToolsDirectory';
+import { FreeAIToolsSection } from './components/FreeAIToolsSection';
 import { AutomationSection } from './components/AutomationSection';
 import { DailyEssentialTools } from './components/DailyEssentialTools';
 import { FAQSection } from './components/FAQSection';
@@ -22,6 +23,7 @@ import { ConsultationModal } from './components/ConsultationModal';
 import { AdminConfigModal } from './components/AdminConfigModal';
 import { BackToTop } from './components/BackToTop';
 import { Footer } from './components/Footer';
+import { ToastProvider } from './context/ToastContext';
 import { CaseStudy, ConsultingOffering, HeroConfig, ThemeMode, Language } from './types';
 import { CONSULTING_OFFERINGS } from './data/consultingOfferings';
 import { DEFAULT_HERO_CONFIG } from './data/defaultHeroConfig';
@@ -195,14 +197,15 @@ export default function App() {
   const isDark = theme === 'dark';
 
   return (
-    <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${
-        isDark
-          ? 'bg-[#06080e] text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-200'
-          : 'bg-[#f8fafc] text-slate-900 selection:bg-emerald-500/20 selection:text-emerald-900'
-      }`}
-    >
-      {/* Navigation Header with Theme Toggle, Language Switcher & Admin Customizer */}
+    <ToastProvider>
+      <div
+        className={`min-h-screen flex flex-col transition-colors duration-300 ${
+          isDark
+            ? 'bg-[#06080e] text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-200'
+            : 'bg-[#f8fafc] text-slate-900 selection:bg-emerald-500/20 selection:text-emerald-900'
+        }`}
+      >
+        {/* Navigation Header with Theme Toggle, Language Switcher & Admin Customizer */}
       <Navbar
         theme={theme}
         language={language}
@@ -261,6 +264,13 @@ export default function App() {
           selectedStack={selectedStack}
           onToggleStack={handleToggleStack}
           onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
+        />
+
+        {/* Section: Free AI Tools, APIs Guide & Live Multimodal Data Extractor */}
+        <FreeAIToolsSection
+          theme={theme}
+          language={language}
+          onOpenConsultation={handleOpenConsultation}
         />
 
         {/* Section: AI Automation Workflows for Nepal Businesses */}
@@ -345,6 +355,7 @@ export default function App() {
         onSaveOfferings={handleSaveOfferings}
         onResetOfferings={handleResetOfferings}
       />
-    </div>
+      </div>
+    </ToastProvider>
   );
 }

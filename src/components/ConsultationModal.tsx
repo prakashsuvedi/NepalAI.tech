@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Send, CheckCircle2, ShieldCheck, Mail, MessageSquare, Phone, Building, User } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   onClose,
   prefilledService = '',
 }) => {
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [organization, setOrganization] = useState('');
@@ -40,9 +42,46 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const existingLeads = JSON.parse(localStorage.getItem('nepalai_consultation_leads') || '[]');
+      const newLead = {
+        name,
+        email,
+        organization,
+        phone,
+        budgetNpr,
+        projectScope,
+        service: prefilledService || 'General Consultation',
+        submittedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('nepalai_consultation_leads', JSON.stringify([...existingLeads, newLead]));
+      
+      // Post to backend contact API
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          phone,
+          organization,
+          serviceCategory: prefilledService || 'Consulting Modal',
+          budgetRange: budgetNpr,
+          message: projectScope
+        }),
+      }).catch(err => console.log('Consultation lead api notice:', err));
+    } catch (err) {
+      console.log('Lead persistence note:', err);
+    }
     setSubmitted(true);
+    showToast(
+      'Advisory Session Scheduled!',
+      `Thank you ${name || 'there'}! Your briefing for ${prefilledService || 'AI Advisory'} has been recorded. We will connect shortly.`,
+      'success',
+      6000
+    );
   };
 
   const handleSendEmail = () => {

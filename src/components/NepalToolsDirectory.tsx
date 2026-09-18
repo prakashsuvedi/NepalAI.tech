@@ -158,7 +158,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
           
           {/* Search */}
           <div className="relative md:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
               id="tools-search-input"
               type="text"
@@ -166,7 +166,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               placeholder={t.tools.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full rounded-xl border pl-9 pr-3.5 py-2 text-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors ${
+              className={`w-full min-h-[44px] rounded-xl border pl-10 pr-3.5 py-2.5 text-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors ${
                 isDark
                   ? 'border-white/10 bg-black/40 text-white placeholder-slate-500 focus:border-white/30'
                   : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-500 shadow-xs'
@@ -174,9 +174,9 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
             />
           </div>
 
-          {/* Quick Payment Filter */}
+          {/* Quick Payment Filter with 44px touch targets */}
           <div
-            className="flex flex-wrap items-center gap-1.5 text-xs"
+            className="flex flex-wrap items-center gap-2 text-xs"
             role="group"
             aria-label="Payment method filter"
           >
@@ -194,12 +194,12 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                 type="button"
                 aria-pressed={filterType === f.id}
                 onClick={() => setFilterType(f.id as any)}
-                className={`px-3 py-1.5 rounded-lg transition-colors text-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-xl transition-colors text-xs font-medium flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   filterType === f.id
                     ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
                     : isDark
-                    ? 'bg-white/[0.02] border border-white/[0.06] text-slate-400 hover:text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-950 shadow-xs'
+                    ? 'bg-white/[0.03] border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-50 shadow-xs'
                 }`}
               >
                 {f.label}
@@ -211,7 +211,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
 
         {/* Categories */}
         <div
-          className="mt-4 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs"
+          className="mt-4 flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none text-xs"
           role="group"
           aria-label="Tool categories filter"
         >
@@ -221,11 +221,11 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               type="button"
               aria-pressed={category === c}
               onClick={() => setCategory(c)}
-              className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              className={`min-h-[42px] px-4 py-2 rounded-xl whitespace-nowrap transition-colors flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 category === c
                   ? isDark
-                    ? 'bg-white/10 text-emerald-400 border border-emerald-500/40'
-                    : 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold'
+                    ? 'bg-white/10 text-emerald-400 border border-emerald-500/40 font-bold'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold'
                   : isDark
                   ? 'bg-black/20 text-slate-400 hover:text-slate-200'
                   : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900'
@@ -247,8 +247,8 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
           </span>
         </div>
 
-        {/* Modular Grid: Clean 3-Column Bento Cards with Tooltip Overlays */}
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Modular Responsive Grid: Clean 1-col on mobile, 2-col on sm/tablet, 3-col on lg/desktop */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filteredTools.map((tool) => {
             const isSelected = selectedStack.includes(tool.id);
             const npr = Math.round(tool.monthlyPriceUsd * exchangeRate);
@@ -354,18 +354,18 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                 </div>
 
                 {/* Bottom Card Actions */}
-                <div className="mt-4 pt-3 border-t border-slate-500/15 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-slate-500/15 flex items-center justify-between gap-2">
                   <a
                     href={tool.officialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Visit official website for ${tool.name} (opens in new tab)`}
-                    className={`text-[11px] flex items-center gap-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-1 ${
-                      isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                    className={`min-h-[44px] px-2.5 py-2 text-xs flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl transition-colors ${
+                      isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     <span>{t.tools.visitOfficial}</span>
-                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
 
                   <button
@@ -373,7 +373,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                     onClick={() => onToggleStack(tool.id)}
                     aria-label={isSelected ? `Remove ${tool.name} from stack` : `Add ${tool.name} to stack`}
                     aria-pressed={isSelected}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                       isSelected
                         ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
                         : isDark
@@ -383,14 +383,14 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   >
                     {isSelected ? (
                       <>
-                        <Check className="h-3 w-3" aria-hidden="true" />
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
                         <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
                           {t.tools.inStack}
                         </span>
                       </>
                     ) : (
                       <>
-                        <Plus className="h-3 w-3" aria-hidden="true" />
+                        <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                         <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
                           {t.tools.addToStack}
                         </span>

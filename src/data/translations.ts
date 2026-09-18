@@ -5,6 +5,7 @@ export interface Translations {
     caseStudies: string;
     services: string;
     toolsDirectory: string;
+    freeTools: string;
     automation: string;
     dailyTools: string;
     studio: string;
@@ -205,6 +206,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       caseStudies: 'Case Studies',
       services: 'Consulting',
       toolsDirectory: 'AI Tools Directory',
+      freeTools: 'Free APIs & Data',
       automation: 'AI Automation',
       dailyTools: 'Daily AI Tools',
       studio: 'NepalAI Studio',
@@ -423,6 +425,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       caseStudies: 'केस स्टडीज',
       services: 'परामर्श सेवाहरू',
       toolsDirectory: 'टुल्स डाइरेक्टरी',
+      freeTools: 'निःशुल्क एआई र डेटा',
       automation: 'अटोमेसन',
       dailyTools: 'दैनिक टुल्स',
       studio: 'नेपाल एआई स्टुडियो',
