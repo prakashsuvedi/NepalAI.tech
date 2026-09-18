@@ -16,14 +16,13 @@ jobs:
       - name: 📥 Checkout repository code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js 20
+      - name: ⚙️ Setup Node.js 22 (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
 
       - name: 📦 Install dependencies
-        run: npm ci || npm install
+        run: npm install --no-audit --no-fund
 
       - name: 🔨 Build Production Assets (Vite)
         run: npm run build
@@ -40,9 +39,10 @@ jobs:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-          CPANEL_DEPLOY_DIR: ${{ secrets.CPANEL_DEPLOY_DIR || 'public_html' }}
+          CPANEL_DEPLOY_DIR: ${{ secrets.CPANEL_DEPLOY_DIR || 'nepalai.tech' }}
         run: |
           echo "🌐 Connecting to cPanel at https://$CPANEL_HOST:2083 ..."
+          echo "🎯 Target deployment directory: $CPANEL_DEPLOY_DIR"
           
           # 1. Upload deploy.zip to cPanel using UAPI Fileman
           echo "📤 Uploading build archive to $CPANEL_DEPLOY_DIR..."
