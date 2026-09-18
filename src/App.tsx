@@ -6,10 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { AboutSection } from './components/AboutSection';
 import { StudioBanner } from './components/StudioBanner';
 import { CaseStudiesSection } from './components/CaseStudiesSection';
 import { ConsultingSection } from './components/ConsultingSection';
 import { NepalToolsDirectory } from './components/NepalToolsDirectory';
+import { FAQSection } from './components/FAQSection';
+import { ContactSection } from './components/ContactSection';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { CaseStudyModal } from './components/CaseStudyModal';
 import { StackCalculatorModal } from './components/StackCalculatorModal';
 import { ConsultationModal } from './components/ConsultationModal';
@@ -90,6 +94,7 @@ export default function App() {
   const [isStackCalculatorOpen, setIsStackCalculatorOpen] = useState<boolean>(false);
   const [isConsultationOpen, setIsConsultationOpen] = useState<boolean>(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
+  const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState<boolean>(false);
   const [prefilledService, setPrefilledService] = useState<string>('');
 
   const handleToggleTheme = () => {
@@ -116,6 +121,15 @@ export default function App() {
     });
   };
 
+  const handleSelectLanguage = (lang: Language) => {
+    setLanguage(lang);
+    try {
+      localStorage.setItem('nepalai_language', lang);
+    } catch (e) {
+      console.error('Failed to save language to localStorage', e);
+    }
+  };
+
   const handleToggleStack = (toolId: string) => {
     setSelectedStack((prev) =>
       prev.includes(toolId) ? prev.filter((id) => id !== toolId) : [...prev, toolId]
@@ -131,8 +145,8 @@ export default function App() {
     setIsConsultationOpen(true);
   };
 
-  const handleScrollToCaseStudies = () => {
-    const el = document.getElementById('case-studies');
+  const handleScrollToSection = (sectionId: string) => {
+    const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
@@ -192,6 +206,7 @@ export default function App() {
         language={language}
         onToggleTheme={handleToggleTheme}
         onToggleLanguage={handleToggleLanguage}
+        onSelectLanguage={handleSelectLanguage}
         onOpenConsultation={handleOpenConsultation}
         onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
         onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
@@ -206,8 +221,15 @@ export default function App() {
           theme={theme}
           language={language}
           onOpenConsultation={() => handleOpenConsultation('General Enterprise AI Advisory')}
-          onExploreCaseStudies={handleScrollToCaseStudies}
+          onExploreCaseStudies={() => handleScrollToSection('case-studies')}
           onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
+        />
+
+        {/* Section: About NepalAI Sovereign Mission & 4 Engineering Pillars */}
+        <AboutSection
+          theme={theme}
+          language={language}
+          onOpenConsultation={handleOpenConsultation}
         />
 
         {/* Dedicated NepalAI Studio Spotlight (studio.nepalai.tech) */}
@@ -238,10 +260,29 @@ export default function App() {
           onToggleStack={handleToggleStack}
           onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
         />
+
+        {/* Section: FAQ Accordion (eSewa/Khalti, Dollar Card, Consulting, Devanagari OCR) */}
+        <FAQSection
+          theme={theme}
+          language={language}
+          onOpenConsultation={handleOpenConsultation}
+          onScrollToContact={() => handleScrollToSection('contact')}
+        />
+
+        {/* Section: Contact & Direct Consultation Booking */}
+        <ContactSection
+          theme={theme}
+          language={language}
+        />
       </main>
 
       {/* Footer */}
-      <Footer theme={theme} language={language} onOpenConsultation={() => handleOpenConsultation()} />
+      <Footer 
+        theme={theme} 
+        language={language} 
+        onOpenConsultation={() => handleOpenConsultation()}
+        onOpenPrivacyPolicy={() => setIsPrivacyPolicyOpen(true)}
+      />
 
       {/* Floating Back to Top Button */}
       <BackToTop theme={theme} language={language} />
@@ -267,6 +308,14 @@ export default function App() {
         isOpen={isConsultationOpen}
         onClose={() => setIsConsultationOpen(false)}
         prefilledService={prefilledService}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={isPrivacyPolicyOpen}
+        onClose={() => setIsPrivacyPolicyOpen(false)}
+        theme={theme}
+        language={language}
       />
 
       {/* Unified Admin Panel: Hero Data, Cultural Motifs & Pricing Customizer */}

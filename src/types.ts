@@ -76,3 +76,26 @@ export interface NepalAITool {
   officialUrl: string;
   keyCapability: string;
 }
+
+export type FAQCategory = 'All' | 'Payments & Wallets' | 'AI Consulting' | 'Sovereign AI & Studio' | 'Privacy & Compliance';
+
+export interface FAQItem {
+  id: string;
+  category: FAQCategory;
+  questionEn: string;
+  questionNe: string;
+  answerEn: string;
+  answerNe: string;
+  tags?: string[];
+  badge?: string;
+}
+
+export interface ContactFormData {
+  fullName: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+  serviceCategory?: string;
+  budgetRange?: string;
+  message: string;
+}

@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop Navigation */}
         <nav
-          className="hidden md:flex items-center gap-6 text-xs"
+          className="hidden lg:flex items-center gap-5 text-xs"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="https://studio.nepalai.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all shadow-sm group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all shadow-sm group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
               isDark
                 ? 'border-indigo-500/40 bg-indigo-950/40 text-indigo-200 hover:border-indigo-400 hover:text-white'
                 : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:border-indigo-500 hover:bg-indigo-100'
@@ -77,6 +77,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               {t.nav.studio}
             </span>
             <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
+          </a>
+
+          <a
+            href="#about"
+            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+              isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to About section"
+          >
+            {t.nav.about}
           </a>
 
           <a
@@ -108,10 +118,30 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {t.nav.toolsDirectory}
           </a>
+
+          <a
+            href="#faq"
+            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+              isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to FAQ section"
+          >
+            {t.nav.faq}
+          </a>
+
+          <a
+            href="#contact"
+            className={`transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 py-0.5 ${
+              isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'
+            } ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="Navigate to Contact section"
+          >
+            {t.nav.contact}
+          </a>
         </nav>
 
         {/* Action Controls, Language Toggle & Theme Toggle */}
-        <div className="hidden md:flex items-center gap-2.5">
+        <div className="hidden lg:flex items-center gap-2.5">
           
           {/* LANGUAGE SEGMENTED SWITCHER */}
           <div
@@ -361,6 +391,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
           <a
+            href="#about"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View About section"
+          >
+            {t.nav.about}
+          </a>
+
+          <a
             href="#case-studies"
             onClick={() => setMobileOpen(false)}
             className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
@@ -385,6 +424,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="View AI Tools Directory"
           >
             {t.nav.toolsDirectory}
+          </a>
+
+          <a
+            href="#faq"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View FAQ"
+          >
+            {t.nav.faq}
+          </a>
+
+          <a
+            href="#contact"
+            onClick={() => setMobileOpen(false)}
+            className={`block p-2 hover:text-emerald-500 ${language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            aria-label="View Contact section"
+          >
+            {t.nav.contact}
           </a>
 
           <div className="pt-2 border-t border-slate-500/20 flex flex-col gap-2">

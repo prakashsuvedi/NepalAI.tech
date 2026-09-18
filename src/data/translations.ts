@@ -23,6 +23,35 @@ export interface Translations {
     samplePrompt: string;
     backendStack: string;
   };
+  about: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    missionHeading: string;
+    missionBody: string;
+    visionHeading: string;
+    visionBody: string;
+    pillarsTitle: string;
+    pillar1Title: string;
+    pillar1Desc: string;
+    pillar2Title: string;
+    pillar2Desc: string;
+    pillar3Title: string;
+    pillar3Desc: string;
+    pillar4Title: string;
+    pillar4Desc: string;
+    stats: {
+      stat1Val: string;
+      stat1Label: string;
+      stat2Val: string;
+      stat2Label: string;
+      stat3Val: string;
+      stat3Label: string;
+      stat4Val: string;
+      stat4Label: string;
+    };
+    techStackHeading: string;
+  };
   studioBanner: {
     badge: string;
     title: string;
@@ -80,6 +109,58 @@ export interface Translations {
     visitOfficial: string;
     toolsFound: string;
   };
+  faq: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    paymentGuideCardTitle: string;
+    paymentGuideCardDesc: string;
+    consultingGuideCardTitle: string;
+    consultingGuideCardDesc: string;
+    noResults: string;
+    clearSearch: string;
+    stillQuestions: string;
+    stillQuestionsSub: string;
+    contactSupport: string;
+  };
+  contact: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    directTitle: string;
+    directSubtitle: string;
+    emailLabel: string;
+    emailVal: string;
+    whatsappLabel: string;
+    whatsappVal: string;
+    officeLabel: string;
+    officeVal: string;
+    hoursLabel: string;
+    hoursVal: string;
+    whatsappChatBtn: string;
+    successTitle: string;
+    successMessage: string;
+    sendAnother: string;
+    formTitle: string;
+    formSubtitle: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    emailInputLabel: string;
+    emailPlaceholder: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    orgLabel: string;
+    orgPlaceholder: string;
+    serviceLabel: string;
+    serviceOptionDefault: string;
+    budgetLabel: string;
+    budgetOptionDefault: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    submitBtn: string;
+    submittingBtn: string;
+  };
   footer: {
     tagline: string;
     rights: string;
@@ -116,6 +197,42 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       activePreset: 'Active AI Pipeline',
       samplePrompt: 'Generated Prompt / Scenario',
       backendStack: 'Engineered Stack',
+    },
+    about: {
+      badge: 'Sovereign AI for Nepal',
+      title: 'Engineered for Devanagari, Local Banking & Data Residency',
+      subtitle:
+        'NepalAI bridges the gap between frontier artificial intelligence and the unique technological landscape of Nepal through indigenous models, local payment rails, and enterprise consulting.',
+      missionHeading: 'Our Sovereign Mission',
+      missionBody:
+        'To build and deploy artificial intelligence systems that preserve Nepalese languages, cultural heritage, and regulatory independence without sending sovereign institutional data abroad.',
+      visionHeading: 'Enterprise AI Transformation',
+      visionBody:
+        'We empower Nepali commercial banks, government bodies, agricultural cooperatives, and tech enterprises with robust 2-week MVP sprints, on-premise deployments, and technical training.',
+      pillarsTitle: 'The 4 Architectural Pillars of NepalAI',
+      pillar1Title: 'Fine-Tuned Devanagari Models',
+      pillar1Desc:
+        'Custom tokenizers and neural models natively trained on authentic Nepali, Maithili, and Nepal Bhasa corpora for superior OCR and reasoning.',
+      pillar2Title: 'Local Payment & Wallet Rails',
+      pillar2Desc:
+        'Full integration with eSewa, Khalti, and FonePay NPR billing so institutions never stall over international credit card constraints.',
+      pillar3Title: 'NRB IT & Privacy Compliance',
+      pillar3Desc:
+        'Air-gapped on-premise and local Tier-3 cloud deployments strictly conforming to Nepal Rastra Bank guidelines and the Privacy Act 2075.',
+      pillar4Title: 'Hands-On Consulting Sprints',
+      pillar4Desc:
+        'Dedicated senior AI engineers working on-site in Kathmandu or remotely across Nepal to take your enterprise from concept to production.',
+      stats: {
+        stat1Val: '>98.4%',
+        stat1Label: 'Devanagari OCR Accuracy',
+        stat2Val: '100%',
+        stat2Label: 'Air-Gapped & NRB Compliant',
+        stat3Val: '2-Week',
+        stat3Label: 'Rapid MVP Delivery Sprint',
+        stat4Val: '3 Hubs',
+        stat4Label: 'Kathmandu, Lalitpur & Pokhara',
+      },
+      techStackHeading: 'Verified Technical Capabilities & Standards',
     },
     studioBanner: {
       badge: 'Integrated Sovereign AI Platform',
@@ -178,6 +295,64 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       visitOfficial: 'Official Site',
       toolsFound: 'tools available',
     },
+    faq: {
+      badge: 'Clear Answers for Nepal',
+      title: 'Frequently Asked Questions',
+      subtitle:
+        'Everything you need to know about paying for AI tools in Nepal, eSewa/Khalti support, enterprise consulting, and sovereign Devanagari models.',
+      searchPlaceholder: 'Search questions by keyword, topic, or payment method...',
+      paymentGuideCardTitle: 'eSewa / Khalti vs. Dollar Card',
+      paymentGuideCardDesc:
+        'Global AI tools typically require a $500 NRB Dollar Card. Use NepalAI Studio (studio.nepalai.tech) for direct NPR billing via FonePay and local wallets.',
+      consultingGuideCardTitle: '2-Week Enterprise MVP Sprint',
+      consultingGuideCardDesc:
+        'We scope, build, test, and deploy customized AI architectures on-premise or cloud for Nepali banks and enterprises under NDA.',
+      noResults: 'No questions match your current search criteria.',
+      clearSearch: 'Clear search and show all questions',
+      stillQuestions: 'Have a specific technical or institutional question?',
+      stillQuestionsSub:
+        'Our Kathmandu-based AI architects are available for a direct technical consultation or custom scoping call.',
+      contactSupport: 'Schedule Free Discovery Call',
+    },
+    contact: {
+      badge: 'Start Your AI Project',
+      title: 'Get in Touch with NepalAI',
+      subtitle:
+        'Discuss your enterprise AI initiative, request an on-premise architecture consultation, or explore custom Devanagari model training.',
+      directTitle: 'Direct Contact & Physical Hubs',
+      directSubtitle: 'Connect directly with our engineering architects across Nepal.',
+      emailLabel: 'Official Correspondence',
+      emailVal: 'contact@nepalai.tech',
+      whatsappLabel: 'Direct WhatsApp Support',
+      whatsappVal: '+977-9800000000',
+      officeLabel: 'Primary Hubs',
+      officeVal: 'Kathmandu, Lalitpur & Pokhara, Nepal',
+      hoursLabel: 'Consulting Hours',
+      hoursVal: 'Sun – Fri: 9:00 AM – 6:00 PM NPT',
+      whatsappChatBtn: 'Chat on WhatsApp',
+      successTitle: 'Inquiry Submitted Successfully!',
+      successMessage:
+        'Dhanyabad! Our senior AI consultant will review your project requirements and get back to you within 24 business hours.',
+      sendAnother: 'Submit Another Inquiry',
+      formTitle: 'Schedule Technical Advisory & Scoping',
+      formSubtitle: 'Fill in your project details below for a prompt, confidential response.',
+      nameLabel: 'Full Name *',
+      namePlaceholder: 'e.g., Aarav Sharma',
+      emailInputLabel: 'Work / Personal Email *',
+      emailPlaceholder: 'aarav@organization.com.np',
+      phoneLabel: 'Phone / WhatsApp',
+      phonePlaceholder: '+977-98XXXXXXXX',
+      orgLabel: 'Organization / Company',
+      orgPlaceholder: 'e.g., Himalayan FinTech Ltd.',
+      serviceLabel: 'Area of Interest / Service',
+      serviceOptionDefault: 'Select an AI Service or Solution...',
+      budgetLabel: 'Estimated Project Budget',
+      budgetOptionDefault: 'Select Budget Range...',
+      messageLabel: 'Project Requirements / Problem Statement *',
+      messagePlaceholder: 'Briefly describe your objectives, existing data infrastructure, or desired AI pipeline...',
+      submitBtn: 'Send Consultation Request',
+      submittingBtn: 'Transmitting Request...',
+    },
     footer: {
       tagline:
         "Nepal's sovereign AI hub, enterprise workbench, and technical consulting platform. Engineered for local languages, payment infrastructure, and data residency.",
@@ -213,6 +388,42 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       activePreset: 'सक्रिय एआई पाइपलाइन',
       samplePrompt: 'उत्पन्न प्रम्प्ट / परिदृश्य',
       backendStack: 'इन्जिनियर गरिएको स्ट्याक',
+    },
+    about: {
+      badge: 'नेपालको लागि सार्वभौम एआई',
+      title: 'देवनागरी भाषा, स्थानीय बैंकिङ र डेटा सुरक्षाका लागि निर्मित',
+      subtitle:
+        'NepalAI ले मौलिक मोडेल, स्थानीय भुक्तानी प्रणाली, र संस्थागत परामर्शमार्फत अत्याधुनिक आर्टिफिसियल इन्टेलिजेन्सलाई नेपालको परिवेशसँग जोड्दछ।',
+      missionHeading: 'हाम्रो सार्वभौम मिसन',
+      missionBody:
+        'नेपाली भाषा, सांस्कृतिक सम्पदा र संस्थागत डेटाको पूर्ण गोपनीयता कायम राख्दै विदेशी डेटा सेन्टरहरूमा भर नपर्ने गरी स्वायत्त एआई प्रणाली निर्माण र कार्यान्वयन गर्नु हो।',
+      visionHeading: 'इन्टरप्राइज एआई रूपान्तरण',
+      visionBody:
+        'हामी नेपाली वाणिज्य बैंक, वित्तीय संस्था, सरकारी निकाय र प्रविधि कम्पनीहरूलाई २-हप्ते द्रुत स्प्रिन्ट, आफ्नै सर्भरमा स्थापना, र प्राविधिक तालिममार्फत सशक्त बनाउँछौं।',
+      pillarsTitle: 'NepalAI का ४ आधारभूत प्राविधिक स्तम्भहरू',
+      pillar1Title: 'विशेष देवनागरी मोडलहरू',
+      pillar1Desc:
+        'नेपाली, मैथिली र नेपाल भाषाका मौलिक शब्दावलीमा विशेष रूपमा तालिम प्राप्त न्युरल मोडेलहरू, जसले उच्च शुद्धताका साथ ओसीआर र विश्लेषण गर्दछ।',
+      pillar2Title: 'स्थानीय वालेट भुक्तानी प्रणाली',
+      pillar2Desc:
+        'eSewa, Khalti र FonePay मार्फत सिधै नेपाली रुपैयाँमा भुक्तानीको सुविधा, जसले अन्तर्राष्ट्रिय डलर कार्डको झन्झट हटाउँछ।',
+      pillar3Title: 'राष्ट्र बैंक निर्देशिका र गोपनीयता',
+      pillar3Desc:
+        'नेपाल राष्ट्र बैंकको सूचना प्रविधि निर्देशिका र वैयक्तिक गोपनीयता ऐन २०७५ अनुसार आफ्नै डेटा सेन्टर (On-Premises) मा पूर्ण सुरक्षित स्थापना।',
+      pillar4Title: 'प्रत्यक्ष इन्जिनियरिङ परामर्श',
+      pillar4Desc:
+        'काठमाडौं उपत्यका र देशभरका संस्थाहरूलाई अवधारणादेखि पूर्ण उत्पादनसम्म पुर्‍याउन हाम्रा अनुभवी एआई इन्जिनियरहरू प्रत्यक्ष संलग्न रहनेछन्।',
+      stats: {
+        stat1Val: '>९८.४%',
+        stat1Label: 'देवनागरी ओसीआर शुद्धता',
+        stat2Val: '१००%',
+        stat2Label: 'आफ्नै सर्भरमा सुरक्षित (NRB Compliant)',
+        stat3Val: '२-हप्ता',
+        stat3Label: 'द्रुत एमभीपी डेलिभरी स्प्रिन्ट',
+        stat4Val: '३ केन्द्रहरू',
+        stat4Label: 'काठमाडौं, ललितपुर र पोखरा',
+      },
+      techStackHeading: 'प्रमाणित प्राविधिक क्षमताहरू तथा मापदण्ड',
     },
     studioBanner: {
       badge: 'नेपालको आफ्नै सार्वभौम एआई प्लेटफर्म',
@@ -274,6 +485,64 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewStack: 'स्ट्याक समीक्षा गर्नुहोस्',
       visitOfficial: 'आधिकारिक साइट',
       toolsFound: 'टुल्स उपलब्ध',
+    },
+    faq: {
+      badge: 'नेपालका लागि स्पष्ट उत्तरहरू',
+      title: 'बारम्बार सोधिने प्रश्नहरू (FAQ)',
+      subtitle:
+        'नेपालमा एआई टुल्सको भुक्तानी, ईसेवा/खल्ती समर्थन, इन्टरप्राइज परामर्श र देवनागरी मोडेलहरूबारे सम्पूर्ण जानकारी।',
+      searchPlaceholder: 'शब्द, विषय वा भुक्तानी विधिबाट प्रश्न खोज्नुहोस्...',
+      paymentGuideCardTitle: 'eSewa / Khalti र डलर कार्ड',
+      paymentGuideCardDesc:
+        'विदेशी एआई टुल्सका लागि बैंकको $५०० डलर कार्ड चाहिन्छ। नेपाल एआई स्टुडियो (studio.nepalai.tech) मा FonePay वा स्थानीय वालेटबाट नेपाली रुपैयाँमै भुक्तानी गर्न सकिन्छ।',
+      consultingGuideCardTitle: '२-हप्ते इन्टरप्राइज एमभीपी स्प्रिन्ट',
+      consultingGuideCardDesc:
+        'हामी नेपाली बैंक र संस्थाहरूका लागि कानुनी गोपनीयता सम्झौता (NDA) अन्तर्गत आफ्नै सर्भरमा कस्टम एआई प्रणाली निर्माण र स्थापना गर्दछौं।',
+      noResults: 'तपाईंको खोजी अनुसार कुनै प्रश्न फेला परेन।',
+      clearSearch: 'खोजी हटाउनुहोस् र सबै प्रश्न हेर्नुहोस्',
+      stillQuestions: 'के तपाईंको कुनै विशेष प्राविधिक वा संस्थागत प्रश्न छ?',
+      stillQuestionsSub:
+        'हाम्रा काठमाडौंमा रहेका एआई आर्किटेक्टहरूसँग प्रत्यक्ष प्राविधिक छलफल वा निःशुल्क परामर्श तालिका मिलाउनुहोस्।',
+      contactSupport: 'परामर्श तालिका मिलाउनुहोस्',
+    },
+    contact: {
+      badge: 'एआई परियोजना सुरु गर्नुहोस्',
+      title: 'NepalAI सँग सम्पर्क गर्नुहोस्',
+      subtitle:
+        'तपाईंको संस्थाको एआई आवश्यकता, आफ्नै सर्भरमा स्थापना (On-Premises), वा कस्टम देवनागरी मोडेल तालिमबारे छलफल गर्नुहोस्।',
+      directTitle: 'प्रत्यक्ष सम्पर्क तथा भौतिक केन्द्रहरू',
+      directSubtitle: 'नेपालभर रहेका हाम्रा इन्जिनियरहरूसँग सिधै जोडिनुहोस्।',
+      emailLabel: 'आधिकारिक इमेल',
+      emailVal: 'contact@nepalai.tech',
+      whatsappLabel: 'ह्वाट्सएप सिधा सम्पर्क',
+      whatsappVal: '+977-9800000000',
+      officeLabel: 'प्रमुख केन्द्रहरू',
+      officeVal: 'काठमाडौं, ललितपुर र पोखरा, नेपाल',
+      hoursLabel: 'कार्य समय',
+      hoursVal: 'आइतबार – शुक्रबार: बिहान ९:०० – साँझ ६:०० NPT',
+      whatsappChatBtn: 'WhatsApp मा च्याट गर्नुहोस्',
+      successTitle: 'सम्पर्क अनुरोध सफलतापूर्वक प्राप्त भयो!',
+      successMessage:
+        'धन्यवाद! हाम्रा वरिष्ठ एआई सल्लाहकारले तपाईंको परियोजनाको विवरण अध्ययन गरी २४ घण्टाभित्र सम्पर्क गर्नुहुनेछ।',
+      sendAnother: 'अर्को सन्देश पठाउनुहोस्',
+      formTitle: 'प्राविधिक परामर्श तथा स्कोपिङ अनुरोध',
+      formSubtitle: 'शीघ्र र गोप्य परामर्शका लागि तल आफ्नो परियोजनाको विवरण भर्नुहोस्।',
+      nameLabel: 'पूरा नाम *',
+      namePlaceholder: 'जस्तै: आरभ शर्मा',
+      emailInputLabel: 'कार्य / व्यक्तिगत इमेल *',
+      emailPlaceholder: 'aarav@organization.com.np',
+      phoneLabel: 'फोन / ह्वाट्सएप',
+      phonePlaceholder: '+977-९८XXXXXXXX',
+      orgLabel: 'संस्था / कम्पनी',
+      orgPlaceholder: 'जस्तै: हिमालयन फिनटेक प्रा.लि.',
+      serviceLabel: 'सेवा / चासोको क्षेत्र',
+      serviceOptionDefault: 'सेवा वा समाधान छान्नुहोस्...',
+      budgetLabel: 'अनुमानित परियोजना बजेट',
+      budgetOptionDefault: 'बजेट दायरा छान्नुहोस्...',
+      messageLabel: 'परियोजनाको आवश्यकता / समस्या विवरण *',
+      messagePlaceholder: 'तपाईंको उद्देश्य, हालको डेटा पूर्वाधार वा चाहेको एआई प्रणालीबारे छोटकरीमा लेख्नुहोस्...',
+      submitBtn: 'परामर्श अनुरोध पठाउनुहोस्',
+      submittingBtn: 'पठाउँदैछ...',
     },
     footer: {
       tagline:

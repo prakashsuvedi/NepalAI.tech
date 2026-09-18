@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowUpRight, Mail, MapPin } from 'lucide-react';
+import { Sparkles, ArrowUpRight, Mail, MapPin, ShieldCheck, HelpCircle, FileText } from 'lucide-react';
 import { ThemeMode, Language } from '../types';
 import { NepalAILogo } from './NepalAILogo';
 import { TRANSLATIONS } from '../data/translations';
@@ -8,11 +8,18 @@ interface FooterProps {
   theme?: ThemeMode;
   language?: Language;
   onOpenConsultation: () => void;
+  onOpenPrivacyPolicy?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en', onOpenConsultation }) => {
+export const Footer: React.FC<FooterProps> = ({ 
+  theme = 'dark', 
+  language = 'en', 
+  onOpenConsultation,
+  onOpenPrivacyPolicy 
+}) => {
   const isDark = theme === 'dark';
   const t = TRANSLATIONS[language];
+  const isNepali = language === 'ne';
 
   return (
     <footer
@@ -30,9 +37,9 @@ export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en',
           <div className="md:col-span-4 space-y-3">
             <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
 
-            <p className={`text-xs leading-relaxed font-['Noto_Sans_Devanagari'] ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
-            }`}>
+            <p className={`text-xs leading-relaxed ${
+              isNepali ? "font-['Noto_Sans_Devanagari']" : ''
+            } ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               {t.footer.tagline}
             </p>
 
@@ -42,7 +49,57 @@ export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en',
             </div>
           </div>
 
-          {/* Studio Link Column */}
+          {/* Quick Navigation Column */}
+          <div className="md:col-span-3 space-y-2.5">
+            <h3 className={`text-xs font-semibold uppercase ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
+              {t.footer.quickLinks}
+            </h3>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <a
+                  href="#about"
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                >
+                  {t.nav.about} (Sovereign AI)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#case-studies"
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                >
+                  {t.nav.caseStudies}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#consulting"
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                >
+                  {t.nav.services}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#tools-directory"
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                >
+                  {t.nav.toolsDirectory}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#faq"
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded flex items-center gap-1"
+                >
+                  <HelpCircle className="h-3 w-3 text-emerald-500" aria-hidden="true" />
+                  <span>{t.nav.faq}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Studio & Payments Column */}
           <div className="md:col-span-3 space-y-2.5">
             <h3 className={`text-xs font-semibold uppercase ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
               {t.footer.studioPlatform}
@@ -62,70 +119,28 @@ export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en',
               </li>
               <li>
                 <a
-                  href="#studio-bento"
+                  href="#faq"
                   className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
                 >
-                  Devnagari Prompt Sandbox
+                  eSewa / Khalti & Dollar Card Guide
                 </a>
               </li>
               <li>
-                <a
-                  href="#tools-directory"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                <button
+                  type="button"
+                  onClick={() => onOpenPrivacyPolicy?.()}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded flex items-center gap-1 text-left"
                 >
-                  Nepal AI Tools & Payment Directory
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://studio.nepalai.tech"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="FonePay and eSewa Quick Recharge on NepalAI Studio"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
-                >
-                  FonePay & eSewa Quick Recharge
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Consulting Services Column */}
-          <div className="md:col-span-3 space-y-2.5">
-            <h3 className={`text-xs font-semibold uppercase ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
-              Enterprise Consulting
-            </h3>
-            <ul className="space-y-1.5 text-xs">
-              <li>
-                <a
-                  href="#consulting"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
-                >
-                  Devnagari OCR & KYC Automation
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#consulting"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
-                >
-                  NRB Compliant AI Audit
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#consulting"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
-                >
-                  Nepali-English Legal RAG
-                </a>
+                  <ShieldCheck className="h-3 w-3 text-emerald-500" aria-hidden="true" />
+                  <span>{t.footer.privacyPolicy}</span>
+                </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={onOpenConsultation}
                   aria-label="Book a scoping advisory session"
-                  className="text-emerald-500 hover:underline flex items-center gap-1 font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                  className="text-emerald-500 hover:underline flex items-center gap-1 font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left"
                 >
                   <span>Book Scoping Advisory</span>
                   <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -134,12 +149,18 @@ export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en',
             </ul>
           </div>
 
-          {/* Local Contact Column */}
+          {/* Direct Contact Column */}
           <div className="md:col-span-2 space-y-2.5">
             <h3 className={`text-xs font-semibold uppercase ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
               {t.footer.contactUs}
             </h3>
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-2 text-xs">
+              <a
+                href="#contact"
+                className="inline-block hover:text-emerald-500 transition-colors font-medium"
+              >
+                {isNepali ? 'सम्पर्क फारम खोल्नुहोस्' : 'Open Contact Form'}
+              </a>
               <a
                 href="mailto:contact@nepalai.tech"
                 aria-label="Send email to contact@nepalai.tech"
@@ -149,43 +170,48 @@ export const Footer: React.FC<FooterProps> = ({ theme = 'dark', language = 'en',
                 <span>contact@nepalai.tech</span>
               </a>
               <p className="text-[11px] opacity-75">
-                Kathmandu Valley, Nepal
+                Kathmandu & Pokhara
               </p>
             </div>
           </div>
 
         </div>
 
-        {/* Bottom */}
+        {/* Bottom Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] opacity-75">
           <div>
             © {new Date().getFullYear()} nepalai.tech. {t.footer.rights}
           </div>
 
-          <nav className="flex items-center gap-4" aria-label="Footer quick navigation">
+          <nav className="flex flex-wrap items-center gap-3 sm:gap-4" aria-label="Footer quick navigation">
             <a
-              href="https://studio.nepalai.tech"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Launch NepalAI Studio (opens in new tab)"
+              href="#about"
               className="hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-0.5"
             >
-              Launch Studio
+              {t.nav.about}
             </a>
             <span aria-hidden="true">•</span>
             <a
-              href="#case-studies"
+              href="#faq"
               className="hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-0.5"
             >
-              Case Studies
+              {t.nav.faq}
             </a>
             <span aria-hidden="true">•</span>
             <a
-              href="#consulting"
+              href="#contact"
               className="hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-0.5"
             >
-              Enterprise Services
+              {t.nav.contact}
             </a>
+            <span aria-hidden="true">•</span>
+            <button
+              type="button"
+              onClick={() => onOpenPrivacyPolicy?.()}
+              className="hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-0.5"
+            >
+              Privacy Policy
+            </button>
           </nav>
         </div>
 
