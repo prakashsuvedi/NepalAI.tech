@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="nepalFlagGrad" x1="12" y1="8" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="45%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="techBorderGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <radialGradient id="sparkGlow" cx="24" cy="20" r="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- High-contrast backdrop squircle for dark/light browser tab compatibility -->
+  <rect width="64" height="64" rx="16" fill="#070913"/>
+  <rect width="64" height="64" rx="16" stroke="url(#techBorderGrad)" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Flag Spine / Cyber Bus -->
+  <line x1="14" y1="10" x2="14" y2="54" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Upper Pennant: Mountain Summit & Upper Flag (Crimson to Indigo) -->
+  <path d="M14 12 L44 26 L24 26 Z" fill="url(#nepalFlagGrad)"/>
+  <path d="M14 12 L44 26 L24 26 Z" stroke="#3B82F6" stroke-width="1.2" stroke-linejoin="round" stroke-opacity="0.8"/>
+
+  <!-- Lower Pennant: Valley & Tech Base (Indigo to Emerald) -->
+  <path d="M14 26 L50 48 L14 48 Z" fill="url(#nepalFlagGrad)"/>
+  <path d="M14 26 L50 48 L14 48 Z" stroke="#10B981" stroke-width="1.2" stroke-linejoin="round" stroke-opacity="0.9"/>
+
+  <!-- Nepal Celestial Symbols as AI Nodes -->
+  <!-- Top: Intelligence Sun Spark (from Nepal flag) -->
+  <circle cx="23" cy="19" r="6" fill="url(#sparkGlow)"/>
+  <circle cx="23" cy="19" r="2.5" fill="#FFFFFF"/>
+  <path d="M23 14.5 V23.5 M18.5 19 H27.5 M20 16 L26 22 M20 22 L26 16" stroke="#FFFFFF" stroke-width="0.9" stroke-linecap="round"/>
+
+  <!-- Bottom: Crescent Moon + Neural Synapse (from Nepal flag) -->
+  <path d="M21 34 C26 34 29 37.5 29 42 C24.5 42 21 39 21 34 Z" fill="#38BDF8"/>
+  <circle cx="25" cy="38" r="1.5" fill="#FFFFFF"/>
+
+  <!-- AI Circuit Traces & Peak Nodes -->
+  <line x1="29" y1="42" x2="38" y2="44" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="38" cy="44" r="2" fill="#10B981"/>
+  
+  <line x1="44" y1="26" x2="50" y2="48" stroke="#60A5FA" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+  <circle cx="44" cy="26" r="2.2" fill="#60A5FA" filter="url(#neon)"/>
+  <circle cx="50" cy="48" r="2.5" fill="#10B981" filter="url(#neon)"/>
+
+  <!-- Tech Tag Accent Beacon in Top-Right -->
+  <circle cx="51" cy="13" r="2" fill="#10B981"/>
+  <circle cx="51" cy="13" r="4" stroke="#10B981" stroke-width="0.8" stroke-opacity="0.4"/>
+</svg>

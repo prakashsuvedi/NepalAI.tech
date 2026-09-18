@@ -1,0 +1,6 @@
+{
+  "name": "nepalai.tech - AI Hub, Studio & Consulting for Nepal",
+  "description": "Nepal's premier AI platform featuring the NepalAI Studio, verified AI tools with eSewa & Khalti payment accessibility, real-world AI project case studies, and enterprise AI consulting services.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
