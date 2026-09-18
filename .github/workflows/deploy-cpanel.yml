@@ -63,21 +63,39 @@ jobs:
             exit 1
           fi
 
-          # 2. Extract deploy.zip inside target directory
+          # 2. Extract deploy.zip inside target directory automatically
           echo "📂 Extracting archive into $CPANEL_DEPLOY_DIR..."
           EXTRACT_RES=$(curl -s -k \
             -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-            -d "dir=$CPANEL_DEPLOY_DIR" \
-            -d "file=deploy.zip" \
-            -d "dest=$CPANEL_DEPLOY_DIR" \
+            --data-urlencode "dir=$CPANEL_DEPLOY_DIR" \
+            --data-urlencode "file=deploy.zip" \
+            --data-urlencode "dest=$CPANEL_DEPLOY_DIR" \
+            --data-urlencode "overwrite=1" \
             "https://$CPANEL_HOST:2083/execute/Fileman/extract_archive")
           
           echo "Extract Response: $EXTRACT_RES"
+
+          # Fallback extraction check
+          if [[ ! "$EXTRACT_RES" =~ '"status":1' && ! "$EXTRACT_RES" =~ '"status": 1' ]]; then
+            echo "⚠️ Primary extract returned notice, trying secondary UAPI extract_files..."
+            curl -s -k \
+              -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
+              --data-urlencode "dir=$CPANEL_DEPLOY_DIR" \
+              --data-urlencode "files=deploy.zip" \
+              "https://$CPANEL_HOST:2083/execute/Fileman/extract_files"
+          fi
+
+          # 3. Clean up the zip file on server (delete deploy.zip)
+          echo "🧹 Automatically removing deploy.zip from server..."
+          # Try delete_files UAPI
+          curl -s -k \
+            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
+            --data-urlencode "files[0]=$CPANEL_DEPLOY_DIR/deploy.zip" \
+            "https://$CPANEL_HOST:2083/execute/Fileman/delete_files" > /dev/null || true
           
-          # 3. Clean up the zip file on server
-          echo "🧹 Cleaning up temporary deploy.zip on server..."
+          # Try fileop unlink as fallback
           curl -s -k \
             -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
             "https://$CPANEL_HOST:2083/execute/Fileman/fileop?op=unlink&sourcefiles=$CPANEL_DEPLOY_DIR%2Fdeploy.zip" > /dev/null || true
 
-          echo "🎉 Deployment to cPanel completed successfully!"
+          echo "🎉 Deployment to cPanel completed and updated automatically!"
