@@ -15,6 +15,7 @@ import {
 import { ThemeMode, Language, ContactFormData } from '../types';
 import { TRANSLATIONS } from '../data/translations';
 import { useToast } from '../context/ToastContext';
+import { submitConsultationRequest } from '../services/consultationService';
 
 interface ContactSectionProps {
   theme: ThemeMode;
@@ -76,23 +77,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
     setIsSubmitting(true);
 
-    // Save lead to local storage and send to backend API
+    // Dispatch lead via secure consultationService utility using non-client-visible email proxy
     try {
-      const existingLeads = JSON.parse(localStorage.getItem('nepalai_contact_leads') || '[]');
-      const newLead = {
-        ...formData,
-        submittedAt: new Date().toISOString(),
-        id: `lead_${Date.now()}`,
-      };
-      localStorage.setItem('nepalai_contact_leads', JSON.stringify([...existingLeads, newLead]));
-
-      // Dispatch to /api/contact
-      await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      }).catch(err => console.log('API contact endpoint noted:', err));
-
+      await submitConsultationRequest({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        organization: formData.organization,
+        serviceCategory: formData.serviceCategory,
+        budgetRange: formData.budgetRange,
+        message: formData.message,
+        source: 'contact_section',
+      });
     } catch (e) {
       console.error('Contact lead processing note', e);
     }

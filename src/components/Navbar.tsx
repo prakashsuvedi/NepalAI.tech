@@ -361,13 +361,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setMoreMenuOpen(false);
                       onOpenAdminPanel();
                     }}
-                    className={`w-full flex items-center gap-2 p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] ${
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] cursor-pointer ${
                       isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
                     }`}
                   >
-                    <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
-                    <span>{t.nav.adminPanel}</span>
+                    <span className="flex items-center gap-2">
+                      <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
+                      <span>{t.nav.adminPanel}</span>
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
+                      Leads
+                    </span>
                   </button>
+
+                  {/* Studio Admin Dashboard Link */}
+                  <a
+                    href="https://studio.nepalai.tech/admin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] cursor-pointer ${
+                      isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-indigo-400 font-semibold">Studio Admin Hub</span>
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />
+                  </a>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -586,6 +608,40 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <ArrowUpRight className="h-4 w-4" />
               </a>
+
+              {/* Admin & Studio Dashboard Row */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenAdminPanel();
+                  }}
+                  className={`flex items-center justify-center gap-1.5 p-3 rounded-2xl border text-xs font-semibold min-h-[44px] ${
+                    isDark
+                      ? 'border-white/10 bg-white/[0.03] text-slate-200'
+                      : 'border-slate-200 bg-slate-50 text-slate-800'
+                  }`}
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Admin & Leads</span>
+                </button>
+
+                <a
+                  href="https://studio.nepalai.tech/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-center gap-1.5 p-3 rounded-2xl border text-xs font-semibold min-h-[44px] ${
+                    isDark
+                      ? 'border-indigo-500/30 bg-indigo-950/20 text-indigo-300'
+                      : 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Studio Admin</span>
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
 
               {/* Book Consultation Button */}
               <button

@@ -90,9 +90,9 @@ export const AppleTooltip: React.FC<AppleTooltipProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Dismiss tooltip"
-                className="pointer-events-auto p-1 rounded-md text-slate-400 hover:text-white transition-colors"
+                className="pointer-events-auto min-w-[44px] min-h-[44px] -mr-2.5 -my-2 flex items-center justify-center rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
-                ✕
+                <span className="text-sm font-semibold">✕</span>
               </button>
             )}
           </div>

@@ -118,3 +118,23 @@ export interface ContactFormData {
   budgetRange?: string;
   message: string;
 }
+
+export type LeadStatus = 'new' | 'reviewing' | 'contacted' | 'converted' | 'archived';
+
+export interface InquiryLead {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+  industry?: string;
+  serviceCategory?: string;
+  budgetRange?: string;
+  timeline?: string;
+  billingPreference?: string;
+  message: string;
+  submittedAt: string;
+  status: LeadStatus;
+  adminNotes?: string;
+  source?: 'consultation_modal' | 'contact_section' | 'stack_calculator' | 'direct';
+}

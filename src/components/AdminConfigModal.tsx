@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ConsultingOffering, HeroConfig } from '../types';
+import { ConsultingOffering, HeroConfig, InquiryLead, LeadStatus } from '../types';
+import { AdminLeadsTab } from './AdminLeadsTab';
+import { AdminStudioTab } from './AdminStudioTab';
+import { 
+  fetchStudioAdminConnection, 
+  syncLeadsWithStudioAdmin, 
+  updateLeadStatusRealtime, 
+  fetchCurrentLeads,
+  StudioConnectionStatus 
+} from '../services/studioAdminService';
 import {
   X,
   Save,
@@ -12,7 +21,9 @@ import {
   Building2,
   DollarSign,
   Layers,
-  Globe
+  Globe,
+  Inbox,
+  Activity
 } from 'lucide-react';
 
 interface AdminConfigModalProps {
@@ -36,10 +47,82 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
   onSaveOfferings,
   onResetOfferings,
 }) => {
-  const [activeTab, setActiveTab] = useState<'hero' | 'consulting' | 'cultural'>('hero');
+  const [activeTab, setActiveTab] = useState<'leads' | 'studio' | 'hero' | 'consulting' | 'cultural'>('leads');
   const [localHero, setLocalHero] = useState<HeroConfig>(heroConfig);
   const [localOfferings, setLocalOfferings] = useState<ConsultingOffering[]>(offerings);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [leads, setLeads] = useState<InquiryLead[]>([]);
+  const [isLoadingLeads, setIsLoadingLeads] = useState(false);
+  const [studioStatus, setStudioStatus] = useState<StudioConnectionStatus | null>(null);
+  const [isStudioSyncing, setIsStudioSyncing] = useState(false);
+  const [lastStudioSync, setLastStudioSync] = useState<string | null>(null);
+  const [realtimeSyncEnabled, setRealtimeSyncEnabled] = useState(true);
+
+  // Fetch leads and update state
+  const fetchLeads = async () => {
+    setIsLoadingLeads(true);
+    try {
+      const freshLeads = await fetchCurrentLeads();
+      if (freshLeads && freshLeads.length >= 0) {
+        setLeads(freshLeads);
+      }
+    } catch (err) {
+      console.log('Fetching leads error:', err);
+    } finally {
+      setIsLoadingLeads(false);
+    }
+  };
+
+  // Fetch utility: Connects and synchronizes pending consulting leads with studio.nepalai.tech/admin
+  const handleSyncWithStudio = async () => {
+    setIsStudioSyncing(true);
+    try {
+      const syncResult = await syncLeadsWithStudioAdmin(leads);
+      const conn = await fetchStudioAdminConnection();
+      setStudioStatus(conn);
+      setLastStudioSync(new Date().toLocaleTimeString());
+      if (syncResult.leads && Array.isArray(syncResult.leads)) {
+        setLeads(syncResult.leads);
+      }
+    } catch (e) {
+      console.warn('Studio real-time sync notice:', e);
+    } finally {
+      setTimeout(() => {
+        setIsStudioSyncing(false);
+      }, 500);
+    }
+  };
+
+  // Real-time synchronization effect: polls studio.nepalai.tech/admin every 10 seconds when open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetchLeads();
+    fetchStudioAdminConnection().then((conn) => {
+      setStudioStatus(conn);
+      setLastStudioSync(new Date().toLocaleTimeString());
+    });
+
+    if (!realtimeSyncEnabled) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const [freshLeads, conn] = await Promise.all([
+          fetchCurrentLeads(),
+          fetchStudioAdminConnection(),
+        ]);
+        if (freshLeads.length > 0) {
+          setLeads(freshLeads);
+        }
+        setStudioStatus(conn);
+        setLastStudioSync(new Date().toLocaleTimeString());
+      } catch (err) {
+        console.debug('Real-time sync tick note:', err);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, realtimeSyncEnabled]);
 
   useEffect(() => {
     setLocalHero(heroConfig);
@@ -62,6 +145,33 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  // Real-time status update fetch utility: updates lead status and syncs immediately with studio.nepalai.tech/admin
+  const handleUpdateLeadStatus = async (id: string, newStatus: LeadStatus, notes?: string) => {
+    // Optimistic local state update
+    setLeads((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, status: newStatus, ...(notes !== undefined ? { adminNotes: notes } : {}) } : l))
+    );
+
+    try {
+      const result = await updateLeadStatusRealtime(id, newStatus, notes);
+      if (result.success && result.lead) {
+        setLeads((prev) => prev.map((l) => (l.id === id ? result.lead! : l)));
+        setLastStudioSync(new Date().toLocaleTimeString());
+      }
+    } catch (err) {
+      console.log('Update status API note:', err);
+    }
+  };
+
+  const handleDeleteLead = async (id: string) => {
+    try {
+      await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.log('Delete lead API note:', err);
+    }
+    setLeads((prev) => prev.filter((l) => l.id !== id));
+  };
 
   const handleHeroChange = (field: keyof HeroConfig, value: any) => {
     setLocalHero((prev) => ({ ...prev, [field]: value }));
@@ -141,12 +251,47 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 pt-4 pb-2 border-b border-white/10 text-xs" role="tablist" aria-label="Admin panel sections">
+        <div className="flex items-center gap-1.5 pt-4 pb-2 border-b border-white/10 text-xs overflow-x-auto scrollbar-none" role="tablist" aria-label="Admin panel sections">
+          <button
+            role="tab"
+            aria-selected={activeTab === 'leads'}
+            onClick={() => setActiveTab('leads')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+              activeTab === 'leads'
+                ? 'bg-emerald-500 text-slate-950 font-bold'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white'
+            }`}
+          >
+            <Inbox className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Inquiries & Leads</span>
+            {leads.filter((l) => l.status === 'new').length > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeTab === 'leads' ? 'bg-slate-950 text-emerald-300' : 'bg-emerald-500/20 text-emerald-400'
+              }`}>
+                {leads.filter((l) => l.status === 'new').length} New
+              </span>
+            )}
+          </button>
+
+          <button
+            role="tab"
+            aria-selected={activeTab === 'studio'}
+            onClick={() => setActiveTab('studio')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+              activeTab === 'studio'
+                ? 'bg-indigo-600 text-white font-bold'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white'
+            }`}
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Studio.nepalai.tech Dashboard</span>
+          </button>
+
           <button
             role="tab"
             aria-selected={activeTab === 'hero'}
             onClick={() => setActiveTab('hero')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
               activeTab === 'hero'
                 ? 'bg-emerald-500 text-slate-950 font-bold'
                 : 'bg-white/[0.04] text-slate-400 hover:text-white'
@@ -160,7 +305,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
             role="tab"
             aria-selected={activeTab === 'consulting'}
             onClick={() => setActiveTab('consulting')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
               activeTab === 'consulting'
                 ? 'bg-emerald-500 text-slate-950 font-bold'
                 : 'bg-white/[0.04] text-slate-400 hover:text-white'
@@ -174,7 +319,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
             role="tab"
             aria-selected={activeTab === 'cultural'}
             onClick={() => setActiveTab('cultural')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
               activeTab === 'cultural'
                 ? 'bg-emerald-500 text-slate-950 font-bold'
                 : 'bg-white/[0.04] text-slate-400 hover:text-white'
@@ -188,7 +333,35 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
         {/* Content Tabs */}
         <div className="flex-1 overflow-y-auto py-4 pr-1 space-y-4 text-xs scrollbar-thin">
           
-          {/* TAB 1: HERO SECTION CONFIG */}
+          {/* TAB 1: INQUIRIES & LEADS */}
+          {activeTab === 'leads' && (
+            <AdminLeadsTab
+              leads={leads}
+              onRefreshLeads={fetchLeads}
+              onUpdateLeadStatus={handleUpdateLeadStatus}
+              onDeleteLead={handleDeleteLead}
+              isLoading={isLoadingLeads}
+              studioConnected={studioStatus?.connected ?? true}
+              onSyncStudio={handleSyncWithStudio}
+              isStudioSyncing={isStudioSyncing}
+              lastStudioSync={lastStudioSync}
+              realtimeSyncEnabled={realtimeSyncEnabled}
+              onToggleRealtimeSync={() => setRealtimeSyncEnabled((prev) => !prev)}
+            />
+          )}
+
+          {/* TAB 2: STUDIO INTEGRATION */}
+          {activeTab === 'studio' && (
+            <AdminStudioTab 
+              leadsCount={leads.length}
+              pendingCount={leads.filter((l) => l.status === 'new' || l.status === 'reviewing').length}
+              studioConnection={studioStatus}
+              onTriggerSync={handleSyncWithStudio}
+              isSyncing={isStudioSyncing}
+            />
+          )}
+
+          {/* TAB 3: HERO SECTION CONFIG */}
           {activeTab === 'hero' && (
             <div className="space-y-4">
               

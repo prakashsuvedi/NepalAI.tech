@@ -124,21 +124,21 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Admin Panel Customization Button */}
+            {/* Admin Panel Customization Button with 44px min touch target */}
             <motion.button
               type="button"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={onOpenAdminPricing}
               data-cursor="Pricing"
-              className={`px-3.5 py-2 rounded-full border text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-full border text-xs font-mono transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 isDark
                   ? 'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white'
                   : 'border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-950 shadow-xs'
               }`}
               title="Customize service rates and scopes from Admin Panel"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500" aria-hidden="true" />
+              <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Admin Rates (रू/$)</span>
             </motion.button>
 
@@ -149,7 +149,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
               onClick={() => onOpenConsultation('General Enterprise Advisory')}
               data-cursor="Book"
               aria-label="Schedule a general enterprise AI advisory session"
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-md cursor-pointer ${
+              className={`min-h-[44px] px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 isDark 
                   ? 'bg-white text-slate-950 hover:bg-slate-200' 
                   : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20'
@@ -158,7 +158,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
               <span>
                 {t.consulting.bookAdvisory}
               </span>
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             </motion.button>
           </div>
         </motion.div>
@@ -259,7 +259,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                   {/* Action */}
                   <div className={`pt-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
                     <div
-                      className={`w-full py-2.5 rounded-full border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                      className={`w-full min-h-[44px] py-2.5 px-4 rounded-full border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                         isDark
                           ? 'bg-white/[0.04] border-white/10 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-200'
                           : 'bg-slate-50 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white text-slate-800'
@@ -268,7 +268,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                       <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
                         {t.consulting.bookAdvisory} (रू & $)
                       </span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     </div>
                   </div>
                 </motion.article>
@@ -283,12 +283,12 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className={`mt-10 rounded-3xl border p-7 transition-all shadow-sm ${
+          className={`mt-10 rounded-3xl border p-6 sm:p-7 transition-all shadow-sm ${
             isDark ? 'border-white/10 bg-black/50' : 'border-slate-200 bg-slate-50'
           }`}
         >
           <div className="flex items-center gap-2.5 mb-4">
-            <Sparkles className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
             <h3 className={`text-sm font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {isNepali ? 'उद्योग अनुसार सिफारिस गरिएको आर्किटेक्चर र लागत' : 'Targeted Architecture & Pricing by Industry'}
             </h3>
@@ -310,7 +310,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                 aria-label={`Select industry: ${ind}`}
                 onClick={() => handleIndustryChange(ind)}
                 data-cursor="Industry"
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center justify-center cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   selectedIndustry === ind
                     ? isDark 
                       ? 'bg-white text-slate-950 font-bold shadow-md' 
@@ -341,7 +341,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                 }}
                 data-cursor="Inquire"
                 aria-label={`Consult about: ${item.en}`}
-                className={`p-3.5 rounded-2xl border text-left text-xs transition-all flex flex-col justify-between group cursor-pointer ${
+                className={`min-h-[76px] p-4 rounded-2xl border text-left text-xs transition-all flex flex-col justify-between group cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   selectedObjective === item.en
                     ? isDark ? 'border-emerald-500/60 bg-emerald-950/30 text-white shadow-lg' : 'border-emerald-500 bg-emerald-50 text-emerald-950 shadow-xs'
                     : isDark ? 'border-white/10 bg-white/[0.015] text-slate-300 hover:border-white/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 shadow-xs'

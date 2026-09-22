@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useToast } from '../context/ToastContext';
 import { ThemeMode, Language } from '../types';
 import { TRANSLATIONS } from '../data/translations';
+import { submitConsultationRequest } from '../services/consultationService';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -136,36 +137,25 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     if (!validateStep(3)) return;
 
     try {
-      const existingLeads = JSON.parse(localStorage.getItem('nepalai_consultation_leads') || '[]');
-      const newLead = {
-        name,
+      // Dispatch via frontend consultationService utility to secure server proxy
+      // The server relays to prakash@scamspike.com using a non-client-visible email proxy pattern
+      const result = await submitConsultationRequest({
+        fullName: name,
         email,
+        phone,
         organization,
         industry,
-        phone,
-        service,
+        serviceCategory: service,
+        budgetRange: budgetNpr,
         timeline,
-        budgetNpr,
         billingPreference,
-        projectScope,
-        submittedAt: new Date().toISOString(),
-      };
-      localStorage.setItem('nepalai_consultation_leads', JSON.stringify([...existingLeads, newLead]));
-      
-      // Post to backend contact API
-      await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: name,
-          email,
-          phone,
-          organization,
-          serviceCategory: `${service} (${industry})`,
-          budgetRange: `${budgetNpr} [${billingPreference}]`,
-          message: `[Timeline: ${timeline}]\n\nObjectives:\n${projectScope}`
-        }),
-      }).catch(err => console.log('Consultation lead api notice:', err));
+        message: projectScope,
+        source: 'consultation_modal',
+      });
+
+      if (!result.success) {
+        console.warn('Consultation submission notice:', result.message);
+      }
     } catch (err) {
       console.log('Lead persistence note:', err);
     }
@@ -184,7 +174,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     const body = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\nPhone/WhatsApp: ${phone}\nOrganization: ${organization} (${industry})\nService Track: ${service}\nTarget Timeline: ${timeline}\nBudget Bracket: ${budgetNpr}\nBilling Preference: ${billingPreference}\n\nProject Scope & Technical Objectives:\n${projectScope}`
     );
-    window.open(`mailto:contact@nepalai.tech,prakashsuvedi@gmail.com?subject=${subject}&body=${body}`, '_blank');
+    window.open(`mailto:contact@nepalai.tech?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleWhatsApp = () => {
@@ -537,7 +527,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                             id="consult-email-field"
                             type="email"
                             required
-                            placeholder="prakash@organization.com"
+                            placeholder="executive@organization.com.np"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-9 pr-3 py-2.5 text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-hidden"
