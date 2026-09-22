@@ -298,12 +298,14 @@ export const Hero: React.FC<HeroProps> = ({
             {/* Content Body */}
             <div className="p-5 sm:p-6 flex flex-col justify-between">
               <div>
-                <div className="text-[11px] font-mono text-emerald-500 flex items-center gap-1.5 mb-2 font-bold">
+                <div className={`text-[11px] font-mono flex items-center gap-1.5 mb-2 font-bold ${
+                  isDark ? 'text-emerald-400' : 'text-emerald-700'
+                }`}>
                   <Sparkles className="h-3 w-3" />
                   <span>NATURAL LANGUAGE SCENARIO</span>
                 </div>
                 <p className={`text-sm sm:text-base font-medium leading-relaxed ${
-                  isDark ? 'text-slate-100' : 'text-slate-800'
+                  isDark ? 'text-slate-100' : 'text-slate-900'
                 }`}>
                   {currentTab.previewPrompt}
                 </p>
@@ -325,7 +327,7 @@ export const Hero: React.FC<HeroProps> = ({
 
                   <div className="flex-1">
                     <div className={`flex items-center justify-between text-[11px] font-mono mb-1 ${
-                      isDark ? 'text-slate-400' : 'text-slate-500'
+                      isDark ? 'text-slate-300' : 'text-slate-600'
                     }`}>
                       <span>{currentTab.outputDetail}</span>
                       <span>{progress}%</span>
@@ -368,27 +370,27 @@ export const Hero: React.FC<HeroProps> = ({
               <div className={`text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {config.metric1Value}
               </div>
-              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {config.metric1Label}
               </div>
             </div>
             <div className={`p-3 rounded-xl border ${
               isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-xs'
             }`}>
-              <div className="text-xl font-bold font-display text-emerald-500">
+              <div className={`text-xl font-bold font-display ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                 {config.metric2Value}
               </div>
-              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {config.metric2Label}
               </div>
             </div>
             <div className={`p-3 rounded-xl border ${
               isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-xs'
             }`}>
-              <div className={`text-xl font-bold font-display ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
+              <div className={`text-xl font-bold font-display ${isDark ? 'text-indigo-400' : 'text-indigo-700'}`}>
                 {config.metric3Value}
               </div>
-              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {config.metric3Label}
               </div>
             </div>

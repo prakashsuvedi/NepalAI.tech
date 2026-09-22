@@ -277,8 +277,10 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-slate-500/20">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-2 text-xs text-emerald-400 mb-2 font-mono uppercase tracking-wider">
-              <Cpu className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            <div className={`flex items-center gap-2 text-xs mb-2 font-mono uppercase tracking-wider ${
+              isDark ? 'text-emerald-400' : 'text-emerald-800 font-semibold'
+            }`}>
+              <Cpu className="h-4 w-4" aria-hidden="true" />
               <span>n8n on Hugging Face • Sovereign Automation Hub</span>
             </div>
             
@@ -292,7 +294,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
             </h2>
 
             <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
+              isDark ? 'text-slate-300' : 'text-slate-600'
             }`}>
               {language === 'ne' 
                 ? 'ह्वाट्सएप अर्डर, देवनागरी कागजात ओसीआर, र FonePay क्युआर अटोमेसन पाइपलाइन।' 
@@ -326,7 +328,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
               <Radio className="h-4 w-4 text-indigo-400 animate-pulse" />
             </div>
             <div>
-              <span className="text-xs font-bold text-indigo-300 block">
+              <span className={`text-xs font-bold block ${isDark ? 'text-indigo-300' : 'text-indigo-900'}`}>
                 Connect Hugging Face n8n Instance
               </span>
               <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -402,7 +404,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="font-mono text-[10px] text-emerald-400 uppercase font-bold tracking-wider">
+                        <span className={`font-mono text-[10px] uppercase font-bold tracking-wider ${
+                          isDark ? 'text-emerald-400' : 'text-emerald-700'
+                        }`}>
                           {wf.category}
                         </span>
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
@@ -419,7 +423,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                       </h3>
 
                       <p className={`mt-1 text-[11px] line-clamp-2 leading-relaxed ${
-                        isDark ? 'text-slate-400' : 'text-slate-600'
+                        isDark ? 'text-slate-300' : 'text-slate-600'
                       }`}>
                         {wf.description[language] || wf.description.en}
                       </p>
@@ -461,7 +465,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                 {/* Visual Pipeline Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-500/20">
                   <div>
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold tracking-wider">
+                    <span className={`text-[10px] font-mono uppercase font-bold tracking-wider ${
+                      isDark ? 'text-emerald-400' : 'text-emerald-700'
+                    }`}>
                       Hugging Face n8n Execution Graph
                     </span>
                     <h4 className={`text-base font-bold font-display mt-0.5 ${
@@ -505,7 +511,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                   <div className={`p-3.5 rounded-xl border relative ${
                     isDark ? 'border-indigo-500/30 bg-indigo-950/15' : 'border-indigo-200 bg-indigo-50/50'
                   }`}>
-                    <div className="flex items-center justify-between text-[10px] font-mono text-indigo-400 uppercase font-bold mb-1.5">
+                    <div className={`flex items-center justify-between text-[10px] font-mono uppercase font-bold mb-1.5 ${
+                      isDark ? 'text-indigo-400' : 'text-indigo-700'
+                    }`}>
                       <span>1. Trigger Node</span>
                       <Workflow className="h-3.5 w-3.5" />
                     </div>
@@ -518,14 +526,18 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                   <div className={`p-3.5 rounded-xl border relative ${
                     isDark ? 'border-emerald-500/30 bg-emerald-950/20 ring-1 ring-emerald-500/20' : 'border-emerald-200 bg-emerald-50/70 ring-1 ring-emerald-400/30'
                   }`}>
-                    <div className="flex items-center justify-between text-[10px] font-mono text-emerald-400 uppercase font-bold mb-1.5">
+                    <div className={`flex items-center justify-between text-[10px] font-mono uppercase font-bold mb-1.5 ${
+                      isDark ? 'text-emerald-400' : 'text-emerald-700'
+                    }`}>
                       <span>2. HF Sovereign AI</span>
-                      <Cpu className="h-3.5 w-3.5 text-emerald-400" />
+                      <Cpu className="h-3.5 w-3.5" />
                     </div>
                     <p className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                       {selectedWorkflow.aiStep[language] || selectedWorkflow.aiStep.en}
                     </p>
-                    <span className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                    <span className={`inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded ${
+                      isDark ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold'
+                    }`}>
                       {selectedWorkflow.hfNode}
                     </span>
                   </div>
@@ -534,7 +546,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                   <div className={`p-3.5 rounded-xl border relative ${
                     isDark ? 'border-purple-500/30 bg-purple-950/15' : 'border-purple-200 bg-purple-50/50'
                   }`}>
-                    <div className="flex items-center justify-between text-[10px] font-mono text-purple-400 uppercase font-bold mb-1.5">
+                    <div className={`flex items-center justify-between text-[10px] font-mono uppercase font-bold mb-1.5 ${
+                      isDark ? 'text-purple-400' : 'text-purple-700'
+                    }`}>
                       <span>3. Local Dispatch</span>
                       <Send className="h-3.5 w-3.5" />
                     </div>
@@ -547,7 +561,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                 {/* Sample Payload Breakdown */}
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-[11px] font-mono text-slate-400 block mb-1">
+                    <span className={`text-[11px] font-mono block mb-1 ${
+                      isDark ? 'text-slate-400' : 'text-slate-700 font-medium'
+                    }`}>
                       Inbound Payload Sample:
                     </span>
                     <div className={`p-3 rounded-xl border text-xs font-mono min-h-[90px] ${
@@ -558,7 +574,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                   </div>
 
                   <div>
-                    <span className="text-[11px] font-mono text-emerald-400 block mb-1">
+                    <span className={`text-[11px] font-mono block mb-1 ${
+                      isDark ? 'text-emerald-400' : 'text-emerald-800 font-semibold'
+                    }`}>
                       Structured AI Output (JSON / Receipt):
                     </span>
                     <pre className={`p-3 rounded-xl border text-xs font-mono min-h-[90px] whitespace-pre-wrap overflow-x-auto ${
@@ -585,7 +603,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
 
               {/* Bottom Quick Action */}
               <div className="mt-6 pt-4 border-t border-slate-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+                <div className={`flex items-center gap-2 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <span>Compatible with self-hosted n8n, Hugging Face Spaces & Cloud Webhooks</span>
                 </div>
@@ -594,7 +612,9 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                   href="https://huggingface.co/docs/hub/spaces"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-mono font-bold text-[11px]"
+                  className={`flex items-center gap-1 font-mono text-[11px] ${
+                    isDark ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-700 hover:text-emerald-800 font-semibold'
+                  }`}
                 >
                   <span>Hugging Face Deployment Docs</span>
                   <ExternalLink className="h-3 w-3" />

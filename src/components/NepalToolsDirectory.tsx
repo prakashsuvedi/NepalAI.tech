@@ -501,13 +501,15 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   </div>
 
                   <p className={`text-xs mt-1.5 line-clamp-2 leading-relaxed ${
-                    isDark ? 'text-slate-400' : 'text-slate-600'
+                    isDark ? 'text-slate-300' : 'text-slate-600'
                   }`}>
                     {tool.description}
                   </p>
 
                   {/* Standout Capability Pill */}
-                  <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-500/90 font-medium">
+                  <div className={`mt-2.5 flex items-center gap-1.5 text-xs font-medium ${
+                    isDark ? 'text-emerald-400' : 'text-emerald-700 font-semibold'
+                  }`}>
                     <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
                     <span className="truncate">{tool.keyCapability}</span>
                   </div>
@@ -517,13 +519,13 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                     isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50/80 border-slate-200'
                   }`}>
                     <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1 text-slate-400">
-                        <TrendingUp className="h-3 w-3 text-emerald-400 shrink-0" aria-hidden="true" />
+                      <div className={`flex items-center gap-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                        <TrendingUp className={`h-3 w-3 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
                         <span className="font-medium text-xs">
                           {language === 'ne' ? 'नेपाली व्यवसाय प्रयोग दर:' : 'Local Business Adoption:'}
                         </span>
                       </div>
-                      <span className="font-bold tabular-nums text-emerald-400">
+                      <span className={`font-bold tabular-nums ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                         {adoption}%
                       </span>
                     </div>
@@ -542,12 +544,12 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                    <div className={`flex items-center justify-between text-[11px] pt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       <span className="truncate max-w-[170px]" title={tool.businessUsageTier || 'SME & Enterprise Standard'}>
                         {tool.businessUsageTier || 'SME & Enterprise Standard'}
                       </span>
                       {tool.monthlyActiveBusinesses && (
-                        <span className="text-emerald-500/90 font-semibold tabular-nums shrink-0">
+                        <span className={`font-semibold tabular-nums shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                           {tool.monthlyActiveBusinesses}
                         </span>
                       )}
@@ -562,16 +564,18 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                       <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
                         {language === 'ne' ? 'भुक्तानी विधि:' : 'Payment Method:'}
                       </span>
-                      <span className="text-emerald-500 font-bold tabular-nums">
+                      <span className={`font-bold tabular-nums ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                         {tool.monthlyPriceUsd > 0 ? `$${tool.monthlyPriceUsd}/mo (~NPR ${npr.toLocaleString()})` : 'Free Tier'}
                       </span>
                     </div>
-                    <p className={`text-xs mt-0.5 leading-snug ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <p className={`text-xs mt-0.5 leading-snug ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       {tool.paymentDetails}
                     </p>
 
                     {supportsQuickPay && (
-                      <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-slate-500/15 text-[11px] text-emerald-500 font-medium">
+                      <div className={`flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-slate-500/15 text-[11px] font-medium ${
+                        isDark ? 'text-emerald-400' : 'text-emerald-700'
+                      }`}>
                         <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />

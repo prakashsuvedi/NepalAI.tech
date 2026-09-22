@@ -139,9 +139,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           </p>
 
           {/* Bilingual Quick Tagline */}
-          <div className="text-xs font-mono text-emerald-400 flex items-center justify-center gap-2 pt-1">
+          <div className={`text-xs font-mono flex items-center justify-center gap-2 pt-1 ${
+            isDark ? 'text-emerald-400' : 'text-emerald-800 font-semibold'
+          }`}>
             <span>🇳🇵 Devanagari AI Native</span>
-            <span className="text-slate-500">•</span>
+            <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>•</span>
             <span>Billing in NPR (रू) & USD ($)</span>
           </div>
         </motion.div>
@@ -159,7 +161,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             className={`lg:col-span-7 rounded-3xl border p-7 sm:p-9 transition-all relative overflow-hidden backdrop-blur-2xl shadow-xl flex flex-col justify-between group cursor-pointer ${
               isDark
                 ? 'border-white/10 bg-white/[0.03] hover:border-emerald-500/40 hover:bg-white/[0.05]'
-                : 'border-slate-300/90 bg-white/80 hover:border-emerald-500/50 shadow-sm'
+                : 'border-slate-300/90 bg-white hover:border-emerald-500/50 shadow-sm'
             }`}
             onClick={() => onOpenConsultation('Sovereignty & Indigenous LLM Architecture')}
             data-cursor="Explore"
@@ -168,7 +170,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div>
               <div className="flex items-center justify-between gap-4 mb-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-inner">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border shadow-inner ${
+                    isDark ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  }`}>
                     <Sparkles className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div>
@@ -176,16 +180,18 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                       {t.about.missionHeading}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+                      <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                        isDark ? 'text-emerald-400' : 'text-emerald-700'
+                      }`}>
                         {isNepali ? 'स्वायत्त प्राविधिक आत्मनिर्भरता' : 'Indigenous Sovereignty'}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         {isNepali ? '(Sovereign AI)' : '(देवनागरी एआई)'}
                       </span>
                     </div>
                   </div>
                 </div>
-                <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
               </div>
 
               <p className={`text-sm leading-relaxed mb-6 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
@@ -193,17 +199,23 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </p>
 
               {/* Bento Feature Points */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-5 border-t border-white/10">
-                <div className="flex items-start gap-2.5 p-3 rounded-xl border border-white/5 bg-white/[0.02]">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 pt-5 border-t ${
+                isDark ? 'border-white/10' : 'border-slate-200'
+              }`}>
+                <div className={`flex items-start gap-2.5 p-3 rounded-xl border ${
+                  isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+                }`}>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {isNepali
                       ? 'नेपाली, नेवारी र मैथिली भाषाहरूका लागि विशेष टोकनाइजेसन'
                       : 'Dialect-aware tokenizers for Devanagari & Nepali scripts'}
                   </span>
                 </div>
-                <div className="flex items-start gap-2.5 p-3 rounded-xl border border-white/5 bg-white/[0.02]">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className={`flex items-start gap-2.5 p-3 rounded-xl border ${
+                  isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+                }`}>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {isNepali
                       ? 'स्थानीय नेपाली डेटा सेन्टरहरूमा शून्य-डेटा-लिकेज होस्टिङ'
@@ -214,12 +226,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </div>
 
             {/* Bottom Status Bar */}
-            <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-slate-400">
-              <span className="flex items-center gap-1.5 text-emerald-400">
+            <div className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono ${
+              isDark ? 'border-white/10 text-slate-400' : 'border-slate-200 text-slate-600'
+            }`}>
+              <span className={`flex items-center gap-1.5 ${isDark ? 'text-emerald-400' : 'text-emerald-700 font-medium'}`}>
                 <ShieldCheck className="h-4 w-4" />
                 <span>Zero Foreign Cloud Lock-in • NPR Billing</span>
               </span>
-              <span className="text-[11px] text-slate-500">Tier-3 Kathmandu DC</span>
+              <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Tier-3 Kathmandu DC</span>
             </div>
           </motion.div>
 
@@ -233,7 +247,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             className={`lg:col-span-5 rounded-3xl border p-7 sm:p-9 transition-all relative overflow-hidden backdrop-blur-2xl shadow-xl flex flex-col justify-between group cursor-pointer ${
               isDark
                 ? 'border-white/10 bg-white/[0.03] hover:border-indigo-500/40 hover:bg-white/[0.05]'
-                : 'border-slate-300/90 bg-white/80 hover:border-indigo-500/50 shadow-sm'
+                : 'border-slate-300/90 bg-white hover:border-indigo-500/50 shadow-sm'
             }`}
             onClick={() => onOpenConsultation('Commercial Enterprise AI Transformation')}
             data-cursor="Scale"
@@ -241,7 +255,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div>
               <div className="flex items-center justify-between gap-4 mb-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-inner">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border shadow-inner ${
+                    isDark ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                  }`}>
                     <Building2 className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div>
@@ -249,10 +265,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                       {t.about.visionHeading}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-indigo-400 font-semibold">
+                      <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                        isDark ? 'text-indigo-400' : 'text-indigo-700'
+                      }`}>
                         {isNepali ? 'इन्टरप्राइज एआई रूपान्तरण' : 'Enterprise Scale'}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         {isNepali ? '(Commercial AI)' : '(संस्थागत रूपान्तरण)'}
                       </span>
                     </div>
@@ -265,17 +283,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 {t.about.visionBody}
               </p>
 
-              <div className="space-y-2.5 pt-5 border-t border-white/10">
-                <div className="flex items-start gap-2.5 p-3 rounded-xl border border-white/5 bg-white/[0.02]">
-                  <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+              <div className={`space-y-2.5 pt-5 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                <div className={`flex items-start gap-2.5 p-3 rounded-xl border ${
+                  isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+                }`}>
+                  <CheckCircle2 className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
                   <span className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {isNepali
                       ? 'वाणिज्य बैंक र वित्तीय संस्थाहरूका लागि NRB मापदण्ड अनुकूल'
                       : 'NRB IT guideline aligned architectures for commercial banks'}
                   </span>
                 </div>
-                <div className="flex items-start gap-2.5 p-3 rounded-xl border border-white/5 bg-white/[0.02]">
-                  <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                <div className={`flex items-start gap-2.5 p-3 rounded-xl border ${
+                  isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+                }`}>
+                  <CheckCircle2 className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
                   <span className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {isNepali
                       ? 'हप्तौंभित्र कार्यशील प्रोटोटाइप र भौतिक इन्जिनियरिङ सहयोग'
@@ -285,12 +307,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-slate-400">
-              <span className="flex items-center gap-1.5 text-indigo-400">
+            <div className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono ${
+              isDark ? 'border-white/10 text-slate-400' : 'border-slate-200 text-slate-600'
+            }`}>
+              <span className={`flex items-center gap-1.5 ${isDark ? 'text-indigo-400' : 'text-indigo-700 font-medium'}`}>
                 <Zap className="h-4 w-4" />
                 <span>Production Ready • Full IP Transfer</span>
               </span>
-              <span className="text-[11px] text-slate-500">रू / $ Invoicing</span>
+              <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>रू / $ Invoicing</span>
             </div>
           </motion.div>
 
@@ -318,10 +342,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl border group-hover:scale-105 transition-transform ${
+                      isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}>
                       <IconComp className="h-5 w-5" aria-hidden="true" />
                     </div>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-emerald-400">
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                      isDark ? 'bg-white/[0.04] border-white/10 text-emerald-400' : 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                    }`}>
                       {pillar.tag}
                     </span>
                   </div>
@@ -329,11 +357,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                   <h4 className={`text-base font-bold leading-snug font-display mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {pillar.title}
                   </h4>
-                  <div className="text-[11px] text-emerald-400/90 font-mono mb-2">
+                  <div className={`text-[11px] font-mono mb-2 ${
+                    isDark ? 'text-emerald-400/90' : 'text-emerald-700 font-medium'
+                  }`}>
                     {pillar.titleSecondary}
                   </div>
 
-                  <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                     {pillar.description}
                   </p>
                 </div>

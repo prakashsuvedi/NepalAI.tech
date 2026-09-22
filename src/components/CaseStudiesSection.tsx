@@ -174,7 +174,7 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
                 </h3>
 
                 <p className={`text-xs mb-4 line-clamp-3 leading-relaxed ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
+                  isDark ? 'text-slate-300' : 'text-slate-600'
                 }`}>
                   {study.summary}
                 </p>
@@ -186,7 +186,7 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
                       <div className={`text-sm font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {m.value}
                       </div>
-                      <div className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <div className={`text-[10px] ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                         {m.label}
                       </div>
                     </div>
@@ -213,7 +213,7 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
               {/* Action */}
               <div className="pt-3 border-t border-slate-500/15 flex items-center justify-between">
                 <span className={`flex items-center gap-1 text-[11px] font-mono ${
-                  isDark ? 'text-slate-400' : 'text-slate-500'
+                  isDark ? 'text-slate-400' : 'text-slate-600'
                 }`}>
                   <Clock className="h-3 w-3" aria-hidden="true" />
                   <span>{study.duration}</span>
@@ -226,7 +226,9 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
                     onSelectCaseStudy(study);
                   }}
                   aria-label={`Read full case study for ${study.title}`}
-                  className="text-xs font-semibold text-emerald-500 group-hover:text-emerald-600 flex items-center gap-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1"
+                  className={`text-xs font-semibold flex items-center gap-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1 transition-colors ${
+                    isDark ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-700 hover:text-emerald-800'
+                  }`}
                 >
                   <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
                     {t.caseStudies.viewDetails}

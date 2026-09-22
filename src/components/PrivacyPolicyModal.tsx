@@ -62,7 +62,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-500/20 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border shrink-0 ${
+              isDark ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            }`}>
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
@@ -75,11 +77,13 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 >
                   {t.privacy.modalTitle}
                 </h3>
-                <span className="hidden sm:inline-block text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
+                <span className={`hidden sm:inline-block text-[10px] uppercase font-mono px-2 py-0.5 rounded border ${
+                  isDark ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold'
+                }`}>
                   Sovereignty
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 {t.privacy.badge} • {t.privacy.lastUpdated}
               </p>
             </div>
@@ -90,7 +94,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               type="button"
               onClick={handlePrint}
               title="Print policy document"
-              className="p-1.5 rounded-lg border border-slate-500/20 text-slate-400 hover:text-white hover:bg-white/5 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className={`p-1.5 rounded-lg border border-slate-500/20 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+              }`}
               aria-label="Print policy document"
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
@@ -98,7 +104,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg border border-slate-500/20 text-slate-400 hover:text-white hover:bg-white/5 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className={`p-1.5 rounded-lg border border-slate-500/20 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+              }`}
               aria-label="Close modal"
             >
               <X className="h-5 w-5" aria-hidden="true" />
@@ -128,10 +136,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             >
-              <Lock className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <Lock className={`h-4 w-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
               <span>{t.privacy.section1Title}</span>
             </h4>
-            <p className={`text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+            <p className={`${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
               {t.privacy.section1Body}
             </p>
           </div>
@@ -143,10 +151,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             >
-              <Server className="h-4 w-4 text-indigo-400 shrink-0" aria-hidden="true" />
+              <Server className={`h-4 w-4 shrink-0 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} aria-hidden="true" />
               <span>{t.privacy.section2Title}</span>
             </h4>
-            <p className={`text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+            <p className={`${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
               {t.privacy.section2Body}
             </p>
           </div>
@@ -158,10 +166,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             >
-              <FileText className="h-4 w-4 text-amber-400 shrink-0" aria-hidden="true" />
+              <FileText className={`h-4 w-4 shrink-0 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} aria-hidden="true" />
               <span>{t.privacy.section3Title}</span>
             </h4>
-            <p className={`text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+            <p className={`${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
               {t.privacy.section3Body}
             </p>
           </div>
@@ -173,10 +181,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             >
-              <ShieldCheck className="h-4 w-4 text-cyan-400 shrink-0" aria-hidden="true" />
+              <ShieldCheck className={`h-4 w-4 shrink-0 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} aria-hidden="true" />
               <span>{t.privacy.section4Title}</span>
             </h4>
-            <p className={`text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+            <p className={`${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
               {t.privacy.section4Body}
             </p>
           </div>
@@ -188,10 +196,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <CheckCircle2 className={`h-4 w-4 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
               <span>{t.privacy.section5Title}</span>
             </h4>
-            <p className={`text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+            <p className={`${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
               {t.privacy.section5Body}
             </p>
           </div>
@@ -200,7 +208,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
 
         {/* Modal Footer */}
         <div className="pt-4 border-t border-slate-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shrink-0">
-          <span className="text-slate-400 font-mono text-[11px]">
+          <span className={`font-mono text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             {t.privacy.contactDpo}
           </span>
 

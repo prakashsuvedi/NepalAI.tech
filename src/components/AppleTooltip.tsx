@@ -90,7 +90,9 @@ export const AppleTooltip: React.FC<AppleTooltipProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Dismiss tooltip"
-                className="pointer-events-auto min-w-[44px] min-h-[44px] -mr-2.5 -my-2 flex items-center justify-center rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className={`pointer-events-auto min-w-[44px] min-h-[44px] -mr-2.5 -my-2 flex items-center justify-center rounded-xl transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
               >
                 <span className="text-sm font-semibold">✕</span>
               </button>
@@ -105,7 +107,9 @@ export const AppleTooltip: React.FC<AppleTooltipProps> = ({
               {toolName}
             </h4>
             {priceLabel && (
-              <span className="text-[11px] font-mono font-bold text-emerald-400 shrink-0">
+              <span className={`text-[11px] font-mono font-bold shrink-0 ${
+                isDark ? 'text-emerald-400' : 'text-emerald-700'
+              }`}>
                 {priceLabel}
               </span>
             )}
@@ -115,7 +119,9 @@ export const AppleTooltip: React.FC<AppleTooltipProps> = ({
           <div className="mt-2 space-y-2">
             {/* English One-Sentence Description */}
             <div className="flex items-start gap-1.5">
-              <span className="text-[9px] font-mono uppercase px-1 py-0.2 rounded font-bold bg-slate-500/20 text-slate-400 shrink-0 mt-0.5">
+              <span className={`text-[9px] font-mono uppercase px-1 py-0.2 rounded font-bold bg-slate-500/20 shrink-0 mt-0.5 ${
+                isDark ? 'text-slate-300' : 'text-slate-700'
+              }`}>
                 EN
               </span>
               <p className={`text-xs leading-relaxed font-sans ${
@@ -128,7 +134,9 @@ export const AppleTooltip: React.FC<AppleTooltipProps> = ({
             {/* Nepali One-Sentence Devanagari Description */}
             {descriptionNe && (
               <div className="flex items-start gap-1.5 pt-1.5 border-t border-slate-500/10">
-                <span className="text-[9px] font-mono uppercase px-1 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+                <span className={`text-[9px] font-mono uppercase px-1 py-0.2 rounded font-bold shrink-0 mt-0.5 ${
+                  isDark ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-800'
+                }`}>
                   NE
                 </span>
                 <p className={`text-xs leading-relaxed font-['Noto_Sans_Devanagari'] font-normal ${

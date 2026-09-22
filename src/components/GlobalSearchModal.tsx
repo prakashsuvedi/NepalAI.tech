@@ -456,8 +456,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="relative flex items-center px-4 sm:px-6 py-4 border-b border-white/10 gap-3">
-          <Search className="h-5 w-5 text-emerald-400 shrink-0" aria-hidden="true" />
+        <div className={`relative flex items-center px-4 sm:px-6 py-4 border-b gap-3 ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
+          <Search className="h-5 w-5 text-emerald-500 shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -468,9 +470,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 ? 'एआई टुल्स, परामर्श, FAQ वा पृष्ठ खोज्नुहोस्... (उदा. eSewa, OCR, HamroAI)'
                 : 'Search verified AI tools, consulting services, FAQs, and sections... (e.g. eSewa, OCR, Sora)'
             }
-            className={`w-full bg-transparent text-sm sm:text-base font-medium focus:outline-hidden placeholder-slate-400 ${
-              isNepali ? "font-['Noto_Sans_Devanagari']" : ''
-            }`}
+            className={`w-full bg-transparent text-sm sm:text-base font-medium focus:outline-hidden ${
+              isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'
+            } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Global search input"
           />
 
@@ -478,14 +480,18 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className={`p-1 rounded-full transition-colors ${
+                isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+              }`}
               aria-label="Clear search query"
             >
               <X className="h-4 w-4" />
             </button>
           )}
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.06] border border-white/10 text-[10px] font-mono text-slate-400">
+          <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono ${
+            isDark ? 'bg-white/[0.06] border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+          }`}>
             <kbd className="font-sans">ESC</kbd>
             <span>to close</span>
           </div>
@@ -493,7 +499,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="sm:hidden p-1.5 rounded-lg text-slate-400 hover:text-white"
+            className={`sm:hidden p-1.5 rounded-lg ${
+              isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+            }`}
             aria-label="Close search"
           >
             <X className="h-5 w-5" />
@@ -501,7 +509,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Category Filter Tabs & Popular Queries */}
-        <div className="px-4 sm:px-6 py-2.5 border-b border-white/10 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none text-xs">
+        <div className={`px-4 sm:px-6 py-2.5 border-b flex items-center justify-between gap-3 overflow-x-auto scrollbar-none text-xs ${
+          isDark ? 'border-white/10' : 'border-slate-200'
+        }`}>
           <div className="flex items-center gap-1.5 shrink-0">
             {categories.map((cat) => (
               <button
@@ -515,14 +525,14 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       : 'bg-emerald-600 text-white font-bold shadow-xs'
                     : isDark
                     ? 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-950'
                 }`}
               >
                 <span>{isNepali ? cat.labelNe : cat.labelEn}</span>
                 <span className={`text-[10px] font-mono px-1 rounded ${
                   selectedCategory === cat.id
-                    ? 'bg-slate-950/20 text-slate-950 font-bold'
-                    : 'text-slate-400'
+                    ? isDark ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-emerald-700/30 text-white font-bold'
+                    : isDark ? 'text-slate-400' : 'text-slate-500'
                 }`}>
                   {cat.count}
                 </span>
@@ -532,12 +542,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
           {/* Quick Language Toggle inside Search */}
           {onSelectLanguage && (
-            <div className="hidden md:flex items-center gap-1 text-[11px] font-mono text-slate-400 shrink-0">
-              <Globe2 className="h-3 w-3 text-emerald-400" />
+            <div className={`hidden md:flex items-center gap-1 text-[11px] font-mono shrink-0 ${
+              isDark ? 'text-slate-400' : 'text-slate-600'
+            }`}>
+              <Globe2 className="h-3 w-3 text-emerald-500" />
               <button
                 type="button"
                 onClick={() => onSelectLanguage(language === 'en' ? 'ne' : 'en')}
-                className="hover:text-white underline cursor-pointer"
+                className={`hover:underline cursor-pointer ${
+                  isDark ? 'hover:text-white' : 'hover:text-slate-950'
+                }`}
               >
                 {language === 'en' ? 'नेपालीमा खोज्नुहोस्' : 'Search in EN'}
               </button>
@@ -547,8 +561,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
         {/* Popular Tags Strip when query is empty */}
         {!query && (
-          <div className="px-4 sm:px-6 py-2 bg-white/[0.02] border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px]">
-            <span className="text-slate-400 shrink-0 font-medium">
+          <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px] ${
+            isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200'
+          }`}>
+            <span className={`shrink-0 font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               {isNepali ? 'लोकप्रिय खोज:' : 'Trending in Nepal:'}
             </span>
             {popularPills.map((pill, pIdx) => (
@@ -556,7 +572,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 key={pIdx}
                 type="button"
                 onClick={() => setQuery(pill.query)}
-                className="px-2.5 py-0.5 rounded-full bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-slate-300 whitespace-nowrap transition-colors cursor-pointer"
+                className={`px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
+                  isDark
+                    ? 'bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 border-white/10 text-slate-300'
+                    : 'bg-white hover:bg-emerald-50 hover:text-emerald-800 border-slate-300 text-slate-700 shadow-2xs'
+                }`}
               >
                 {isNepali ? pill.labelNe : pill.labelEn}
               </button>
@@ -565,8 +585,12 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         )}
 
         {/* Unified AI Engine Query Bridges: Hamro AI, Perplexity, ChatGPT, Claude, DeepSeek */}
-        <div className="px-4 sm:px-6 py-2 bg-emerald-500/[0.03] border-b border-emerald-500/15 flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px]">
-          <span className="text-emerald-400 shrink-0 font-mono font-bold flex items-center gap-1">
+        <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px] ${
+          isDark ? 'bg-emerald-500/[0.03] border-emerald-500/15' : 'bg-emerald-50/70 border-emerald-200'
+        }`}>
+          <span className={`shrink-0 font-mono font-bold flex items-center gap-1 ${
+            isDark ? 'text-emerald-400' : 'text-emerald-800'
+          }`}>
             <Sparkles className="h-3 w-3" /> AI Engines:
           </span>
 
@@ -577,7 +601,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 onClose();
                 onOpenHamroAI();
               }}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all font-semibold flex items-center gap-1 shrink-0 cursor-pointer shadow-xs"
+              className={`px-2.5 py-1 rounded-lg border transition-all font-semibold flex items-center gap-1 shrink-0 cursor-pointer shadow-xs ${
+                isDark
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
+                  : 'bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700'
+              }`}
             >
               <Bot className="h-3 w-3" />
               <span>{isNepali ? 'हाम्रो एआई च्याट' : 'Hamro AI Chat'}</span>
@@ -588,7 +616,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             href={`https://www.perplexity.ai/search?q=${encodeURIComponent(query ? query + ' in Nepal context' : 'Nepal AI sovereign tools NRB compliance')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all flex items-center gap-1 shrink-0"
+            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+              isDark
+                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+            }`}
           >
             <span>Perplexity Pro</span>
             <ExternalLink className="h-2.5 w-2.5 opacity-60" />
@@ -598,7 +630,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             href={`https://chatgpt.com/?q=${encodeURIComponent(query ? query : 'Nepal AI enterprise consulting')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all flex items-center gap-1 shrink-0"
+            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+              isDark
+                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+            }`}
           >
             <span>ChatGPT</span>
             <ExternalLink className="h-2.5 w-2.5 opacity-60" />
@@ -608,7 +644,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             href={`https://claude.ai/new?q=${encodeURIComponent(query ? query : 'Architecture for sovereign LLM in Nepal')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all flex items-center gap-1 shrink-0"
+            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+              isDark
+                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+            }`}
           >
             <span>Claude 3.7</span>
             <ExternalLink className="h-2.5 w-2.5 opacity-60" />
@@ -618,7 +658,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             href={`https://chat.deepseek.com/?q=${encodeURIComponent(query ? query : 'DeepSeek R1 reasoning')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all flex items-center gap-1 shrink-0"
+            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+              isDark
+                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+            }`}
           >
             <span>DeepSeek R1</span>
             <ExternalLink className="h-2.5 w-2.5 opacity-60" />
@@ -698,7 +742,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                         )}
 
                         {item.extraInfo && (
-                          <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                          <span className={`text-[11px] font-mono font-semibold ${
+                            isDark ? 'text-emerald-400' : 'text-emerald-700'
+                          }`}>
                             {item.extraInfo}
                           </span>
                         )}
@@ -707,7 +753,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${
                         isSelected
                           ? isDark ? 'text-slate-200' : 'text-slate-700'
-                          : isDark ? 'text-slate-400' : 'text-slate-600'
+                          : isDark ? 'text-slate-300' : 'text-slate-600'
                       } ${isNepali ? "font-['Mukta']" : ''}`}>
                         {isNepali ? item.descriptionNe : item.descriptionEn}
                       </p>
@@ -721,7 +767,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                         ? isDark
                           ? 'bg-emerald-500 text-slate-950 shadow-sm'
                           : 'bg-emerald-600 text-white shadow-sm'
-                        : 'text-slate-500 opacity-0 group-hover:opacity-100'
+                        : isDark ? 'text-slate-400 opacity-0 group-hover:opacity-100' : 'text-slate-500 opacity-0 group-hover:opacity-100'
                     }`}>
                       <span className="text-[11px] hidden sm:inline">
                         {item.actionType === 'consultation'
@@ -738,24 +784,34 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Footer Shortcut Helper Bar */}
-        <div className="px-4 sm:px-6 py-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono text-slate-400 bg-white/[0.01]">
+        <div className={`px-4 sm:px-6 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono ${
+          isDark ? 'border-white/10 text-slate-400 bg-white/[0.01]' : 'border-slate-200 text-slate-600 bg-slate-50'
+        }`}>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">↑</kbd>
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">↓</kbd>
+              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              }`}>↑</kbd>
+              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              }`}>↓</kbd>
               <span>navigate</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">↵</kbd>
+              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              }`}>↵</kbd>
               <span>select</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">esc</kbd>
+              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              }`}>esc</kbd>
               <span>close</span>
             </span>
           </div>
 
-          <div className="text-emerald-400 font-medium">
+          <div className={`font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700 font-semibold'}`}>
             <span>nepalai.tech Global Command Palette</span>
           </div>
         </div>
