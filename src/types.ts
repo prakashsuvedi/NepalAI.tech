@@ -75,6 +75,21 @@ export interface NepalAITool {
   popularityInNepal: 'Top 1%' | 'Trending' | 'Essential' | 'Specialized';
   officialUrl: string;
   keyCapability: string;
+  localAdoptionPercent?: number;
+  businessUsageTier?: string;
+  monthlyActiveBusinesses?: string;
+}
+
+export interface NepalAINewsItem {
+  id: string;
+  headline: string;
+  source: string;
+  date: string;
+  category: string;
+  summary: string;
+  impactForNepal: string;
+  sourceUrl?: string;
+  verifiedTag?: string;
 }
 
 export type FAQCategory = 'All' | 'Payments & Wallets' | 'AI Consulting' | 'Sovereign AI & Studio' | 'Privacy & Compliance';

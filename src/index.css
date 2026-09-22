@@ -1,1 +1,190 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Outfit', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-devanagari: 'Mukta', 'Noto Sans Devanagari', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Outfit', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: 'Instrument Serif', Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-devanagari: 'Mukta', 'Noto Sans Devanagari', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+    --tracking-tighter-heading: -0.035em;
+    --tracking-tight-heading: -0.028em;
+    --tracking-snug-heading: -0.02em;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    line-height: 1.625;
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 1rem;
+      line-height: 1.68;
+    }
+  }
+
+  /* Balanced, tight heading typography scale */
+  h1, .font-display-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: var(--tracking-tighter-heading);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  h2, .font-display-lg {
+    font-family: var(--font-display);
+    font-weight: 750;
+    letter-spacing: var(--tracking-tight-heading);
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+
+  h3, .font-display-md {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: var(--tracking-tight-heading);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  h4, h5, h6, .font-display-sm {
+    font-family: var(--font-display);
+    font-weight: 650;
+    letter-spacing: var(--tracking-snug-heading);
+    line-height: 1.35;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-tight-heading);
+  }
+
+  .font-serif-editorial {
+    font-family: var(--font-serif);
+  }
+
+  /* Balanced Devanagari typography scale */
+  .font-devanagari, [lang="ne"] {
+    font-family: var(--font-devanagari);
+    line-height: 1.72;
+    letter-spacing: -0.005em;
+  }
+
+  [lang="ne"] h1, [lang="ne"] h2, [lang="ne"] h3, [lang="ne"] h4 {
+    letter-spacing: -0.01em;
+    line-height: 1.32;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "zero", "ss01", "ss02";
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Global Minimalist Translucent Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Dark mode specific scrollbar tint */
+.dark ::-webkit-scrollbar-thumb,
+body.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+body.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 211, 153, 0.55);
+}
+
+/* Custom minimal utilities */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Zen reading mode typography & focus container */
+.zen-active {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zen-prose {
+  max-width: 68ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.82;
+  letter-spacing: 0.008em;
+  word-spacing: 0.02em;
+}
+
+.zen-prose p {
+  line-height: 1.82;
+  letter-spacing: 0.008em;
+  word-spacing: 0.02em;
+  margin-bottom: 1.5rem;
+}
+
+.zen-prose h1,
+.zen-prose h2,
+.zen-prose h3 {
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+[lang="ne"] .zen-prose {
+  line-height: 1.95;
+  letter-spacing: 0.005em;
+  word-spacing: 0.03em;
+}
+
+

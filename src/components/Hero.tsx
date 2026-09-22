@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   ArrowUpRight,
-  Layers,
   Video,
   Mic,
   MessageSquare,
@@ -10,11 +9,18 @@ import {
   Sparkles,
   ExternalLink,
   ShieldCheck,
+  SlidersHorizontal,
+  Copy,
+  Check,
+  Play,
+  Pause,
+  Maximize2,
+  Volume2,
   Zap,
-  SlidersHorizontal
+  Globe
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { HeroConfig, ThemeMode, Language } from '../types';
-import { NepaliHeritageArt } from './NepaliHeritageArt';
 import { TRANSLATIONS } from '../data/translations';
 
 interface HeroProps {
@@ -22,7 +28,7 @@ interface HeroProps {
   theme: ThemeMode;
   language: Language;
   onOpenConsultation: () => void;
-  onExploreCaseStudies: () => void;
+  onExploreConsulting: () => void;
   onOpenAdminPanel: () => void;
 }
 
@@ -31,416 +37,363 @@ export const Hero: React.FC<HeroProps> = ({
   theme,
   language,
   onOpenConsultation,
-  onExploreCaseStudies,
+  onExploreConsulting,
   onOpenAdminPanel,
 }) => {
   const isDark = theme === 'dark';
+  const isNepali = language === 'ne';
   const t = TRANSLATIONS[language];
+  
   const [activeTab, setActiveTab] = useState<'video' | 'voice' | 'chat' | 'ocr'>('video');
-  const [pulseLive, setPulseLive] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [progress, setProgress] = useState(38);
 
-  // Subtle blink interval for live connection indicator
+  // Simulated media scrubber animation
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPulseLive((prev) => !prev);
-    }, 2400);
-    return () => clearInterval(timer);
-  }, []);
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev >= 100 ? 0 : prev + 1));
+    }, 150);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   const featureTabs = [
     {
       id: 'video' as const,
-      label: language === 'ne' ? 'सोरा-२ भिडियो' : 'Sora-2 Video',
+      label: isNepali ? 'सोरा-२ ४K भिडियो' : 'Sora-2 4K Video',
       icon: Video,
       color: 'text-indigo-400',
-      tag: language === 'ne' ? '६-दृश्य निर्देशक' : '6-Scene Nepali Director',
-      previewPrompt:
-        language === 'ne'
-          ? '“माछापुच्छ्रे हिमालको बिहानी दृश्य, सुनौलो घाम, लालीगुराँसको वन र हिमाली उपत्यकाको ४K सिनेमाटिक भिडियो।”'
-          : '“Cinematic morning flight above Machapuchare (Fishtail) with golden alpine sunrise, traditional rhododendron valley, 4K 60fps.”',
-      techBadge: 'OpenAI Sora-2 + FFmpeg Cloud',
+      tag: '4K HDR • 60 FPS',
+      badge: 'OpenAI Sora-2 + FFmpeg Cloud',
+      previewPrompt: isNepali
+        ? '“माछापुच्छ्रे हिमालको बिहानी दृश्य, सुनौलो घाम, लालीगुराँसको वन र हिमाली उपत्यकाको ४K सिनेमाटिक भिडियो।”'
+        : '“Cinematic morning aerial of Machapuchare peak with golden sunrise and traditional rhododendron valley, 4K 60fps.”',
+      outputDetail: '6 Scenes Generated • 4K ProRes 422 HQ',
+      mediaType: 'video'
     },
     {
       id: 'voice' as const,
-      label: language === 'ne' ? 'न्युरल आवाज' : 'Neural Voice',
+      label: isNepali ? '२४kHz न्युरल भ्वाइस' : '24kHz Neural Voice',
       icon: Mic,
       color: 'text-emerald-400',
-      tag: 'SpeechT5 Devnagari',
-      previewPrompt:
-        language === 'ne'
-          ? '“नमस्ते, नेपालको पहिलो उच्च-स्तरको नेपाली आवाज स्टुडियोमा स्वागत छ। अब अडियोबुक र विज्ञापन मिनेटमै बनाउनुहोस्।”'
-          : '“Namaste, welcome to Nepal’s high-fidelity neural voice synthesis studio. Produce radio ads and audiobooks with authentic Nepali intonation in minutes.”',
-      techBadge: '24kHz Studio Neural Audio',
-    },
-    {
-      id: 'chat' as const,
-      label: language === 'ne' ? 'हाम्रोएआई रिजनिङ' : 'HamroAI Reasoning',
-      icon: MessageSquare,
-      color: 'text-sky-400',
-      tag: 'NRB & Legal RAG',
-      previewPrompt:
-        language === 'ne'
-          ? '“नेपाल राष्ट्र बैंकको विदेशी मुद्रा भुक्तानी कार्यविधि २०८० अनुसार डलर कार्ड मार्फत वार्षिक कति खर्च गर्न पाइन्छ?”'
-          : '“According to Nepal Rastra Bank foreign currency regulations 2080, what are the annual compliance limits and KYC requirements for prepaid dollar cards?”',
-      techBadge: 'Local Vector RAG & Nepali LLM',
+      tag: 'Studio Master • Dolby',
+      badge: 'SpeechT5 Devanagari Engine',
+      previewPrompt: isNepali
+        ? '“नमस्ते, नेपालको पहिलो उच्च-स्तरको न्युरल आवाज स्टुडियोमा स्वागत छ। अब अडियो सामग्री मिनेटमै तयार गर्नुहोस्।”'
+        : '“Namaste, welcome to Nepal’s studio-grade neural voice synthesis platform with authentic Nepali prosody.”',
+      outputDetail: '24kHz High-Fidelity Lossless Audio • 0ms Latency',
+      mediaType: 'audio'
     },
     {
       id: 'ocr' as const,
-      label: language === 'ne' ? 'देवनागरी ओसीआर' : 'Devnagari OCR',
+      label: isNepali ? 'देवनागरी भिजन ओसीआर' : 'Devanagari Vision OCR',
       icon: FileCheck,
       color: 'text-amber-400',
       tag: '99.4% Accuracy',
-      previewPrompt:
-        language === 'ne'
-          ? '“नागरिकता प्रमाणपत्र, राष्ट्रिय परिचयपत्र, र बैंक भौचरको देवनागरी हस्तलिखित विवरण तत्काल JSON मा रूपान्तरण।”'
-          : '“Instant structured JSON extraction from handwritten Devanagari Nagarikta certificates, Lalpurja land deeds, and bank deposit slips.”',
-      techBadge: 'Vision Transformer for Nepali',
+      badge: 'Vision Transformer (Devanagari)',
+      previewPrompt: isNepali
+        ? '“नागरिकता प्रमाणपत्र, राष्ट्रिय परिचयपत्र, र बैंक भौचरको हस्तलिखित विवरण तत्काल JSON मा रूपान्तरण।”'
+        : '“Instant structured JSON extraction from handwritten Devanagari Nagarikta certificates and bank deposit slips.”',
+      outputDetail: 'Structured JSON Payload • Verified Confidence 99.4%',
+      mediaType: 'document'
+    },
+    {
+      id: 'chat' as const,
+      label: isNepali ? 'हाम्रोएआई लिगल RAG' : 'HamroAI Legal RAG',
+      icon: MessageSquare,
+      color: 'text-sky-400',
+      tag: 'NRB Air-Gapped',
+      badge: 'Sovereign Vector RAG + Llama-3',
+      previewPrompt: isNepali
+        ? '“नेपाल राष्ट्र बैंकको विदेशी मुद्रा भुक्तानी कार्यविधि अनुसार डलर कार्ड र ई-कमर्स भुक्तानीको कानुनी दायरा।”'
+        : '“Nepal Rastra Bank foreign currency regulations for international payments, Dollar Card KYC, and limits.”',
+      outputDetail: 'Cited 4 NRB Directives • Air-Gapped Local Cluster',
+      mediaType: 'chat'
     },
   ];
 
-  const currentTab = featureTabs.find((t) => t.id === activeTab) || featureTabs[0];
+  const currentTab = featureTabs.find((tab) => tab.id === activeTab) || featureTabs[0];
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(currentTab.previewPrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <section
-      className="relative overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24 transition-colors duration-300"
-      aria-label="nepalai.tech Introduction"
+      className={`relative overflow-hidden pt-10 pb-14 md:pt-16 md:pb-20 transition-colors duration-300 ${
+        isDark ? 'bg-[#06080e] text-white' : 'bg-slate-50/80 text-slate-900 border-b border-slate-200/80'
+      }`}
+      aria-label="NepalAI Platform Introduction"
     >
-      {/* Authentic Nepali Heritage Vector Art (Himalayas & Mandir Silhouette) */}
-      <NepaliHeritageArt
-        theme={theme}
-        showHimalaya={config.showHimalayaArt}
-        showMandir={config.showMandirMotif}
-      />
+      {/* Background Glow */}
+      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] blur-[120px] pointer-events-none -z-10 ${
+        isDark 
+          ? 'bg-gradient-to-tr from-emerald-500/15 via-indigo-500/10 to-rose-500/10' 
+          : 'bg-gradient-to-tr from-emerald-400/10 via-indigo-400/10 to-amber-300/10'
+      }`} />
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Top Ticker: Himalayan Node, Live Latency, Sovereign Billing */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-dashed border-slate-500/20 text-[11px] mb-8 font-mono">
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-block h-2 w-2 rounded-full transition-opacity duration-700 ${
-                pulseLive ? 'bg-emerald-400 opacity-100 shadow-[0_0_8px_#34d399]' : 'bg-emerald-500 opacity-50'
-              }`}
-              aria-hidden="true"
-            />
-            <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-              Himalaya Cluster 01: Kathmandu PoP (४५ms Latency)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className={`flex items-center gap-1.5 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>NRB Data Sovereignty Compliant</span>
-            </span>
-
-            <span className={`hidden sm:inline ${isDark ? 'text-slate-600' : 'text-slate-300'}`} aria-hidden="true">|</span>
-
-            <span className={`hidden sm:flex items-center gap-1.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              <Zap className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
-              <span>FonePay QR Instant Settlement</span>
-            </span>
-
-            <button
-              type="button"
-              onClick={onOpenAdminPanel}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isDark
-                  ? 'border-white/10 text-slate-400 hover:text-white hover:bg-white/[0.04]'
-                  : 'border-slate-300 text-slate-600 hover:text-slate-900 bg-white'
-              }`}
-              title="Open Admin customizer"
-              aria-label="Open Admin configuration modal"
-            >
-              <SlidersHorizontal className="h-2.5 w-2.5 text-indigo-400" aria-hidden="true" />
-              <span>{t.nav.adminPanel}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Hero Title and Eyebrow */}
-        <div className="text-center max-w-4xl mx-auto">
+        {/* Hero Title & Pitch - Sweet, Punchy, Bilingual */}
+        <div className="text-center max-w-3xl mx-auto">
           
-          {/* Eyebrow Pill linking to studio */}
-          <a
-            href={config.studioUrl || 'https://studio.nepalai.tech'}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Explore NepalAI Studio Workbench (opens in new tab)"
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs backdrop-blur-md mb-6 transition-all group shadow-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-              isDark
-                ? 'border-white/10 bg-white/[0.03] hover:border-indigo-500/50 hover:bg-white/[0.07] text-slate-300'
-                : 'border-slate-300/80 bg-white/80 hover:border-indigo-500 hover:bg-white text-slate-800 shadow-sm'
+          {/* Eyebrow Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium mb-4 shadow-sm ${
+              isDark 
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' 
+                : 'border-emerald-300 bg-emerald-50 text-emerald-800'
             }`}
           >
-            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
-            <span className="font-['Noto_Sans_Devanagari'] font-semibold">
-              {language === 'ne' ? config.eyebrowNepali : config.eyebrowEnglish}
-            </span>
-            <span className={isDark ? 'text-slate-600' : 'text-slate-300'} aria-hidden="true">•</span>
-            <span className="text-indigo-400 font-semibold group-hover:underline">
-              {t.nav.studio}
-            </span>
-            <ArrowUpRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
-          </a>
+            <Sparkles className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
+            <span className="font-semibold">Sovereign AI for Nepal • नेपालको आफ्नै एआई</span>
+          </motion.div>
 
-          {/* High-Status Typographic Display */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight font-['Space_Grotesk'] leading-[1.12]">
-            <span className={`block font-['Noto_Sans_Devanagari'] font-bold text-2xl sm:text-4xl lg:text-5xl mb-2.5 ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}>
-              {config.headlineDevanagari}
+          {/* Sweet Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className={`text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display leading-[1.15] ${
+              isDark ? 'text-white' : 'text-slate-950'
+            }`}
+          >
+            Devanagari Intelligence. <br className="hidden sm:inline" />
+            <span className="text-emerald-500 dark:text-emerald-400">
+              {isNepali ? 'नेपालको आफ्नै सार्वभौम एआई।' : 'Local Rails & Sovereign AI.'}
             </span>
-            <span className={`font-medium text-xl sm:text-3xl lg:text-4xl block ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
-            }`}>
-              {config.headlineEnglish}
-            </span>
-          </h1>
+          </motion.h1>
 
-          {/* Descriptive Pitch */}
-          <p className={`mt-5 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-['Noto_Sans_Devanagari'] font-normal ${
-            isDark ? 'text-slate-300' : 'text-slate-700'
-          }`}>
-            {config.descriptionNepali}
-          </p>
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className={`mt-4 text-sm sm:text-base max-w-xl mx-auto leading-relaxed ${
+              isDark ? 'text-slate-300' : 'text-slate-600'
+            }`}
+          >
+            {isNepali ? (
+              <span>मौलिक देवनागरी भाषा मोडल, २४kHz न्युरल भ्वाइस, र eSewa/FonePay भुक्तानी।</span>
+            ) : (
+              <span>Fine-tuned Devanagari LLMs, 24kHz neural voice synthesis, and native eSewa/FonePay payment rails.</span>
+            )}
+          </motion.p>
 
           {/* Action CTAs */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-6 flex flex-wrap items-center justify-center gap-3"
+          >
             <a
               href={config.studioUrl || 'https://studio.nepalai.tech'}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Open NepalAI Studio in a new tab"
-              className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className={`px-6 py-3 rounded-full font-bold text-xs transition-all shadow-md flex items-center gap-2 group cursor-pointer ${
+                isDark 
+                  ? 'bg-white text-slate-950 hover:bg-slate-200' 
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20'
+              }`}
             >
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
-                {language === 'ne' ? 'नेपाल AI स्टुडियो खोल्नुहोस्' : 'Launch NepalAI Studio'}
-              </span>
-              <ArrowUpRight className="h-4 w-4 ml-0.5" aria-hidden="true" />
+              <Sparkles className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              <span>{isNepali ? 'एआई स्टुडियो खोल्नुहोस्' : 'Launch AI Studio'}</span>
+              <ArrowUpRight className="h-4 w-4 opacity-75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
 
             <button
               type="button"
               onClick={onOpenConsultation}
-              aria-label="Schedule an AI Consultation"
-              className={`px-5 py-3 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isDark
-                  ? 'border-white/15 bg-white/[0.04] text-white hover:bg-white/[0.08] hover:border-white/30'
-                  : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-400 shadow-sm'
+              className={`px-6 py-3 rounded-full border text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                isDark 
+                  ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white' 
+                : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-800 shadow-xs'
               }`}
             >
-              <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
-                {t.hero.primaryCta}
-              </span>
-              <ArrowRight className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+              <span>{t.hero.primaryCta}</span>
+              <ArrowRight className="h-3.5 w-3.5 text-emerald-500" />
             </button>
-          </div>
-
-          {/* 3 Live Key Metric Badges */}
-          <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-4 max-w-lg mx-auto">
-            <div className={`p-3 rounded-xl border text-center transition-all ${
-              isDark ? 'border-white/[0.08] bg-black/40' : 'border-slate-200 bg-white/90 shadow-sm'
-            }`}>
-              <div className="text-base sm:text-lg font-bold font-mono text-emerald-500">
-                {config.metric1Value}
-              </div>
-              <div className={`text-[10px] sm:text-xs font-['Noto_Sans_Devanagari'] leading-tight mt-0.5 ${
-                isDark ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                {config.metric1Label}
-              </div>
-            </div>
-
-            <div className={`p-3 rounded-xl border text-center transition-all ${
-              isDark ? 'border-white/[0.08] bg-black/40' : 'border-slate-200 bg-white/90 shadow-sm'
-            }`}>
-              <div className="text-base sm:text-lg font-bold font-mono text-indigo-400">
-                {config.metric2Value}
-              </div>
-              <div className={`text-[10px] sm:text-xs font-['Noto_Sans_Devanagari'] leading-tight mt-0.5 ${
-                isDark ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                {config.metric2Label}
-              </div>
-            </div>
-
-            <div className={`p-3 rounded-xl border text-center transition-all ${
-              isDark ? 'border-white/[0.08] bg-black/40' : 'border-slate-200 bg-white/90 shadow-sm'
-            }`}>
-              <div className="text-base sm:text-lg font-bold font-mono text-amber-500">
-                {config.metric3Value}
-              </div>
-              <div className={`text-[10px] sm:text-xs font-['Noto_Sans_Devanagari'] leading-tight mt-0.5 ${
-                isDark ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                {config.metric3Label}
-              </div>
-            </div>
-          </div>
+          </motion.div>
 
         </div>
 
-        {/* ULTRA-CONVINCING INTERACTIVE STUDIO PREVIEW CARD */}
-        <div className="mt-12 max-w-4xl mx-auto">
+        {/* INTERACTIVE SHOWCASE STAGE */}
+        <div className="mt-10 max-w-4xl mx-auto">
           
-          <div className={`rounded-3xl border p-5 sm:p-7 shadow-2xl backdrop-blur-xl transition-all duration-300 relative ${
-            isDark
-              ? 'border-white/[0.12] bg-gradient-to-b from-white/[0.05] to-[#0a0d16]/90'
-              : 'border-slate-300/80 bg-gradient-to-b from-white to-slate-50 shadow-xl'
+          {/* Segmented Controller Tab Bar */}
+          <div className={`p-1.5 rounded-full border max-w-xl mx-auto flex items-center justify-between gap-1 mb-4 shadow-sm ${
+            isDark ? 'border-white/10 bg-white/[0.04]' : 'border-slate-300 bg-white'
+          }`}>
+            {featureTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    isActive
+                      ? isDark 
+                        ? 'bg-white text-slate-950 shadow-md' 
+                        : 'bg-slate-900 text-white shadow-md'
+                      : isDark 
+                        ? 'text-slate-400 hover:text-white hover:bg-white/5' 
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive Screen Container */}
+          <div className={`relative rounded-2xl border transition-all shadow-xl overflow-hidden ${
+            isDark ? 'border-white/10 bg-black/60' : 'border-slate-300 bg-white'
           }`}>
             
-            {/* Header with Direct URL & Live Badge */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-500/20">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" aria-hidden="true" />
-                <span className="text-xs font-mono font-bold tracking-wider text-emerald-500 uppercase">
-                  {config.liveCreditAmount} • {language === 'ne' ? 'पूर्ण वर्कबेन्च सिमुलेशन' : 'FULL SUITE PREVIEW'}
-                </span>
-              </div>
-
-              {/* Direct Link pill */}
-              <a
-                href={config.studioUrl || 'https://studio.nepalai.tech'}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Launch NepalAI Studio"
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                  isDark
-                    ? 'border-indigo-500/40 bg-indigo-950/40 text-indigo-300 hover:bg-indigo-900/60 hover:text-white'
-                    : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-                }`}
-              >
-                <span>{t.hero.launchStudioCta}</span>
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            </div>
-
-            {/* Interactive Capability Selectors */}
-            <div
-              className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2"
-              role="tablist"
-              aria-label="NepalAI Studio interactive capability presets"
-            >
-              {featureTabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    id={`tab-${tab.id}`}
-                    role="tab"
-                    type="button"
-                    aria-selected={isActive}
-                    aria-controls={`tabpanel-${tab.id}`}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                      isActive
-                        ? isDark
-                          ? 'border-emerald-500/60 bg-emerald-950/30 text-white shadow-md'
-                          : 'border-emerald-500 bg-emerald-50/80 text-slate-900 shadow-sm'
-                        : isDark
-                        ? 'border-white/[0.06] bg-black/30 text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
-                        : 'border-slate-200 bg-white/70 text-slate-600 hover:text-slate-900 hover:bg-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <Icon className={`h-4 w-4 ${tab.color}`} aria-hidden="true" />
-                      <span className="text-[10px] font-mono opacity-80">{tab.tag}</span>
-                    </div>
-                    <span className="text-xs font-bold">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Live Interactive Prompt & Engine Simulation Container */}
-            <div
-              id={`tabpanel-${currentTab.id}`}
-              role="tabpanel"
-              aria-labelledby={`tab-${currentTab.id}`}
-              className={`mt-4 rounded-2xl border p-4 sm:p-5 transition-all ${
-                isDark ? 'border-white/[0.08] bg-black/60' : 'border-slate-200 bg-slate-100/90'
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-mono text-emerald-500 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" aria-hidden="true" />
-                  <span>{t.hero.samplePrompt}:</span>
-                </span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border ${
-                  isDark ? 'border-white/10 bg-white/[0.04] text-slate-400' : 'border-slate-300 bg-white text-slate-600'
+            {/* Stage Header */}
+            <div className={`flex items-center justify-between px-5 py-3 border-b text-xs ${
+              isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+            }`}>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 mr-2">
+                  <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className={`font-mono font-bold tracking-wider uppercase text-[11px] ${
+                  isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
-                  {currentTab.techBadge}
+                  {currentTab.badge}
                 </span>
               </div>
 
-              <div className={`text-xs sm:text-sm font-['Noto_Sans_Devanagari'] italic leading-relaxed p-3 rounded-xl border ${
-                isDark ? 'border-white/[0.04] bg-white/[0.02] text-slate-200' : 'border-slate-200 bg-white text-slate-800'
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-semibold ${
+                  isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                }`}>
+                  {currentTab.tag}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyPrompt}
+                  className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                    isDark ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+                  }`}
+                  title="Copy Prompt"
+                >
+                  {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-5 sm:p-6 flex flex-col justify-between">
+              <div>
+                <div className="text-[11px] font-mono text-emerald-500 flex items-center gap-1.5 mb-2 font-bold">
+                  <Sparkles className="h-3 w-3" />
+                  <span>NATURAL LANGUAGE SCENARIO</span>
+                </div>
+                <p className={`text-sm sm:text-base font-medium leading-relaxed ${
+                  isDark ? 'text-slate-100' : 'text-slate-800'
+                }`}>
+                  {currentTab.previewPrompt}
+                </p>
+              </div>
+
+              {/* Scrubber and Action */}
+              <div className={`mt-5 pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                isDark ? 'border-white/10' : 'border-slate-200'
               }`}>
-                {currentTab.previewPrompt}
-              </div>
+                <div className="flex items-center gap-3 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="h-8 w-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center transition-transform hover:scale-105 cursor-pointer shrink-0"
+                    aria-label={isPlaying ? "Pause simulation" : "Play simulation"}
+                  >
+                    {isPlaying ? <Pause className="h-3.5 w-3.5 fill-slate-950" /> : <Play className="h-3.5 w-3.5 fill-slate-950 ml-0.5" />}
+                  </button>
 
-              {/* Action row with background launch */}
-              <div className="mt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-500/15">
-                <div className={`text-[11px] font-['Noto_Sans_Devanagari'] ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
-                }`}>
-                  {language === 'ne'
-                    ? 'तत्काल FonePay, eSewa वा Khalti मार्फत सिधै रिचार्ज गरेर स्टुडियो चलाउनुहोस्।'
-                    : 'Instantly top up via FonePay, eSewa, or Khalti to run neural pipelines in NepalAI Studio.'}
+                  <div className="flex-1">
+                    <div className={`flex items-center justify-between text-[11px] font-mono mb-1 ${
+                      isDark ? 'text-slate-400' : 'text-slate-500'
+                    }`}>
+                      <span>{currentTab.outputDetail}</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <div className={`h-1.5 w-full rounded-full overflow-hidden ${
+                      isDark ? 'bg-white/10' : 'bg-slate-200'
+                    }`}>
+                      <div
+                        className="h-full bg-emerald-500 transition-all duration-150"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <a
                   href={config.studioUrl || 'https://studio.nepalai.tech'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Run this pipeline in NepalAI Studio"
-                  className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 shadow-sm shrink-0 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className={`px-4 py-2 rounded-full border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+                    isDark 
+                      ? 'bg-white/10 hover:bg-white/20 border-white/15 text-white' 
+                      : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                  }`}
                 >
-                  <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
-                    {language === 'ne' ? 'स्टुडियोमा रन गर्नुहोस्' : 'Run in Studio'}
-                  </span>
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Open Pipeline</span>
+                  <ExternalLink className="h-3 w-3 text-slate-400" />
                 </a>
               </div>
+
             </div>
 
           </div>
-        </div>
 
-        {/* Bottom Quick Jump Anchor Links */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs">
-          <button
-            type="button"
-            onClick={onExploreCaseStudies}
-            aria-label="Scroll to Case Studies section"
-            className={`transition-colors flex items-center gap-1.5 font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-0.5 ${
-              isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-950'
-            }`}
-          >
-            <Layers className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
-            <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
-              {language === 'ne' ? '६+ नेपाली उत्पादन केस स्टडीहरू' : '6+ Production Case Studies'}
-            </span>
-          </button>
+          {/* Quick 3-Metric Summary Strip */}
+          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+            <div className={`p-3 rounded-xl border ${
+              isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-xs'
+            }`}>
+              <div className={`text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {config.metric1Value}
+              </div>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {config.metric1Label}
+              </div>
+            </div>
+            <div className={`p-3 rounded-xl border ${
+              isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-xs'
+            }`}>
+              <div className="text-xl font-bold font-display text-emerald-500">
+                {config.metric2Value}
+              </div>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {config.metric2Label}
+              </div>
+            </div>
+            <div className={`p-3 rounded-xl border ${
+              isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-xs'
+            }`}>
+              <div className={`text-xl font-bold font-display ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                {config.metric3Value}
+              </div>
+              <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {config.metric3Label}
+              </div>
+            </div>
+          </div>
 
-          <span className={isDark ? 'text-slate-700' : 'text-slate-300'} aria-hidden="true">•</span>
-
-          <button
-            type="button"
-            onClick={onOpenConsultation}
-            aria-label="Schedule Enterprise AI Architecture Advisory"
-            className={`transition-colors flex items-center gap-1 font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded px-1.5 py-0.5 ${
-              isDark ? 'text-slate-400 hover:text-emerald-400' : 'text-slate-600 hover:text-emerald-600'
-            }`}
-          >
-            <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
-              {language === 'ne' ? 'उद्यम एआई आर्किटेक्चर परामर्श' : 'Enterprise AI Architecture Advisory'}
-            </span>
-            <ArrowRight className="h-3 w-3" aria-hidden="true" />
-          </button>
         </div>
 
       </div>

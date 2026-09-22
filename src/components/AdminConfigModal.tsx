@@ -119,7 +119,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="admin-modal-title" className="text-base font-bold text-white font-['Space_Grotesk'] flex items-center gap-2">
+              <h3 id="admin-modal-title" className="text-base font-bold text-white font-display flex items-center gap-2">
                 <span>Enterprise & Content Admin Panel</span>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
                   Full Control
@@ -231,7 +231,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                     type="text"
                     value={localHero.eyebrowNepali}
                     onChange={(e) => handleHeroChange('eyebrowNepali', e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white font-['Noto_Sans_Devanagari'] focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white font-devanagari focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
@@ -257,7 +257,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                   type="text"
                   value={localHero.headlineDevanagari}
                   onChange={(e) => handleHeroChange('headlineDevanagari', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white text-sm font-['Noto_Sans_Devanagari'] font-bold focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white text-sm font-devanagari font-bold focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -282,7 +282,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                   rows={3}
                   value={localHero.descriptionNepali}
                   onChange={(e) => handleHeroChange('descriptionNepali', e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-slate-200 font-['Noto_Sans_Devanagari'] leading-relaxed focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-slate-200 font-devanagari leading-relaxed focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 

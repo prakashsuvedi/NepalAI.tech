@@ -63,11 +63,11 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
 
             <h2
               id="case-studies-heading"
-              className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-['Space_Grotesk'] ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-display ${
                 isDark ? 'text-white' : 'text-slate-950'
               }`}
             >
-              <span className={`block font-['Noto_Sans_Devanagari'] text-xl sm:text-2xl mb-1 ${
+              <span className={`block text-xl sm:text-2xl mb-1 ${
                 isDark ? 'text-slate-200' : 'text-slate-800'
               }`}>
                 {language === 'ne' ? 'नेपालमा कार्यान्वयन गरिएका एआई परियोजनाहरू' : 'Proven Sovereign Deployments'}
@@ -75,7 +75,7 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
               <span>{t.caseStudies.title}</span>
             </h2>
 
-            <p className={`mt-2 text-xs sm:text-sm font-['Noto_Sans_Devanagari'] leading-relaxed ${
+            <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
               isDark ? 'text-slate-400' : 'text-slate-600'
             }`}>
               {t.caseStudies.subtitle}

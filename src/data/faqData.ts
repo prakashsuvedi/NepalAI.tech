@@ -93,4 +93,16 @@ export const FAQ_ITEMS: FAQItem[] = [
       'हामी कुनै पनि प्राविधिक छलफल अघि नेपालको कानुनअनुसार मान्य हुने कानुनी गोपनीयता सम्झौता (Mutual NDA) हस्ताक्षर गर्छौं। साथै ग्राहकको डेटाबाट सार्वजनिक मोडेल तालिम नगरिने र व्यक्तिगत विवरण स्वतः सुरक्षित गरिने ग्यारेन्टी गर्दछौं।',
     tags: ['NDA', 'Data Protection', 'PII Masking', 'Legal'],
   },
+  {
+    id: 'faq-cib-cyber-safety-nepal',
+    category: 'Privacy & Compliance',
+    questionEn: 'How can Nepali users stay safe from fake AI scams (like the malicious Nepse AI clone flagged by Nepal Police CIB)?',
+    questionNe: 'नेपालमा एआई प्रयोग गर्दा नक्कली सफ्टवेयर र साइबर ठगी (जस्तै नेपाल प्रहरी CIB ले चेतावनी दिएको नक्कली नेप्से एआई) बाट कसरी बच्ने?',
+    answerEn:
+      'Always follow these golden safety rules: 1) Never install unverified third-party APKs, executable files, or pirated software claiming to predict stock markets or automate investments; 2) Never grant remote desktop access (AnyDesk, TeamViewer) to anyone under the pretext of configuring AI tools; 3) Never disclose two-factor OTPs or mobile banking MPINs; and 4) Rely exclusively on verified official web domains (as indexed on nepalai.tech). If you encounter suspicious activities, promptly report them to the Nepal Police Cyber Bureau (CIB) Helpline at 01-5382583 / cyberbureau@nepalpolice.gov.np.',
+    answerNe:
+      'साइबर सुरक्षाका आधारभूत नियमहरू पालना गर्नुहोस्: १) सेयर बजार वा नाफाको ग्यारेन्टी दिने भन्दै प्रचार गरिएका कुनै पनि अनधिकृत APK वा शंकास्पद सफ्टवेयर (जस्तै नेपाल प्रहरीको साइबर ब्युरो CIB ले कारबाही गरेको नक्कली नेप्से एआई क्लोन) डाउनलोड नगर्नुहोस्; २) कसैलाई पनि AnyDesk वा TeamViewer जस्ता रिमोट पहुँच नदिनुहोस्; ३) बैंकको OTP वा पासवर्ड कसैसँग सेयर नगर्नुहोस्; र ४) केवल nepalai.tech मा सूचीकृत प्रमाणित आधिकारिक वेबसाइटहरू मात्र प्रयोग गर्नुहोस्। कुनै शंकास्पद गतिविधि देखिएमा नेपाल प्रहरी साइबर ब्युरो (०१-५३८२५८३) मा उजुरी गर्नुहोस्।',
+    tags: ['Nepal Police CIB', 'Cyber Security', 'Scam Prevention', 'Verified Links', 'Safe AI'],
+    badge: 'Safety Alert',
+  },
 ];

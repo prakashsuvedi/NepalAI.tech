@@ -319,52 +319,127 @@ Generated via https://nepalai.tech`;
     showToast('Breakdown Copied', 'Currency conversion and tax calculation copied to clipboard!', 'success');
   };
 
+  const downloadSummary = () => {
+    const timestamp = new Date().toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    
+    const content = `================================================================================
+🇳🇵 NEPALAI - OFFICIAL AI TOOL & USD-NPR SUBSCRIPTION AUDIT REPORT
+================================================================================
+Generated On: ${timestamp}
+Reference ID: NP-FX-${Date.now().toString(36).toUpperCase()}
+Forex Source: Nepal Rastra Bank (NRB) Real-Time Official Rate
+================================================================================
+
+1. SUBSCRIPTION SPECIFICATIONS
+--------------------------------------------------------------------------------
+Tool / Service Name   : ${activePreset.name}
+Service Provider      : ${activePreset.provider}
+Capability Overview   : ${activePreset.desc}
+Billing Cadence       : ${billingCycle.toUpperCase()} (${billingCycle === 'annual' ? 'Annualized with ~20% discount' : 'Monthly recurrent'})
+Base Foreign Currency : $${effectiveTotalUsd.toFixed(2)} USD (${selectedAiPreset === 'custom' ? 'Custom Quote' : `$${effectiveMonthlyUsd.toFixed(2)}/mo`})
+Live NRB Forex Rate   : 1 USD = NPR ${liveNrbRate.toFixed(2)}
+
+2. NEPALI RUPEES (NPR) FINANCIAL BREAKDOWN
+--------------------------------------------------------------------------------
+Base NPR Conversion   : NPR ${Math.round(fxBaseNpr).toLocaleString()}
+Bank FX Spread (3.0%) : NPR ${Math.round(fxBankSpreadFee).toLocaleString()}  (Standard A-Class Nepal Bank Fee)
+Digital Service Tax   : NPR ${Math.round(fxDstTaxAmount).toLocaleString()}  (2.0% DST under Nepal Finance Act)
+${includeVatTax ? `VAT Assessment (13%) : NPR ${Math.round(fxVatAmount).toLocaleString()}  (Applicable if locally invoiced)\n` : ''}--------------------------------------------------------------------------------
+TOTAL ESTIMATED COST  : NPR ${Math.round(fxTotalNpr).toLocaleString()} (${billingCycle === 'annual' ? `~NPR ${Math.round(fxMonthlyNormalizedNpr).toLocaleString()}/month` : 'Monthly Total'})
+
+3. NEPAL RASTRA BANK (NRB) $500 ANNUAL DOLLAR CARD ANALYSIS
+--------------------------------------------------------------------------------
+Annual Limit Quota    : $500.00 USD / fiscal year
+Quota Consumed        : $${effectiveTotalUsd.toFixed(2)} USD (${quotaUsedPct.toFixed(1)}%)
+Remaining Quota (USD) : $${remainingAnnualQuotaUsd.toFixed(2)} USD
+Remaining Quota (NPR) : ~NPR ${remainingAnnualQuotaNpr.toLocaleString()}
+Estimated Card Runway : ~${maxMonthsOnCard} active billing cycles within statutory cap
+
+4. COMPLIANCE & PAYMENT GATEWAYS IN NEPAL
+--------------------------------------------------------------------------------
+* NRB Prepaid Dollar Card:
+  Available via Nabil Bank, Global IME, NIC Asia, Sanima, Prabhu, and Nepal Investment Mega Bank.
+  Requires verified Nepali PAN and valid citizenship / passport.
+
+* Local Resellers & Digital Wallets:
+  eSewa and Khalti provide voucher settlement for select developer and educational suites.
+
+* IT Export Tax Exemption:
+  Under NRB Foreign Exchange Directives, registered IT firms exporting code/services to 
+  foreign clients are eligible for 1% / 5% TDS incentives and expanded FCY accounts.
+
+================================================================================
+Generated via Nepal AI Hub (https://nepalai.tech)
+Kathmandu, Nepal • AI Infrastructure & Sovereign Technology
+================================================================================`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nepal_ai_cost_summary_${activePreset.id}_${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast(
+      'Summary Downloaded',
+      `Exported calculation summary for ${activePreset.name.split(' (')[0]} as audit report!`,
+      'success',
+      3500
+    );
+  };
+
   return (
     <section
       id="daily-tools"
-      className={`py-16 md:py-24 relative border-t transition-colors duration-300 ${
+      className={`py-12 sm:py-16 md:py-24 relative border-t transition-colors duration-300 ${
         isDark ? 'border-white/[0.08] bg-[#070a12]' : 'border-slate-200 bg-slate-50/70'
       }`}
       aria-labelledby="daily-tools-heading"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-slate-500/20">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-slate-500/20">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2 text-xs text-emerald-400 mb-2 font-mono uppercase tracking-wider">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>High-Impact Daily AI Utilities • Nepal Edition</span>
             </div>
             
             <h2
               id="daily-tools-heading"
-              className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-['Space_Grotesk'] ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display leading-snug ${
                 isDark ? 'text-white' : 'text-slate-950'
               }`}
             >
-              <span className="block font-['Noto_Sans_Devanagari'] text-xl sm:text-2xl mb-1 text-emerald-400">
-                {language === 'ne' ? 'दैनिक जनजीवन र व्यापारका लागि अत्यावश्यक एआई टुल्स' : 'Everyday High-Utility AI Engines'}
-              </span>
-              <span>Practical Sovereign AI for Citizens & Businesses</span>
+              {language === 'ne' ? 'दैनिक नेपाली एआई उपयोगिता' : 'Daily AI Utilities for Nepal'}
             </h2>
 
             <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
               isDark ? 'text-slate-400' : 'text-slate-600'
             }`}>
-              Zero setup required. Generate verified official Devanagari letters, synthesize regional voice accents, extract Nagarikta/Lalpurja OCR data, calculate NRB Dollar card taxes, and convert traditional Nepali produce metrics in real-time.
+              {language === 'ne' 
+                ? 'देवनागरी निवेदन, न्युरल आवाज, नागरिकता ओसीआर, र डलर कार्ड कर क्याल्कुलेटर।' 
+                : 'Devanagari letter generator, neural voice synthesis, Nagarikta OCR, and NRB dollar card calculator.'}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 shrink-0">
-            <BadgeCheck className="h-4 w-4 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 shrink-0 self-start lg:self-auto min-h-[44px]">
+            <BadgeCheck className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>100% Client-Side • Instant Export</span>
           </div>
         </div>
 
-        {/* Tab Controls with clear labels and responsive touch targets */}
+        {/* Tab Controls with clear labels and responsive touch targets (min 48px height) */}
         <div
-          className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
+          className="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
           role="tablist"
           aria-label="Daily AI Utilities Selection"
         >
@@ -402,7 +477,7 @@ Generated via https://nepalai.tech`;
         </div>
 
         {/* Active Tool Interactive Container */}
-        <div className={`mt-6 rounded-2xl border p-5 sm:p-7 transition-all ${
+        <div className={`mt-5 sm:mt-6 rounded-2xl border p-4 sm:p-6 md:p-7 transition-all ${
           isDark
             ? 'border-white/[0.08] bg-[#090d16]'
             : 'border-slate-200 bg-white shadow-xs'
@@ -414,7 +489,7 @@ Generated via https://nepalai.tech`;
               {/* Header & Live Exchange Rate Bar */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-500/20">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                       LIVE NRB BENCHMARK
                     </span>
@@ -422,20 +497,20 @@ Generated via https://nepalai.tech`;
                       {lastRateSync}
                     </span>
                   </div>
-                  <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     💱 {language === 'ne' ? 'एआई सेवा सदस्यता डलर ➔ नेरु रूपान्तरक तथा कर क्याल्कुलेटर' : 'AI Service Subscription USD ➔ NPR Converter & Tax Engine'}
                   </h3>
-                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     Calculate accurate monthly/annual NPR outflow for ChatGPT, Claude, Midjourney & API tokens with bank card fees (3%) & Digital Services Tax (2% DST).
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={handleRefreshNrbRate}
                     disabled={isRefreshingFx}
-                    className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all ${
+                    className={`min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all flex-1 sm:flex-initial ${
                       isDark
                         ? 'bg-white/[0.04] hover:bg-white/[0.08] text-emerald-400 border-emerald-500/30'
                         : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
@@ -448,8 +523,22 @@ Generated via https://nepalai.tech`;
 
                   <button
                     type="button"
+                    onClick={downloadSummary}
+                    className={`min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all flex-1 sm:flex-initial ${
+                      isDark
+                        ? 'bg-white/[0.06] hover:bg-white/[0.12] text-white border-white/20 hover:border-emerald-400'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
+                    }`}
+                    title="Export calculations and tool selections as a text/audit file"
+                  >
+                    <Download className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+                    <span>Download Summary</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={copyFxBreakdown}
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                    className="min-h-[44px] px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm w-full sm:w-auto"
                   >
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     <span>{copied ? 'Copied!' : 'Copy Breakdown'}</span>
@@ -472,8 +561,8 @@ Generated via https://nepalai.tech`;
                       </span>
                     </div>
 
-                    {/* Responsive Grid of AI Tool Presets */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                    {/* Responsive Grid of AI Tool Presets with 48px+ touch targets */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[320px] overflow-y-auto pr-1">
                       {AI_SUBSCRIPTION_PRESETS.map((preset) => {
                         const isSelected = selectedAiPreset === preset.id;
                         const priceDisplay = preset.id === 'custom' 
@@ -486,7 +575,7 @@ Generated via https://nepalai.tech`;
                             key={preset.id}
                             type="button"
                             onClick={() => handleSelectPreset(preset.id)}
-                            className={`min-h-[56px] p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                            className={`min-h-[58px] p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                               isSelected
                                 ? isDark
                                   ? 'border-emerald-400 bg-emerald-950/30 ring-1 ring-emerald-400/50 shadow-md'
@@ -517,10 +606,10 @@ Generated via https://nepalai.tech`;
                   </div>
 
                   {/* Pricing Adjustment, Custom Input & Billing Cycle Toggle */}
-                  <div className={`p-4 rounded-xl border ${isDark ? 'bg-black/40 border-white/[0.08]' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-4 sm:p-5 rounded-xl border ${isDark ? 'bg-black/40 border-white/[0.08]' : 'bg-slate-50 border-slate-200'}`}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       
-                      {/* Billing Cycle Switcher */}
+                      {/* Billing Cycle Switcher with min 44px buttons */}
                       <div>
                         <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           Billing Cycle:
@@ -529,7 +618,7 @@ Generated via https://nepalai.tech`;
                           <button
                             type="button"
                             onClick={() => setBillingCycle('monthly')}
-                            className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all ${
+                            className={`min-h-[44px] px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
                               billingCycle === 'monthly'
                                 ? 'bg-emerald-500 text-slate-950 shadow-sm'
                                 : 'text-slate-400 hover:text-white'
@@ -540,7 +629,7 @@ Generated via https://nepalai.tech`;
                           <button
                             type="button"
                             onClick={() => setBillingCycle('annual')}
-                            className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all relative ${
+                            className={`min-h-[44px] px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center relative ${
                               billingCycle === 'annual'
                                 ? 'bg-emerald-500 text-slate-950 shadow-sm'
                                 : 'text-slate-400 hover:text-white'
@@ -557,7 +646,7 @@ Generated via https://nepalai.tech`;
                           {selectedAiPreset === 'custom' ? 'Custom Subscription Amount ($ USD):' : 'Effective Monthly Cost ($ USD):'}
                         </label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400">$</span>
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400">$</span>
                           <input
                             type="number"
                             step="0.5"
@@ -568,7 +657,7 @@ Generated via https://nepalai.tech`;
                               setSelectedAiPreset('custom');
                               setFxUsdAmount(Math.max(1, Number(e.target.value) || 1));
                             }}
-                            className={`w-full min-h-[44px] pl-7 pr-3 text-xs font-mono font-bold rounded-xl border focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                            className={`w-full min-h-[44px] pl-8 pr-3 text-xs font-mono font-bold rounded-xl border focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                               isDark ? 'bg-black/60 border-white/10 text-white' : 'bg-white border-slate-300 text-slate-900'
                             }`}
                           />
@@ -578,43 +667,43 @@ Generated via https://nepalai.tech`;
                     </div>
 
                     {/* Adjustable Exchange Rate & Tax Toggles */}
-                    <div className="mt-4 pt-3 border-t border-slate-500/20 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="mt-4 pt-3.5 border-t border-slate-500/20 grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
                         <label className={`block text-[11px] font-semibold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                           NRB USD Exchange Rate:
                         </label>
                         <div className="relative">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">रु</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400">रु</span>
                           <input
                             type="number"
                             step="0.05"
                             value={liveNrbRate}
                             onChange={(e) => setLiveNrbRate(Number(e.target.value))}
-                            className={`w-full min-h-[38px] pl-6 pr-2 text-xs font-mono rounded-lg border ${
+                            className={`w-full min-h-[44px] pl-7 pr-2.5 text-xs font-mono rounded-xl border ${
                               isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-white border-slate-300 text-slate-900'
                             }`}
                           />
                         </div>
                       </div>
 
-                      <div className="sm:col-span-2 flex flex-col justify-center space-y-1.5 pt-1">
-                        <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                      <div className="sm:col-span-2 flex flex-col justify-center space-y-1 pt-1">
+                        <label className="min-h-[44px] py-2 px-2.5 rounded-lg flex items-center gap-2.5 text-xs cursor-pointer select-none hover:bg-white/[0.04] transition-colors">
                           <input
                             type="checkbox"
                             checked={includeCardSpread}
                             onChange={(e) => setIncludeCardSpread(e.target.checked)}
-                            className="rounded text-emerald-500 min-h-[16px] min-w-[16px]"
+                            className="rounded text-emerald-500 min-h-[18px] min-w-[18px]"
                           />
                           <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
                             Bank Dollar Card Forex Spread (+3.0%)
                           </span>
                         </label>
-                        <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                        <label className="min-h-[44px] py-2 px-2.5 rounded-lg flex items-center gap-2.5 text-xs cursor-pointer select-none hover:bg-white/[0.04] transition-colors">
                           <input
                             type="checkbox"
                             checked={includeDstTax}
                             onChange={(e) => setIncludeDstTax(e.target.checked)}
-                            className="rounded text-emerald-500 min-h-[16px] min-w-[16px]"
+                            className="rounded text-emerald-500 min-h-[18px] min-w-[18px]"
                           />
                           <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
                             Nepal Digital Services Tax (+2.0% DST)
@@ -629,7 +718,7 @@ Generated via https://nepalai.tech`;
                 <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
                   
                   {/* Detailed NPR Outflow Card */}
-                  <div className={`p-5 rounded-2xl border transition-all ${
+                  <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                     isDark ? 'bg-gradient-to-br from-[#0c1322] to-[#080d18] border-emerald-500/30' : 'bg-white border-emerald-300 shadow-md'
                   }`}>
                     
@@ -682,7 +771,7 @@ Generated via https://nepalai.tech`;
                     </div>
 
                     {/* NRB $500 Dollar Card Quota Gauge */}
-                    <div className="mt-4 pt-3 border-t border-slate-500/20">
+                    <div className="mt-4 pt-3.5 border-t border-slate-500/20">
                       <div className="flex items-center justify-between text-[11px] mb-1.5">
                         <span className="font-semibold text-slate-300">
                           NRB $500 Annual Prepaid Card Limit:
@@ -693,7 +782,7 @@ Generated via https://nepalai.tech`;
                       </div>
 
                       {/* Progress Bar */}
-                      <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden border border-white/10">
+                      <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/10">
                         <div
                           className={`h-full transition-all duration-500 ${
                             quotaUsedPct > 80 ? 'bg-red-500' : quotaUsedPct > 50 ? 'bg-amber-500' : 'bg-emerald-500'
@@ -705,6 +794,21 @@ Generated via https://nepalai.tech`;
                       <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400">
                         <span>Used: ${effectiveTotalUsd.toFixed(0)} ({quotaUsedPct.toFixed(1)}%)</span>
                         <span>Capacity: ~{maxMonthsOnCard} months active</span>
+                      </div>
+
+                      {/* Direct Card Export Action with 44px min-height */}
+                      <div className="mt-3.5 pt-3 border-t border-slate-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          Ready for accounting records & IT audits
+                        </span>
+                        <button
+                          type="button"
+                          onClick={downloadSummary}
+                          className="min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all w-full sm:w-auto"
+                        >
+                          <Download className="h-4 w-4" aria-hidden="true" />
+                          <span>Export Summary</span>
+                        </button>
                       </div>
                     </div>
 
@@ -724,11 +828,11 @@ Generated via https://nepalai.tech`;
                           Accepted via <strong>Nabil iCard, Global IME, NIC Asia, Siddhartha, Sanima Bank Prepaid Dollar Cards</strong>, or corporate foreign exchange accounts.
                         </p>
                         
-                        <div className="mt-2.5 flex flex-wrap gap-2">
+                        <div className="mt-2.5">
                           <button
                             type="button"
                             onClick={() => onOpenConsultation && onOpenConsultation(`Subscription Payment Assistance for ${activePreset.name}`)}
-                            className="text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1"
+                            className="min-h-[44px] py-2 text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1"
                           >
                             <span>Book Consultation for Enterprise Invoicing & Volume Billing ➔</span>
                           </button>
@@ -748,7 +852,7 @@ Generated via https://nepalai.tech`;
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-500/20">
                 <div>
-                  <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     📝 {language === 'ne' ? 'नेपाली आधिकारिक निवेदन तथा सरकारी सिफारिस पत्र निर्माण' : 'Official Devanagari Letter & Ward Application Studio'}
                   </h3>
                   <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -760,15 +864,15 @@ Generated via https://nepalai.tech`;
                   <button
                     type="button"
                     onClick={() => handleCopy(generatedOfficialLetter)}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+                    className="min-h-[44px] px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs w-full sm:w-auto"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     <span>{copied ? 'Copied!' : 'Copy Letter'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Form Controls */}
+              {/* Form Controls with 44px min height touch targets */}
               <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-5 space-y-3.5">
                   <div>
@@ -798,7 +902,7 @@ Generated via https://nepalai.tech`;
                           setLetterReason('घरायसी अत्यावश्यक कार्य परेकोले मिति २०८१/०६/२५ देखि ३ दिनका लागि बिदा');
                         }
                       }}
-                      className={`w-full text-xs rounded-xl border p-2.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                      className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                         isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     >
@@ -809,7 +913,7 @@ Generated via https://nepalai.tech`;
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                         B.S. Date (वि.सं. मिति):
@@ -818,7 +922,7 @@ Generated via https://nepalai.tech`;
                         type="text"
                         value={letterDate}
                         onChange={(e) => setLetterDate(e.target.value)}
-                        className={`w-full text-xs rounded-xl border p-2 ${
+                        className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                           isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       />
@@ -832,7 +936,7 @@ Generated via https://nepalai.tech`;
                         type="text"
                         value={chalaniNo}
                         onChange={(e) => setChalaniNo(e.target.value)}
-                        className={`w-full text-xs rounded-xl border p-2 ${
+                        className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                           isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       />
@@ -847,7 +951,7 @@ Generated via https://nepalai.tech`;
                       type="text"
                       value={applicantName}
                       onChange={(e) => setApplicantName(e.target.value)}
-                      className={`w-full text-xs rounded-xl border p-2.5 ${
+                      className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                         isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
@@ -861,7 +965,7 @@ Generated via https://nepalai.tech`;
                       type="text"
                       value={applicantAddress}
                       onChange={(e) => setApplicantAddress(e.target.value)}
-                      className={`w-full text-xs rounded-xl border p-2.5 ${
+                      className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                         isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
@@ -875,7 +979,7 @@ Generated via https://nepalai.tech`;
                       rows={3}
                       value={letterReason}
                       onChange={(e) => setLetterReason(e.target.value)}
-                      className={`w-full text-xs rounded-xl border p-2.5 ${
+                      className={`w-full text-xs rounded-xl border p-3 ${
                         isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
@@ -884,12 +988,12 @@ Generated via https://nepalai.tech`;
 
                 {/* Generated Preview Document with Official Stamp Border */}
                 <div className="lg:col-span-7">
-                  <div className={`h-full rounded-2xl border p-6 font-['Noto_Sans_Devanagari'] leading-relaxed relative ${
+                  <div className={`h-full rounded-2xl border p-5 sm:p-6 font-['Noto_Sans_Devanagari'] leading-relaxed relative ${
                     isDark ? 'bg-black/70 border-white/10 text-slate-200' : 'bg-amber-50/30 border-amber-200 text-slate-900 shadow-sm'
                   }`}>
                     <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-500/20 text-xs">
                       <span className="font-mono text-emerald-400 font-bold uppercase flex items-center gap-1.5">
-                        <BadgeCheck className="h-4 w-4" />
+                        <BadgeCheck className="h-4 w-4 shrink-0" />
                         <span>Official Gazette Devanagari Format</span>
                       </span>
                       <span className="text-[11px] text-slate-400 font-mono">B.S. Standard Compliant</span>
@@ -899,14 +1003,15 @@ Generated via https://nepalai.tech`;
                       {generatedOfficialLetter}
                     </pre>
 
-                    <div className="mt-6 pt-4 border-t border-slate-500/20 flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="mt-6 pt-4 border-t border-slate-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] text-slate-400">
                       <span>Certified Nepal Format • Ready for print submission</span>
                       <button
                         type="button"
                         onClick={() => handleCopy(generatedOfficialLetter)}
-                        className="text-emerald-400 hover:underline font-bold"
+                        className="min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition-all w-full sm:w-auto"
                       >
-                        Copy to Clipboard
+                        <Copy className="h-3.5 w-3.5" />
+                        <span>Copy to Clipboard</span>
                       </button>
                     </div>
                   </div>
@@ -919,7 +1024,7 @@ Generated via https://nepalai.tech`;
           {activeTab === 'voice' && (
             <div>
               <div className="pb-4 border-b border-slate-500/20">
-                <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   🎙️ {language === 'ne' ? 'नेपाली भाषिक लवज तथा एआई ध्वनि स्टुडियो' : 'Nepali Neural Voice & Regional Accent Synthesizer'}
                 </h3>
                 <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -943,18 +1048,18 @@ Generated via https://nepalai.tech`;
                     />
                   </div>
 
-                  {/* Regional Dialects Selection */}
+                  {/* Regional Dialects Selection with min 48px touch buttons */}
                   <div>
                     <label className={`block text-xs font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                       Regional Accent Profile (क्षेत्रीय लवज):
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {Object.entries(ACCENTS).map(([key, item]) => (
                         <button
                           key={key}
                           type="button"
                           onClick={() => setSelectedAccent(key as any)}
-                          className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                          className={`min-h-[52px] p-3 rounded-xl border text-left text-xs transition-all flex flex-col justify-center ${
                             selectedAccent === key
                               ? isDark
                                 ? 'border-emerald-500 bg-emerald-950/30 text-white'
@@ -972,9 +1077,9 @@ Generated via https://nepalai.tech`;
                   </div>
 
                   {/* Sliders for Speed and Pitch */}
-                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="p-2.5 rounded-xl border border-white/5 bg-black/20">
+                      <div className="flex justify-between text-xs mb-1.5">
                         <span className="text-slate-400">Speech Rate:</span>
                         <span className="font-mono font-bold text-emerald-400">{voiceSpeed}x</span>
                       </div>
@@ -985,12 +1090,12 @@ Generated via https://nepalai.tech`;
                         step="0.05"
                         value={voiceSpeed}
                         onChange={(e) => setVoiceSpeed(Number(e.target.value))}
-                        className="w-full accent-emerald-500 cursor-pointer"
+                        className="w-full h-7 accent-emerald-500 cursor-pointer"
                       />
                     </div>
 
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
+                    <div className="p-2.5 rounded-xl border border-white/5 bg-black/20">
+                      <div className="flex justify-between text-xs mb-1.5">
                         <span className="text-slate-400">Vocal Pitch:</span>
                         <span className="font-mono font-bold text-emerald-400">{voicePitch}x</span>
                       </div>
@@ -1001,7 +1106,7 @@ Generated via https://nepalai.tech`;
                         step="0.05"
                         value={voicePitch}
                         onChange={(e) => setVoicePitch(Number(e.target.value))}
-                        className="w-full accent-emerald-500 cursor-pointer"
+                        className="w-full h-7 accent-emerald-500 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -1009,17 +1114,17 @@ Generated via https://nepalai.tech`;
 
                 {/* Simulated Audio Waveform & Player */}
                 <div className="lg:col-span-6">
-                  <div className={`h-full rounded-2xl border p-6 flex flex-col justify-between ${
+                  <div className={`h-full rounded-2xl border p-5 sm:p-6 flex flex-col justify-between ${
                     isDark ? 'bg-black/60 border-emerald-500/30' : 'bg-emerald-50/40 border-emerald-200 shadow-xs'
                   }`}>
                     <div>
                       <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-500/20">
                         <span className="font-mono text-emerald-400 font-bold uppercase">24kHz Neural Synthesis</span>
-                        <span className="font-mono text-[11px] text-slate-400">{ACCENTS[selectedAccent].name}</span>
+                        <span className="font-mono text-[11px] text-slate-400">{ACCENTS[selectedAccent].name.split(' (')[0]}</span>
                       </div>
 
                       {/* Visual Waveform Animation */}
-                      <div className="my-8 flex items-center justify-center gap-1.5 h-16">
+                      <div className="my-6 sm:my-8 flex items-center justify-center gap-1.5 h-16">
                         {[40, 75, 90, 45, 100, 60, 85, 30, 95, 70, 50, 80, 65, 90, 40].map((h, i) => (
                           <div
                             key={i}
@@ -1031,24 +1136,24 @@ Generated via https://nepalai.tech`;
                         ))}
                       </div>
 
-                      <p className={`text-xs text-center font-['Noto_Sans_Devanagari'] ${
+                      <p className={`text-xs text-center font-['Noto_Sans_Devanagari'] leading-relaxed ${
                         isDark ? 'text-slate-300' : 'text-slate-700'
                       }`}>
                         "{voiceText}"
                       </p>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-slate-500/20 flex items-center justify-between">
+                    <div className="mt-6 pt-4 border-t border-slate-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <button
                         type="button"
                         onClick={handleToggleVoicePlayback}
-                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 transition-all shadow-md"
+                        className="min-h-[44px] px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md w-full sm:w-auto"
                       >
                         {isPlayingAudio ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
                         <span>{isPlayingAudio ? 'Stop Playback' : 'Play Synthesized Voice'}</span>
                       </button>
 
-                      <span className="text-[11px] font-mono text-slate-400">
+                      <span className="text-[11px] font-mono text-slate-400 text-center sm:text-right">
                         SpeechT5 + Hugging Face Engine
                       </span>
                     </div>
@@ -1062,7 +1167,7 @@ Generated via https://nepalai.tech`;
           {activeTab === 'ocr' && (
             <div>
               <div className="pb-4 border-b border-slate-500/20">
-                <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   🔍 {language === 'ne' ? 'देवनागरी नागरिकता, लालपुर्जा र प्यान ओसीआर' : 'Devanagari Document Intelligence & Field Extractor'}
                 </h3>
                 <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -1084,7 +1189,7 @@ Generated via https://nepalai.tech`;
                       key={doc.id}
                       type="button"
                       onClick={() => setSelectedDocType(doc.id as any)}
-                      className={`w-full p-3 rounded-xl border text-left text-xs font-semibold transition-all ${
+                      className={`w-full min-h-[48px] p-3 rounded-xl border text-left text-xs font-semibold transition-all flex items-center ${
                         selectedDocType === doc.id
                           ? isDark
                             ? 'border-emerald-500 bg-emerald-950/20 text-white'
@@ -1102,7 +1207,7 @@ Generated via https://nepalai.tech`;
                     type="button"
                     onClick={handleSimulateScan}
                     disabled={isScanning}
-                    className="w-full mt-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="w-full mt-2 min-h-[44px] py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <Scan className="h-4 w-4" />
                     <span>{isScanning ? 'Scanning Boundaries...' : 'Re-Run Optical Scan'}</span>
@@ -1111,14 +1216,14 @@ Generated via https://nepalai.tech`;
 
                 {/* Structured Extraction Results */}
                 <div className="lg:col-span-7">
-                  <div className={`p-5 rounded-2xl border ${
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
                     isDark ? 'bg-black/60 border-white/10' : 'bg-slate-50 border-slate-200 shadow-xs'
                   }`}>
                     <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-500/20">
-                      <span className="text-xs font-bold font-['Space_Grotesk'] text-emerald-400">
+                      <span className="text-xs font-bold font-display text-emerald-400">
                         {DOC_SAMPLES[selectedDocType].title}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
                         Overall Confidence: 99.4%
                       </span>
                     </div>
@@ -1127,7 +1232,7 @@ Generated via https://nepalai.tech`;
                       {DOC_SAMPLES[selectedDocType].fields.map((field, idx) => (
                         <div
                           key={idx}
-                          className={`p-2.5 rounded-xl border flex items-center justify-between text-xs ${
+                          className={`p-3 rounded-xl border flex items-center justify-between text-xs gap-3 ${
                             isDark ? 'border-white/5 bg-black/40' : 'border-slate-200 bg-white'
                           }`}
                         >
@@ -1135,17 +1240,17 @@ Generated via https://nepalai.tech`;
                             <span className="text-[11px] text-slate-400 block">{field.label}</span>
                             <span className="font-bold text-xs mt-0.5 block">{field.value}</span>
                           </div>
-                          <span className="font-mono text-[10px] text-emerald-400 font-bold">
+                          <span className="font-mono text-[10px] text-emerald-400 font-bold shrink-0">
                             {field.confidence}
                           </span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-500/20 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                    <div className="mt-4 pt-3.5 border-t border-slate-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-[11px] text-slate-400">
                       <a
                         href="#free-ai-tools"
-                        className="inline-flex items-center gap-1.5 text-emerald-400 font-bold hover:underline"
+                        className="min-h-[44px] inline-flex items-center gap-1.5 text-emerald-400 font-bold hover:underline"
                       >
                         <Sparkles className="h-3.5 w-3.5" />
                         <span>Launch Live Multimodal Extractor & JSON API Guide ↗</span>
@@ -1153,7 +1258,7 @@ Generated via https://nepalai.tech`;
                       <button
                         type="button"
                         onClick={() => handleCopy(JSON.stringify(DOC_SAMPLES[selectedDocType], null, 2))}
-                        className="text-emerald-400 hover:underline font-mono"
+                        className="min-h-[44px] px-3 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-emerald-400 font-mono font-semibold flex items-center justify-center border border-white/10"
                       >
                         Copy Extracted JSON
                       </button>
@@ -1168,7 +1273,7 @@ Generated via https://nepalai.tech`;
           {activeTab === 'tax' && (
             <div>
               <div className="pb-4 border-b border-slate-500/20">
-                <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   💱 {language === 'ne' ? 'नेपाल डलर कार्ड तथा डिजिटल सेवा कर (DST) र टीडीएस क्याल्कुलेटर' : 'Nepal $500 Prepaid Dollar Card, Digital VAT & TDS Engine'}
                 </h3>
                 <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -1188,13 +1293,13 @@ Generated via https://nepalai.tech`;
                       max={500}
                       value={usdSpent}
                       onChange={(e) => setUsdSpent(Number(e.target.value))}
-                      className={`w-full text-xs rounded-xl border p-2.5 font-mono ${
+                      className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 font-mono ${
                         isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                         USD / NPR Rate:
@@ -1204,7 +1309,7 @@ Generated via https://nepalai.tech`;
                         step="0.1"
                         value={exchangeRateNpr}
                         onChange={(e) => setExchangeRateNpr(Number(e.target.value))}
-                        className={`w-full text-xs rounded-xl border p-2 font-mono ${
+                        className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 font-mono ${
                           isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       />
@@ -1217,7 +1322,7 @@ Generated via https://nepalai.tech`;
                       <select
                         value={userTaxCategory}
                         onChange={(e) => setUserTaxCategory(e.target.value as any)}
-                        className={`w-full text-xs rounded-xl border p-2 ${
+                        className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                           isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       >
@@ -1228,23 +1333,23 @@ Generated via https://nepalai.tech`;
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2">
-                    <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <div className="space-y-1.5 pt-2">
+                    <label className="min-h-[44px] py-2 px-2.5 rounded-lg flex items-center gap-2.5 text-xs cursor-pointer select-none hover:bg-white/[0.04] transition-colors">
                       <input
                         type="checkbox"
                         checked={includeBankFee}
                         onChange={(e) => setIncludeBankFee(e.target.checked)}
-                        className="rounded text-emerald-500"
+                        className="rounded text-emerald-500 min-h-[18px] min-w-[18px]"
                       />
                       <span>Include Bank Cross-Currency Markup (3.5%)</span>
                     </label>
 
-                    <label className="flex items-center gap-2 text-xs cursor-pointer">
+                    <label className="min-h-[44px] py-2 px-2.5 rounded-lg flex items-center gap-2.5 text-xs cursor-pointer select-none hover:bg-white/[0.04] transition-colors">
                       <input
                         type="checkbox"
                         checked={includeVat}
                         onChange={(e) => setIncludeVat(e.target.checked)}
-                        className="rounded text-emerald-500"
+                        className="rounded text-emerald-500 min-h-[18px] min-w-[18px]"
                       />
                       <span>Include Digital Services Tax (13% DST)</span>
                     </label>
@@ -1253,7 +1358,7 @@ Generated via https://nepalai.tech`;
 
                 {/* Calculation Breakdown Card */}
                 <div className="lg:col-span-6">
-                  <div className={`p-5 rounded-2xl border ${
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
                     isDark ? 'bg-black/60 border-emerald-500/30' : 'bg-slate-50 border-emerald-300 shadow-xs'
                   }`}>
                     <h4 className="text-xs font-mono uppercase text-emerald-400 font-bold mb-3">
@@ -1292,7 +1397,7 @@ Generated via https://nepalai.tech`;
           {activeTab === 'market' && (
             <div>
               <div className="pb-4 border-b border-slate-500/20">
-                <h3 className={`text-base sm:text-lg font-bold font-['Space_Grotesk'] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   🥦 {language === 'ne' ? 'कालिमाटी तरकारी तथा फलफूल बजार र नेपाली नाप रूपान्तरक' : 'Kalimati Daily Produce & Traditional Measurement Estimator'}
                 </h3>
                 <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -1300,7 +1405,7 @@ Generated via https://nepalai.tech`;
                 </p>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
                 <div>
                   <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     Select Commodity (तरकारी / फलफूल):
@@ -1308,7 +1413,7 @@ Generated via https://nepalai.tech`;
                   <select
                     value={selectedProduce}
                     onChange={(e) => setSelectedProduce(e.target.value)}
-                    className={`w-full text-xs rounded-xl border p-2.5 ${
+                    className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                       isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   >
@@ -1330,7 +1435,7 @@ Generated via https://nepalai.tech`;
                     step={0.5}
                     value={quantity}
                     onChange={(e) => setQuantity(Number(e.target.value))}
-                    className={`w-full text-xs rounded-xl border p-2.5 font-mono ${
+                    className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 font-mono ${
                       isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   />
@@ -1343,7 +1448,7 @@ Generated via https://nepalai.tech`;
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as any)}
-                    className={`w-full text-xs rounded-xl border p-2.5 ${
+                    className={`w-full min-h-[44px] text-xs rounded-xl border p-2.5 ${
                       isDark ? 'bg-black/50 border-white/10 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   >
@@ -1355,7 +1460,7 @@ Generated via https://nepalai.tech`;
               </div>
 
               {/* Result Summary */}
-              <div className={`mt-6 p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+              <div className={`mt-6 p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                 isDark ? 'bg-black/60 border-emerald-500/30' : 'bg-emerald-50/70 border-emerald-300'
               }`}>
                 <div>

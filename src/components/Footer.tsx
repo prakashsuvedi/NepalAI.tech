@@ -38,8 +38,8 @@ export const Footer: React.FC<FooterProps> = ({
             <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
 
             <p className={`text-xs leading-relaxed ${
-              isNepali ? "font-['Noto_Sans_Devanagari']" : ''
-            } ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              isDark ? 'text-slate-400' : 'text-slate-600'
+            }`}>
               {t.footer.tagline}
             </p>
 
@@ -61,14 +61,6 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
                 >
                   {t.nav.about} (Sovereign AI)
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#case-studies"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
-                >
-                  {t.nav.caseStudies}
                 </a>
               </li>
               <li>

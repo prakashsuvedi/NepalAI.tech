@@ -69,9 +69,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               <div className="flex items-center gap-2">
                 <h3
                   id="privacy-modal-title"
-                  className={`text-base sm:text-lg font-bold ${
+                  className={`text-base sm:text-lg font-bold font-display ${
                     isDark ? 'text-white' : 'text-slate-900'
-                  } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+                  }`}
                 >
                   {t.privacy.modalTitle}
                 </h3>

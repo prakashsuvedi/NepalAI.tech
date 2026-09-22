@@ -284,20 +284,19 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
             
             <h2
               id="automation-heading"
-              className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-['Space_Grotesk'] ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display ${
                 isDark ? 'text-white' : 'text-slate-950'
               }`}
             >
-              <span className={`block font-['Noto_Sans_Devanagari'] text-xl sm:text-2xl mb-1 text-emerald-400`}>
-                {language === 'ne' ? 'हगिङ फेस n8n द्वारा संचालित स्वचालित एआई वर्कफ्लो' : 'Autonomous AI Pipelines for Nepali Enterprise'}
-              </span>
-              <span>Deploy n8n Workflows on Hugging Face Spaces</span>
+              {language === 'ne' ? 'नेपाली परिवेशका लागि स्वचालित एआई वर्कफ्लो' : 'Sovereign AI Automation Pipelines'}
             </h2>
 
             <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
               isDark ? 'text-slate-400' : 'text-slate-600'
             }`}>
-              Run enterprise-grade automation pipelines 100% free on your Hugging Face Space. Seamlessly connect open-source Nepali AI models, Devanagari OCR, FonePay QR, WhatsApp bots, and Core Banking APIs with zero recurring SaaS subscriptions.
+              {language === 'ne' 
+                ? 'ह्वाट्सएप अर्डर, देवनागरी कागजात ओसीआर, र FonePay क्युआर अटोमेसन पाइपलाइन।' 
+                : 'Automate WhatsApp orders, Devanagari OCR parsing, and FonePay payment workflows with zero foreign SaaS lock-in.'}
             </p>
           </div>
 
@@ -413,7 +412,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                         </span>
                       </div>
 
-                      <h3 className={`font-bold text-xs sm:text-sm line-clamp-1 font-['Space_Grotesk'] ${
+                      <h3 className={`font-bold text-xs sm:text-sm line-clamp-1 font-display ${
                         isSelected ? (isDark ? 'text-white' : 'text-slate-950') : (isDark ? 'text-slate-200' : 'text-slate-800')
                       }`}>
                         {wf.title[language] || wf.title.en}
@@ -465,7 +464,7 @@ export const AutomationSection: React.FC<AutomationSectionProps> = ({
                     <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold tracking-wider">
                       Hugging Face n8n Execution Graph
                     </span>
-                    <h4 className={`text-base font-bold font-['Space_Grotesk'] mt-0.5 ${
+                    <h4 className={`text-base font-bold font-display mt-0.5 ${
                       isDark ? 'text-white' : 'text-slate-900'
                     }`}>
                       {selectedWorkflow.title[language] || selectedWorkflow.title.en}

@@ -94,9 +94,9 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
 
           <h2
             id="faq-section-heading"
-            className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight ${
+            className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-display ${
               isDark ? 'text-white' : 'text-slate-900'
-            } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+            }`}
           >
             {t.faq.title}
           </h2>
@@ -104,7 +104,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
           <p
             className={`text-sm sm:text-base leading-relaxed ${
               isDark ? 'text-slate-400' : 'text-slate-600'
-            } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            }`}
           >
             {t.faq.subtitle}
           </p>
@@ -401,16 +401,14 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
 
           <div className="space-y-1">
             <h3
-              className={`text-base sm:text-lg font-bold ${
+              className={`text-base sm:text-lg font-bold font-display ${
                 isDark ? 'text-white' : 'text-slate-900'
-              } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+              }`}
             >
               {t.faq.stillQuestions}
             </h3>
             <p
-              className={`text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed ${
-                isNepali ? "font-['Noto_Sans_Devanagari']" : ''
-              }`}
+              className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed"
             >
               {t.faq.stillQuestionsSub}
             </p>

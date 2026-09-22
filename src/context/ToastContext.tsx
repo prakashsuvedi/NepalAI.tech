@@ -84,7 +84,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 </div>
 
                 <div className="flex-1 min-w-0 pr-2">
-                  <h4 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5 font-['Space_Grotesk']">
+                  <h4 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5 font-display">
                     {toast.title}
                   </h4>
                   {toast.message && (

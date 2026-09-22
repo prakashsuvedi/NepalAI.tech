@@ -64,7 +64,7 @@ export const BackToTop: React.FC<BackToTopProps> = ({ theme = 'dark', language =
             isDark
               ? 'bg-slate-900 text-slate-200 border border-white/10'
               : 'bg-slate-900 text-white'
-          } ${langKey === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}`}
+          }`}
         >
           {label}
         </span>

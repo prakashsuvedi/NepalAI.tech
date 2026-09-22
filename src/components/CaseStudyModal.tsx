@@ -64,7 +64,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             </span>
           </div>
 
-          <h2 id="case-study-title" className="text-2xl sm:text-3xl font-bold text-white font-['Space_Grotesk'] leading-tight">
+          <h2 id="case-study-title" className="text-2xl sm:text-3xl font-bold text-white font-display leading-tight">
             {caseStudy.title}
           </h2>
 
@@ -77,7 +77,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
           {caseStudy.metrics.map((m, idx) => (
             <div key={idx} className="space-y-0.5">
-              <div className="text-xl sm:text-2xl font-extrabold text-emerald-300 font-['Space_Grotesk']">
+              <div className="text-xl sm:text-2xl font-extrabold text-emerald-300 font-display">
                 {m.value}
               </div>
               <div className="text-xs font-semibold text-white">{m.label}</div>

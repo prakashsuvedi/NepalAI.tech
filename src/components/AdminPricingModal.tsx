@@ -60,7 +60,7 @@ export const AdminPricingModal: React.FC<AdminPricingModalProps> = ({
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white font-['Space_Grotesk'] flex items-center gap-2">
+              <h3 className="text-base font-bold text-white font-display flex items-center gap-2">
                 <span>Admin Pricing & Service Customizer</span>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
                   Admin Panel

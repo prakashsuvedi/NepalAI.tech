@@ -1,28 +1,377 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nepalai.tech - AI Hub, Studio & Consulting for Nepal</title>
+    <title>nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal</title>
+    
+    <!-- Core Favicons & Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="theme-color" content="#06080e" />
-    <meta name="description" content="Discover verified AI tools in Nepal with eSewa & Khalti payment accessibility, explore production AI case studies, consult on enterprise AI solutions, and launch NepalAI Studio." />
-    <meta property="og:title" content="nepalai.tech - AI Hub, Studio & Consulting for Nepal" />
-    <meta property="og:description" content="Nepal's premier AI platform featuring NepalAI Studio, verified AI tools directory, enterprise case studies, and specialized AI consulting." />
+    <link rel="canonical" href="https://nepalai.tech" />
+    <link rel="alternate" hreflang="en" href="https://nepalai.tech/?lang=en" />
+    <link rel="alternate" hreflang="ne" href="https://nepalai.tech/?lang=ne" />
+    <link rel="alternate" hreflang="x-default" href="https://nepalai.tech" />
+
+    <!-- SEO Meta Tags: Trending Keywords & Search Signals -->
+    <meta name="description" content="Nepal's premier Sovereign AI platform. Discover verified AI tools with eSewa & Khalti payment, Devanagari OCR, Nepali TTS, HamroAI LLM, and enterprise AI consulting in NPR & USD." />
+    <meta name="keywords" content="AI in Nepal, Nepal AI, AI tools Nepal, ChatGPT Nepal, eSewa AI payment, Khalti AI subscription, Dollar Card Nepal, Claude 3.7 Sonnet Nepal, DeepSeek Nepal, Nepali OCR, Devanagari AI, HamroAI, Nepali Text to Speech, Sovereign AI Nepal, AI Consulting Kathmandu, NRB IT AI compliance, Sora 2 video AI Nepal, Free AI tools Nepal, AI price in NPR, artificial intelligence Kathmandu" />
+    <meta name="author" content="NepalAI.tech Engineering Team" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="rating" content="General" />
+    <meta name="geo.region" content="NP-BA" />
+    <meta name="geo.placename" content="Kathmandu, Nepal" />
+    <meta name="geo.position" content="27.7172;85.3240" />
+    <meta name="ICBM" content="27.7172, 85.3240" />
+
+    <!-- OpenGraph Social Sharing Metadata -->
+    <meta property="og:site_name" content="NepalAI.tech" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://nepalai.tech" />
+    <meta property="og:title" content="nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal" />
+    <meta property="og:description" content="Nepal's sovereign AI workbench, verified AI tool directory with eSewa & Khalti payment, Devanagari LLMs, and enterprise architecture consulting in NPR & USD." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ne_NP" />
+
+    <!-- Twitter / X Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="nepalai.tech - AI Hub, Studio & Consulting for Nepal" />
-    <meta name="twitter:description" content="Explore Nepal-ready AI tools, payment solutions (eSewa/Khalti), case studies, and enterprise AI consulting." />
+    <meta name="twitter:site" content="@NepalAITech" />
+    <meta name="twitter:creator" content="@NepalAITech" />
+    <meta name="twitter:title" content="nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal" />
+    <meta name="twitter:description" content="Nepal-ready AI tools, payment solutions (eSewa/Khalti/NPR), Devanagari OCR/TTS, and enterprise AI consulting." />
+
+    <!-- Typography & Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600;700&family=Mukta:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD Structured Data for AI & Google Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://nepalai.tech/#website",
+          "url": "https://nepalai.tech",
+          "name": "NepalAI.tech – Sovereign AI Hub & Enterprise AI Consulting",
+          "description": "Nepal's sovereign AI workbench, directory of eSewa/Khalti accessible tools, Hamro AI Devanagari chat, and enterprise AI consulting in NPR and USD.",
+          "inLanguage": ["en-US", "ne-NP"],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://nepalai.tech/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://nepalai.tech/#organization",
+          "name": "NepalAI Technologies",
+          "url": "https://nepalai.tech",
+          "logo": "https://nepalai.tech/favicon.svg",
+          "sameAs": [
+            "https://twitter.com/NepalAITech",
+            "https://github.com/nepalai-tech",
+            "https://linkedin.com/company/nepalai-tech"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Kathmandu Sovereign AI Corridor",
+            "addressLocality": "Kathmandu",
+            "addressRegion": "Bagmati Province",
+            "postalCode": "44600",
+            "addressCountry": "NP"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "namaste@nepalai.tech",
+            "contactType": "sales and technical advisory",
+            "availableLanguage": ["English", "Nepali"]
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://nepalai.tech/#studio",
+          "name": "NepalAI Studio & Hamro AI Chat",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Web, All Modern Browsers",
+          "description": "Sovereign AI workbench featuring Hamro AI vernacular chat in Romanized and Devanagari Nepali, Sora-2 Video generation, Devanagari Voice Synthesis, and in-browser Timeline Editing.",
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "NPR",
+            "lowPrice": "0",
+            "highPrice": "450000",
+            "offerCount": "12",
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Hamro AI Chat & Community Tier",
+                "price": "0",
+                "priceCurrency": "NPR",
+                "description": "Free access to Hamro AI chat in Romanized and Unicode Nepali, directory of Nepal-compatible tools, and stack calculator."
+              },
+              {
+                "@type": "Offer",
+                "name": "Hamro AI Pro & Developer Studio",
+                "price": "1200",
+                "priceCurrency": "NPR",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "price": "9",
+                  "priceCurrency": "USD",
+                  "unitText": "MONTH"
+                },
+                "description": "High-throughput Nepali LLM API, Sora-2 Video rendering, 24kHz Devanagari Voice clone credits."
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-ai-opportunity-audit",
+          "name": "Enterprise AI Readiness & Opportunity Audit",
+          "serviceType": "Enterprise AI Consulting",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "areaServed": [
+            {
+              "@type": "Country",
+              "name": "Nepal"
+            },
+            {
+              "@type": "Country",
+              "name": "Worldwide"
+            }
+          ],
+          "description": "Identify high-ROI automation targets, data vulnerabilities, and compliance risks before committing engineering capital in Nepal.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Sprint Audit (NPR)",
+              "price": "180000",
+              "priceCurrency": "NPR",
+              "availability": "https://schema.org/InStock",
+              "validFrom": "2026-01-01"
+            },
+            {
+              "@type": "Offer",
+              "name": "Sprint Audit (USD)",
+              "price": "1400",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "validFrom": "2026-01-01"
+            }
+          ]
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-custom-llm-rag-agent",
+          "name": "Custom Nepali LLMs, RAG & Autonomous Agents",
+          "serviceType": "Enterprise AI Consulting & Engineering",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "areaServed": {
+            "@type": "Country",
+            "name": "Nepal"
+          },
+          "description": "Design, fine-tune, and deploy domain-specific AI agents that seamlessly comprehend Nepali (Devanagari & Romanized) alongside English.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Enterprise LLM RAG Deployment (NPR)",
+              "price": "450000",
+              "priceCurrency": "NPR",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise LLM RAG Deployment (USD)",
+              "price": "3400",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          ]
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-computer-vision-ocr",
+          "name": "Computer Vision & Devanagari Document Automation",
+          "serviceType": "Document AI & Vision Pipeline",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "areaServed": {
+            "@type": "Country",
+            "name": "Nepal"
+          },
+          "description": "Eliminate manual data entry for Nepali National IDs (Nagarikta), PAN cards, invoices, and industrial visual quality inspections.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Vision OCR Pipeline (NPR)",
+              "price": "380000",
+              "priceCurrency": "NPR",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Vision OCR Pipeline (USD)",
+              "price": "2800",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          ]
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-nepal-payment-ai-gateway",
+          "name": "Nepal Payment Bridge & AI Infrastructure Proxy",
+          "serviceType": "FinTech AI Gateway & Proxy",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "areaServed": {
+            "@type": "Country",
+            "name": "Nepal"
+          },
+          "description": "Bypass the $500 NRB dollar card ceiling with automated enterprise token caching, regional proxy routing, and local eSewa/Khalti billing.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Payment Gateway Setup (NPR)",
+              "price": "120000",
+              "priceCurrency": "NPR",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Payment Gateway Setup (USD)",
+              "price": "900",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          ]
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-corporate-ai-masterclass",
+          "name": "Executive AI Masterclass & Team Engineering Bootcamp",
+          "serviceType": "Corporate Training & AI Enablement",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "description": "Empower your software engineers and executive teams with practical, zero-fluff AI development practices and prompt engineering.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Engineering Bootcamp (NPR)",
+              "price": "95000",
+              "priceCurrency": "NPR",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Engineering Bootcamp (USD)",
+              "price": "750",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          ]
+        },
+        {
+          "@type": "Service",
+          "@id": "https://nepalai.tech/#service-fractional-ai-leadership",
+          "name": "Fractional Chief AI Officer & Advisory Retainer",
+          "serviceType": "Executive AI Advisory",
+          "provider": {
+            "@id": "https://nepalai.tech/#organization"
+          },
+          "description": "Dedicated senior AI architecture leadership guiding your engineering team every sprint without the full-time C-level payroll.",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Monthly Retainer (NPR)",
+              "price": "150000",
+              "priceCurrency": "NPR",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "150000",
+                "priceCurrency": "NPR",
+                "unitText": "MONTH"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Monthly Retainer (USD)",
+              "price": "1150",
+              "priceCurrency": "USD",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "1150",
+                "priceCurrency": "USD",
+                "unitText": "MONTH"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "Product",
+          "@id": "https://nepalai.tech/#product-consulting-packages",
+          "name": "Enterprise AI Consulting Packages – NepalAI",
+          "image": "https://nepalai.tech/favicon.svg",
+          "description": "Custom AI engineering, sovereign on-prem LLM deployment, Devanagari OCR, NRB compliance audits, and local payment integration for organizations in Nepal and globally.",
+          "brand": {
+            "@type": "Brand",
+            "name": "NepalAI"
+          },
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "NPR",
+            "lowPrice": "95000",
+            "highPrice": "450000",
+            "offerCount": "6"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://nepalai.tech/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How can I pay for AI subscriptions like ChatGPT and Claude in Nepal without a Dollar Card?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "NepalAI provides local NPR invoicing via eSewa, Khalti, and FonePay QR, as well as managed token proxy gateways that eliminate the NRB $500 annual card limitation."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does NepalAI support Hamro AI chat in Romanized and Devanagari Nepali?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! NepalAI features Hamro AI Chat, supporting both Romanized phonetic Nepali (e.g., 'namaste') and real Unicode Devanagari with banking, legal, and engineering intelligence."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the pricing options for AI Consulting in Nepal?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "All NepalAI consulting offerings provide transparent dual-currency pricing in both NPR (e.g. NPR 95,000 to NPR 4,50,000) and USD ($750 to $3,400) with complete IP ownership transfer."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body class="antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

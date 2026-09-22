@@ -145,9 +145,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-xs">
             <MessageSquare className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
             <span
-              className={`${
-                isDark ? 'text-emerald-400' : 'text-emerald-700'
-              } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+              className={isDark ? 'text-emerald-400' : 'text-emerald-700'}
             >
               {t.contact.badge}
             </span>
@@ -155,9 +153,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
           <h2
             id="contact-heading"
-            className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight ${
-              isDark ? 'text-white' : 'text-slate-900'
-            } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+            className={`text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-display ${
+              isDark ? 'text-white' : 'text-slate-950'
+            }`}
           >
             {t.contact.title}
           </h2>
@@ -165,7 +163,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           <p
             className={`text-sm sm:text-base leading-relaxed ${
               isDark ? 'text-slate-400' : 'text-slate-600'
-            } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+            }`}
           >
             {t.contact.subtitle}
           </p>
@@ -186,13 +184,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             >
               <div className="space-y-1.5 pb-4 border-b border-slate-500/15">
                 <h3
-                  className={`text-base font-bold ${
+                  className={`text-base font-bold font-display ${
                     isDark ? 'text-white' : 'text-slate-900'
-                  } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+                  }`}
                 >
                   {t.contact.directTitle}
                 </h3>
-                <p className={`text-xs text-slate-400 leading-relaxed ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+                <p className="text-xs text-slate-400 leading-relaxed">
                   {t.contact.directSubtitle}
                 </p>
               </div>
@@ -241,7 +239,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </div>
                   <div className="space-y-0.5">
                     <div className="text-slate-400 font-medium">{t.contact.officeLabel}</div>
-                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                       {t.contact.officeVal}
                     </div>
                   </div>
@@ -254,7 +252,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </div>
                   <div className="space-y-0.5">
                     <div className="text-slate-400 font-medium">{t.contact.hoursLabel}</div>
-                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                       {t.contact.hoursVal}
                     </div>
                   </div>
@@ -272,7 +270,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   aria-label="Direct chat on WhatsApp"
                 >
                   <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                  <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
+                  <span>
                     {t.contact.whatsappChatBtn}
                   </span>
                 </a>
@@ -319,16 +317,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   
                   <div className="space-y-1.5">
                     <h3
-                      className={`text-xl font-bold ${
+                      className={`text-xl font-bold font-display ${
                         isDark ? 'text-white' : 'text-slate-900'
-                      } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+                      }`}
                     >
                       {t.contact.successTitle}
                     </h3>
                     <p
-                      className={`text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed ${
-                        isNepali ? "font-['Noto_Sans_Devanagari']" : ''
-                      }`}
+                      className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed"
                     >
                       {t.contact.successMessage}
                     </p>
@@ -359,13 +355,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   
                   <div className="space-y-1 pb-2 border-b border-slate-500/15">
                     <h3
-                      className={`text-base font-bold ${
+                      className={`text-base font-bold font-display ${
                         isDark ? 'text-white' : 'text-slate-900'
-                      } ${isNepali ? "font-['Noto_Sans_Devanagari']" : "font-['Space_Grotesk']"}`}
+                      }`}
                     >
                       {t.contact.formTitle}
                     </h3>
-                    <p className={`text-xs text-slate-400 ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
+                    <p className="text-xs text-slate-400">
                       {t.contact.formSubtitle}
                     </p>
                   </div>
@@ -383,7 +379,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-name" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.nameLabel}
                       </label>
@@ -406,7 +402,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-email" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.emailInputLabel}
                       </label>
@@ -429,7 +425,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-phone" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.phoneLabel}
                       </label>
@@ -451,7 +447,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-org" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.orgLabel}
                       </label>
@@ -477,7 +473,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-service" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.serviceLabel}
                       </label>
@@ -503,7 +499,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-budget" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                       >
                         {t.contact.budgetLabel}
                       </label>
@@ -532,7 +528,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <div className="space-y-1.5">
                     <label 
                       htmlFor="contact-message" 
-                      className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                      className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                     >
                       {t.contact.messageLabel}
                     </label>
@@ -562,7 +558,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       ) : (
                         <>
                           <Send className="h-4 w-4" aria-hidden="true" />
-                          <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
+                          <span>
                             {t.contact.submitBtn}
                           </span>
                         </>

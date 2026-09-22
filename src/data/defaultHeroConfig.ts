@@ -1,19 +1,19 @@
 import { HeroConfig } from '../types';
 
 export const DEFAULT_HERO_CONFIG: HeroConfig = {
-  eyebrowNepali: 'नेपालको आफ्नै सार्वभौम AI क्रिएसन प्लेटफर्म',
-  eyebrowEnglish: 'Sovereign Nepali AI Studio & Systems',
+  eyebrowNepali: 'नेपालको सार्वभौम एआई स्टुडियो',
+  eyebrowEnglish: 'Sovereign AI Engineering & Studio',
   studioUrl: 'https://studio.nepalai.tech',
-  headlineDevanagari: 'सगरमाथाको देशबाट आधुनिक AI प्रविधि र स्टुडियो',
-  headlineEnglish: "Nepal's Premier AI Studio, Systems & Enterprise Consulting",
-  descriptionNepali: 'नेपाली भाषा (देवनागरी र रो romanized), स्थानीय भुक्तानी (FonePay / eSewa) र नेपालको डेटा सुहाउँदो आधुनिक AI पूर्वाधार। हाम्रो फ्ल्यागशिप स्टुडियो परीक्षण गर्नुहोस् वा उद्यम परामर्श सुरु गर्नुहोस्।',
+  headlineDevanagari: 'नेपालका लागि उच्च-स्तरको एआई पूर्वाधार',
+  headlineEnglish: "High-Performance AI Systems for Nepal",
+  descriptionNepali: 'नेपाली भाषा मोडल, स्थानीय भुक्तानी (FonePay/eSewa) र राष्ट्र बैंक मापदण्ड अनुकूल इन्टरप्राइज एआई इन्जिनियरिङ।',
   liveCreditAmount: '500 Daily Free Credits',
   metric1Value: '९९.४%',
-  metric1Label: 'Devnagari OCR Accuracy',
+  metric1Label: 'Devanagari OCR',
   metric2Value: '२४kHz',
-  metric2Label: 'Neural Voice Studio',
-  metric3Value: '३०+ बैंक',
-  metric3Label: 'FonePay & eSewa Ready',
+  metric2Label: 'Studio Neural Voice',
+  metric3Value: '१००%',
+  metric3Label: 'NRB IT Compliant',
   showHimalayaArt: true,
   showMandirMotif: true,
 };
