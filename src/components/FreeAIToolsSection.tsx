@@ -27,6 +27,7 @@ import {
   Tag,
   TrendingUp
 } from 'lucide-react';
+import { BentoGridSkeleton } from './BentoGridSkeleton';
 
 interface FreeAIToolsSectionProps {
   theme: ThemeMode;
@@ -981,15 +982,15 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
             </div>
           </div>
 
-          {/* Loading Indicator */}
+          {/* Content-Aware Bento Skeleton Loading State during Fetch */}
           {isLoadingNews && (
-            <div className={`p-8 rounded-2xl border text-center ${
-              isDark ? 'border-white/10 bg-black/30' : 'border-slate-200 bg-slate-50'
-            }`}>
-              <RefreshCw className="h-6 w-6 text-emerald-400 animate-spin mx-auto mb-2" />
-              <p className={`text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                Querying latest Nepal AI intelligence and regulatory bulletins...
-              </p>
+            <div className="mt-4">
+              <BentoGridSkeleton
+                theme={theme}
+                type="free"
+                count={4}
+                className="grid-cols-1 md:grid-cols-2"
+              />
             </div>
           )}
 

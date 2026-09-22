@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ConsultingOffering, ThemeMode, Language } from '../types';
 import { Briefcase, CheckCircle2, ArrowRight, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { TRANSLATIONS } from '../data/translations';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { BentoGridSkeleton } from './BentoGridSkeleton';
 
 interface ConsultingSectionProps {
   theme?: ThemeMode;
@@ -10,6 +11,7 @@ interface ConsultingSectionProps {
   offerings: ConsultingOffering[];
   onOpenConsultation: (serviceTitle?: string) => void;
   onOpenAdminPricing: () => void;
+  isHydrating?: boolean;
 }
 
 export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
@@ -18,6 +20,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
   offerings,
   onOpenConsultation,
   onOpenAdminPricing,
+  isHydrating = false,
 }) => {
   const [selectedIndustry, setSelectedIndustry] = useState('Banking & Fintech');
   const isDark = theme === 'dark';
@@ -161,103 +164,118 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
         </motion.div>
 
         {/* Apple-Style Bento 3-Column Grid of Offerings with Staggered Framer Motion Animation */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {offerings.map((offering, idx) => (
-            <motion.article
-              key={offering.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.5, delay: 0.08 * idx }}
-              whileHover={{ y: -4, scale: 1.01 }}
-              data-cursor="Scope"
-              onClick={() => onOpenConsultation(offering.title)}
-              className={`flex flex-col justify-between rounded-3xl border p-7 transition-all duration-300 group shadow-sm cursor-pointer ${
-                isDark
-                  ? 'border-white/10 bg-white/[0.02] hover:border-emerald-500/50 hover:bg-white/[0.04]'
-                  : 'border-slate-200 bg-white hover:border-emerald-500 hover:shadow-md'
-              }`}
+        <AnimatePresence mode="wait">
+          {isHydrating ? (
+            <div key="consulting-skeleton" className="mt-8">
+              <BentoGridSkeleton theme={theme} type="consulting" count={3} />
+            </div>
+          ) : (
+            <motion.div
+              key="consulting-content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
             >
-              <div>
-                {/* Header Tag */}
-                <div className="flex items-center justify-between text-[11px] mb-4">
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wide">
-                    {offering.tier} • {offering.duration}
-                  </span>
-                  {offering.badge && (
-                    <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-mono ${
-                      isDark
-                        ? 'bg-white/[0.04] border-white/10 text-slate-300'
-                        : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}>
-                      {offering.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h3 className={`text-lg font-bold font-display transition-colors leading-snug group-hover:text-emerald-500 ${
-                  isDark ? 'text-white' : 'text-slate-900'
-                }`}>
-                  {offering.title}
-                </h3>
-                
-                <p className={`text-xs mt-2 mb-4 leading-relaxed ${
-                  isDark ? 'text-slate-300' : 'text-slate-600'
-                }`}>
-                  {offering.subtitle}
-                </p>
-
-                {/* Pricing Pill with Dual NPR (रू) and USD ($) */}
-                <div className={`rounded-2xl border p-3.5 mb-5 flex items-center justify-between text-xs ${
-                  isDark ? 'bg-black/40 border-white/10' : 'bg-slate-50 border-slate-200'
-                }`}>
-                  <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {isNepali ? 'सुरुवाती लागत' : t.consulting.startingFrom}:
-                  </span>
-                  <div className="text-right">
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-xs">
-                      {offering.startingPriceNpr || 'Custom Scoped'}
-                    </span>
-                    {offering.startingPriceUsd && (
-                      <span className={`text-[11px] font-mono ml-1.5 ${isDark ? 'text-indigo-300' : 'text-indigo-600 font-semibold'}`}>
-                        ({offering.startingPriceUsd})
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Key Deliverables */}
-                <div className="space-y-2.5 mb-5">
-                  {offering.deliverables.slice(0, 3).map((item, dIdx) => (
-                    <div key={dIdx} className="flex items-start gap-2 text-xs">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span className={`line-clamp-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action */}
-              <div className={`pt-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-                <div
-                  className={`w-full py-2.5 rounded-full border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+              {offerings.map((offering, idx) => (
+                <motion.article
+                  key={offering.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.5, delay: 0.08 * idx }}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  data-cursor="Scope"
+                  onClick={() => onOpenConsultation(offering.title)}
+                  className={`flex flex-col justify-between rounded-3xl border p-7 transition-all duration-300 group shadow-sm cursor-pointer ${
                     isDark
-                      ? 'bg-white/[0.04] border-white/10 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-200'
-                      : 'bg-slate-50 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white text-slate-800'
+                      ? 'border-white/10 bg-white/[0.02] hover:border-emerald-500/50 hover:bg-white/[0.04]'
+                      : 'border-slate-200 bg-white hover:border-emerald-500 hover:shadow-md'
                   }`}
                 >
-                  <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
-                    {t.consulting.bookAdvisory} (रू & $)
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
+                  <div>
+                    {/* Header Tag */}
+                    <div className="flex items-center justify-between text-[11px] mb-4">
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wide">
+                        {offering.tier} • {offering.duration}
+                      </span>
+                      {offering.badge && (
+                        <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-mono ${
+                          isDark
+                            ? 'bg-white/[0.04] border-white/10 text-slate-300'
+                            : 'bg-slate-100 border-slate-200 text-slate-700'
+                        }`}>
+                          {offering.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <h3 className={`text-lg font-bold font-display transition-colors leading-snug group-hover:text-emerald-500 ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {offering.title}
+                    </h3>
+                    
+                    <p className={`text-xs mt-2 mb-4 leading-relaxed ${
+                      isDark ? 'text-slate-300' : 'text-slate-600'
+                    }`}>
+                      {offering.subtitle}
+                    </p>
+
+                    {/* Pricing Pill with Dual NPR (रू) and USD ($) */}
+                    <div className={`rounded-2xl border p-3.5 mb-5 flex items-center justify-between text-xs ${
+                      isDark ? 'bg-black/40 border-white/10' : 'bg-slate-50 border-slate-200'
+                    }`}>
+                      <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {isNepali ? 'सुरुवाती लागत' : t.consulting.startingFrom}:
+                      </span>
+                      <div className="text-right">
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-xs">
+                          {offering.startingPriceNpr || 'Custom Scoped'}
+                        </span>
+                        {offering.startingPriceUsd && (
+                          <span className={`text-[11px] font-mono ml-1.5 ${isDark ? 'text-indigo-300' : 'text-indigo-600 font-semibold'}`}>
+                            ({offering.startingPriceUsd})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Key Deliverables */}
+                    <div className="space-y-2.5 mb-5">
+                      {offering.deliverables.slice(0, 3).map((item, dIdx) => (
+                        <div key={dIdx} className="flex items-start gap-2 text-xs">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span className={`line-clamp-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            {item}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action */}
+                  <div className={`pt-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                    <div
+                      className={`w-full py-2.5 rounded-full border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                        isDark
+                          ? 'bg-white/[0.04] border-white/10 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-200'
+                          : 'bg-slate-50 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white text-slate-800'
+                      }`}
+                    >
+                      <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
+                        {t.consulting.bookAdvisory} (रू & $)
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </div>
+                  </div>
+                </motion.article>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Interactive Scope Scenarios Builder (Apple Bento Style) */}
         <motion.div

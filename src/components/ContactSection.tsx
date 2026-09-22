@@ -206,7 +206,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="text-slate-400 font-medium">{t.contact.emailLabel}</div>
                     <a
                       href="mailto:contact@nepalai.tech"
-                      className="font-bold text-emerald-400 hover:underline text-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                      className="font-bold text-emerald-400 hover:underline text-sm inline-flex items-center min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
                     >
                       {t.contact.emailVal}
                     </a>
@@ -224,7 +224,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-emerald-400 hover:underline text-sm flex items-center gap-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                      className="font-bold text-emerald-400 hover:underline text-sm inline-flex items-center gap-1 min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
                     >
                       <span>{t.contact.whatsappVal}</span>
                       <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -551,7 +551,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 px-4 text-xs transition-all shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 px-4 text-xs transition-all shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 min-h-[44px] cursor-pointer"
                     >
                       {isSubmitting ? (
                         <span>{t.contact.submittingBtn}</span>

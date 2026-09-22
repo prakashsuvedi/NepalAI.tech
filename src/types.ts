@@ -1,5 +1,6 @@
 export type ThemeMode = 'dark' | 'light';
 export type Language = 'en' | 'ne';
+export type AppPage = 'home' | 'directory' | 'daily' | 'free' | 'consulting' | 'compliance';
 
 export interface HeroConfig {
   eyebrowNepali: string;
@@ -78,6 +79,9 @@ export interface NepalAITool {
   localAdoptionPercent?: number;
   businessUsageTier?: string;
   monthlyActiveBusinesses?: string;
+  descriptionNe?: string;
+  supportsQuickPay?: boolean;
+  quickPayProvider?: string;
 }
 
 export interface NepalAINewsItem {

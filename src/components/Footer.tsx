@@ -1,12 +1,13 @@
 import React from 'react';
 import { Sparkles, ArrowUpRight, Mail, MapPin, ShieldCheck, HelpCircle, FileText } from 'lucide-react';
-import { ThemeMode, Language } from '../types';
+import { ThemeMode, Language, AppPage } from '../types';
 import { NepalAILogo } from './NepalAILogo';
 import { TRANSLATIONS } from '../data/translations';
 
 interface FooterProps {
   theme?: ThemeMode;
   language?: Language;
+  onSelectPage?: (page: AppPage) => void;
   onOpenConsultation: () => void;
   onOpenPrivacyPolicy?: () => void;
 }
@@ -14,12 +15,21 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ 
   theme = 'dark', 
   language = 'en', 
+  onSelectPage,
   onOpenConsultation,
   onOpenPrivacyPolicy 
 }) => {
   const isDark = theme === 'dark';
   const t = TRANSLATIONS[language];
   const isNepali = language === 'ne';
+
+  const handlePageClick = (e: React.MouseEvent, page: AppPage) => {
+    e.preventDefault();
+    if (onSelectPage) {
+      onSelectPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <footer
@@ -56,37 +66,59 @@ export const Footer: React.FC<FooterProps> = ({
             </h3>
             <ul className="space-y-1.5 text-xs">
               <li>
-                <a
-                  href="#about"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'home')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
                 >
-                  {t.nav.about} (Sovereign AI)
-                </a>
+                  {t.nav.home} ({isNepali ? 'गृहपृष्ठ' : 'Home Overview'})
+                </button>
               </li>
               <li>
-                <a
-                  href="#consulting"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'directory')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
                 >
-                  {t.nav.services}
-                </a>
+                  {t.nav.directory} ({isNepali ? 'टुल्स डाइरेक्टरी' : '40+ Tools'})
+                </button>
               </li>
               <li>
-                <a
-                  href="#tools-directory"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'daily')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
                 >
-                  {t.nav.toolsDirectory}
-                </a>
+                  {t.nav.daily} ({isNepali ? 'दैनिक एआई' : 'OCR & Voice'})
+                </button>
               </li>
               <li>
-                <a
-                  href="#faq"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded flex items-center gap-1"
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'free')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
+                >
+                  {t.nav.free} ({isNepali ? 'निःशुल्क' : 'Free APIs'})
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'consulting')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
+                >
+                  {t.nav.consulting} ({isNepali ? 'परामर्श' : 'Enterprise'})
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'compliance')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded flex items-center gap-1 text-left cursor-pointer"
                 >
                   <HelpCircle className="h-3 w-3 text-emerald-500" aria-hidden="true" />
-                  <span>{t.nav.faq}</span>
-                </a>
+                  <span>{t.nav.compliance}</span>
+                </button>
               </li>
             </ul>
           </div>
@@ -110,12 +142,13 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </li>
               <li>
-                <a
-                  href="#faq"
-                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                <button
+                  type="button"
+                  onClick={(e) => handlePageClick(e, 'compliance')}
+                  className="hover:text-emerald-500 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded text-left cursor-pointer"
                 >
                   eSewa / Khalti & Dollar Card Guide
-                </a>
+                </button>
               </li>
               <li>
                 <button

@@ -244,7 +244,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+            className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             aria-label="Close consultation modal"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -279,7 +279,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                       if (isCompleted) setCurrentStep(step.number);
                     }}
                     disabled={!isCompleted && !isActive}
-                    className={`relative z-10 flex flex-col items-center gap-1.5 group cursor-pointer transition-all ${
+                    className={`relative z-10 flex flex-col items-center gap-1.5 group cursor-pointer transition-all min-h-[44px] min-w-[44px] justify-center ${
                       !isCompleted && !isActive ? 'cursor-not-allowed opacity-60' : ''
                     }`}
                   >
@@ -607,7 +607,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   <button
                     type="button"
                     onClick={handlePrevStep}
-                    className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer min-h-[44px]"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     <span>{isNepali ? 'पछाडि' : 'Back'}</span>
@@ -620,7 +620,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   <button
                     type="button"
                     onClick={handleNextStep}
-                    className="px-6 py-2.5 rounded-xl bg-white text-slate-950 hover:bg-slate-200 font-bold transition-all flex items-center gap-1.5 shadow-md cursor-pointer ml-auto"
+                    className="px-6 py-2.5 rounded-xl bg-white text-slate-950 hover:bg-slate-200 font-bold transition-all flex items-center gap-1.5 shadow-md cursor-pointer ml-auto min-h-[44px]"
                   >
                     <span>{isNepali ? 'अगाडि बढ्नुहोस्' : 'Continue'}</span>
                     <ArrowRight className="h-4 w-4" />
@@ -628,7 +628,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                 ) : (
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 hover:brightness-110 font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer ml-auto"
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 hover:brightness-110 font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer ml-auto min-h-[44px]"
                   >
                     <Send className="h-4 w-4" />
                     <span>{isNepali ? 'अनुरोध पेस गर्नुहोस्' : 'Submit Consultation Brief'}</span>
@@ -655,7 +655,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                 <button
                   type="button"
                   onClick={handleSendEmail}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 text-xs font-semibold transition-colors cursor-pointer"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
                 >
                   <Mail className="h-4 w-4 text-emerald-400" aria-hidden="true" />
                   <span>Launch Direct Email</span>
@@ -664,7 +664,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                 <button
                   type="button"
                   onClick={handleWhatsApp}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-semibold transition-colors shadow-md shadow-emerald-600/20 cursor-pointer"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-semibold transition-colors shadow-md shadow-emerald-600/20 cursor-pointer min-h-[44px]"
                 >
                   <MessageSquare className="h-4 w-4" aria-hidden="true" />
                   <span>Chat on WhatsApp</span>
@@ -678,7 +678,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     setSubmitted(false);
                     onClose();
                   }}
-                  className="text-xs text-slate-400 hover:text-white px-4 py-1.5 rounded cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-white px-4 py-2.5 rounded cursor-pointer min-h-[44px] inline-flex items-center justify-center"
                 >
                   Done
                 </button>

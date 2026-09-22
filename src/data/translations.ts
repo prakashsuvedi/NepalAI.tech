@@ -2,6 +2,12 @@ import { Language } from '../types';
 
 export interface Translations {
   nav: {
+    home: string;
+    directory: string;
+    daily: string;
+    free: string;
+    consulting: string;
+    compliance: string;
     caseStudies: string;
     services: string;
     toolsDirectory: string;
@@ -205,6 +211,12 @@ export interface Translations {
 export const TRANSLATIONS: Record<Language, Translations> = {
   en: {
     nav: {
+      home: 'Home',
+      directory: 'Tools Directory',
+      daily: 'Daily AI',
+      free: 'Free AI & News',
+      consulting: 'Consulting',
+      compliance: 'Compliance & FAQ',
       caseStudies: 'Case Studies',
       services: 'Consulting',
       toolsDirectory: 'AI Tools Directory',
@@ -426,6 +438,12 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ne: {
     nav: {
+      home: 'गृहपृष्ठ',
+      directory: 'टुल्स डाइरेक्टरी',
+      daily: 'दैनिक एआई',
+      free: 'निःशुल्क एआई र समाचार',
+      consulting: 'परामर्श सेवा',
+      compliance: 'नियम तथा मद्दत',
       caseStudies: 'केस स्टडीज',
       services: 'परामर्श सेवाहरू',
       toolsDirectory: 'टुल्स डाइरेक्टरी',

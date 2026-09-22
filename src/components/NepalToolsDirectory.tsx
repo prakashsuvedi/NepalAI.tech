@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { NEPAL_AI_TOOLS } from '../data/nepalTools';
 import { ToolCategory, ThemeMode, Language, NepalAITool } from '../types';
-import { Search, CheckCircle, AlertTriangle, ExternalLink, Plus, Check, Layers, Info, Sparkles, Zap, ShieldCheck, X, TrendingUp, Award, ShieldAlert, Lock, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle, AlertTriangle, ExternalLink, Plus, Check, Layers, Info, Sparkles, Zap, ShieldCheck, X, TrendingUp, Award, ShieldAlert, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 import { TRANSLATIONS } from '../data/translations';
+import { BentoGridSkeleton } from './BentoGridSkeleton';
+import { AppleTooltip } from './AppleTooltip';
 
 interface NepalToolsDirectoryProps {
   theme?: ThemeMode;
@@ -11,6 +13,7 @@ interface NepalToolsDirectoryProps {
   selectedStack: string[];
   onToggleStack: (toolId: string) => void;
   onOpenStackCalculator: () => void;
+  isHydrating?: boolean;
 }
 
 const CATEGORIES: ToolCategory[] = [
@@ -28,6 +31,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
   selectedStack,
   onToggleStack,
   onOpenStackCalculator,
+  isHydrating = false,
 }) => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<ToolCategory>('All');
@@ -35,7 +39,23 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
   const [hoveredTool, setHoveredTool] = useState<NepalAITool | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; alignRight?: boolean } | null>(null);
   const [pinnedToolId, setPinnedToolId] = useState<string | null>(null);
+  const [isFetchingData, setIsFetchingData] = useState<boolean>(true);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Content-aware initial hydration state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFetchingData(false);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRefreshDirectory = () => {
+    setIsFetchingData(true);
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 600);
+  };
 
   const isDark = theme === 'dark';
   const t = TRANSLATIONS[language];
@@ -83,7 +103,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
       filterType === 'all'
         ? true
         : filterType === 'esewa'
-        ? item.nepalPaymentStatus === 'esewa-khalti'
+        ? (item.nepalPaymentStatus === 'esewa-khalti' || Boolean(item.supportsQuickPay))
         : filterType === 'free'
         ? item.freeTierAvailable
         : item.nepalPaymentStatus === 'dollar-card-only';
@@ -300,30 +320,81 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
           </div>
         </div>
 
-        {/* Hover Tooltip Overlay Indicator */}
-        <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
+        {/* Hover Tooltip Overlay Indicator & Live Sync Trigger */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-emerald-400 animate-pulse" aria-hidden="true" />
-            <span className="font-medium">{language === 'ne' ? 'टुल्सको विस्तृत विवरण हेर्न माउस होभर वा ट्याप गर्नुहोस्' : 'Hover or tap on any tool card or info icon for instant capabilities tooltip'}</span>
+            <span className="font-medium">{language === 'ne' ? 'टुल्सको संक्षिप्त नेपाली तथा अंग्रेजी विवरण हेर्न माउस होभर वा ट्याप गर्नुहोस्' : 'Hover or tap on any tool card for instant Apple-style bilingual tooltip & specs'}</span>
           </span>
-          <span className="hidden sm:inline font-semibold text-slate-400">
-            {filteredTools.length} {t.tools.toolsFound}
-          </span>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleRefreshDirectory}
+              disabled={isFetchingData || isHydrating}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer ${
+                isDark
+                  ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:text-white hover:border-emerald-500/40'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:border-emerald-500/40'
+              }`}
+              title={language === 'ne' ? 'टुल्स डाटा पुनः लोड गर्नुहोस्' : 'Simulate live data fetch and test bento skeleton loading'}
+            >
+              <RefreshCw
+                className={`h-3 w-3 text-emerald-400 ${
+                  isFetchingData || isHydrating ? 'animate-spin' : ''
+                }`}
+                aria-hidden="true"
+              />
+              <span>
+                {isFetchingData || isHydrating
+                  ? language === 'ne'
+                    ? 'अपडेट हुँदैछ...'
+                    : 'Hydrating Data...'
+                  : language === 'ne'
+                  ? 'रिफ्रेस'
+                  : 'Sync Directory'}
+              </span>
+            </button>
+
+            <span className="hidden sm:inline font-semibold text-slate-400">
+              {filteredTools.length} {t.tools.toolsFound}
+            </span>
+          </div>
         </div>
 
-        {/* Modular Responsive Grid: Clean 1-col on mobile, 2-col on sm/tablet, 3-col on lg/desktop */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {filteredTools.map((tool, idx) => {
-            const isSelected = selectedStack.includes(tool.id);
-            const npr = Math.round(tool.monthlyPriceUsd * exchangeRate);
-            const isTooltipActive = hoveredTool?.id === tool.id || pinnedToolId === tool.id;
+        {/* Content-Aware Skeleton State during Data Fetch & Hydration */}
+        <AnimatePresence mode="wait">
+          {isFetchingData || isHydrating ? (
+            <div key="directory-skeleton" className="mt-4">
+              <BentoGridSkeleton theme={theme} type="tools" count={6} />
+            </div>
+          ) : (
+            /* Modular Responsive Grid: Clean 1-col on mobile, 2-col on sm/tablet, 3-col on lg/desktop */
+            <motion.div
+              key="directory-content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+            >
+              {filteredTools.map((tool, idx) => {
+                const isSelected = selectedStack.includes(tool.id);
+                const npr = Math.round(tool.monthlyPriceUsd * exchangeRate);
+                const isTooltipActive = hoveredTool?.id === tool.id || pinnedToolId === tool.id;
+                const supportsQuickPay = Boolean(
+                  tool.supportsQuickPay ||
+                  tool.nepalPaymentStatus === 'esewa-khalti' ||
+                  tool.paymentDetails.toLowerCase().includes('esewa') ||
+                  tool.paymentDetails.toLowerCase().includes('khalti')
+                );
 
-            const adoption = tool.localAdoptionPercent || 85;
-            const isHighValue = adoption >= 90;
+                const adoption = tool.localAdoptionPercent || 85;
+                const isHighValue = adoption >= 90;
 
-            return (
-              <motion.article
-                key={tool.id}
+                return (
+                  <motion.article
+                    key={tool.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
@@ -343,11 +414,37 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between text-xs mb-2.5">
-                    <span className={`font-semibold px-2.5 py-0.5 rounded-md text-[11px] ${
-                      isDark ? 'bg-white/[0.05] text-slate-300' : 'bg-slate-100 text-slate-700'
-                    }`}>
-                      {tool.category}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`font-semibold px-2.5 py-0.5 rounded-md text-[11px] ${
+                        isDark ? 'bg-white/[0.05] text-slate-300' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {tool.category}
+                      </span>
+
+                      {/* Small Visual Quick Pay Badge with Subtle Green Pulse Effect */}
+                      {supportsQuickPay && (
+                        <span
+                          id={`quick-pay-badge-${tool.id}`}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight border transition-colors ${
+                            isDark
+                              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.18)]'
+                              : 'bg-emerald-50 border-emerald-300/80 text-emerald-800 shadow-2xs'
+                          }`}
+                          title={language === 'ne' ? 'नेपालमा इसेवा वा खल्तीबाट सिधै भुक्तानी गर्न सकिने' : 'Direct payment via eSewa or Khalti supported'}
+                        >
+                          <span className="relative flex h-2 w-2" aria-hidden="true">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                          </span>
+                          <span>Quick Pay</span>
+                          <span className={`text-[9px] font-medium hidden sm:inline ${
+                            isDark ? 'text-emerald-400/90' : 'text-emerald-700'
+                          }`}>
+                            • {tool.quickPayProvider || 'eSewa/Khalti'}
+                          </span>
+                        </span>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-1.5">
                       {isHighValue && (
@@ -376,8 +473,8 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                           e.stopPropagation();
                           handleTogglePinTooltip(tool);
                         }}
-                        aria-label={`View detailed specs for ${tool.name}`}
-                        title="Click to toggle specs overlay"
+                        aria-label={`View bilingual description and specs for ${tool.name}`}
+                        title="Click to toggle Apple-style specs tooltip"
                         className={`p-1 rounded-md transition-colors ${
                           isTooltipActive
                             ? 'bg-emerald-500 text-slate-950'
@@ -471,6 +568,16 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                     <p className={`text-xs mt-0.5 leading-snug ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                       {tool.paymentDetails}
                     </p>
+
+                    {supportsQuickPay && (
+                      <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-slate-500/15 text-[11px] text-emerald-500 font-medium">
+                        <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                        </span>
+                        <span>{language === 'ne' ? 'सिधै इसेवा / खल्ती भुक्तानी समर्थित' : 'Direct eSewa / Khalti instant payment supported'}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -522,103 +629,31 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   </motion.button>
                 </div>
 
-                {/* INLINE TOOLTIP OVERLAY on Hover / Tap */}
-                {isTooltipActive && (
-                  <div
-                    role="tooltip"
-                    id={`tooltip-${tool.id}`}
-                    className={`absolute inset-0 z-20 rounded-2xl p-4 flex flex-col justify-between backdrop-blur-md transition-all animate-in fade-in duration-200 ${
-                      isDark
-                        ? 'bg-[#080d16]/95 border-2 border-emerald-500/60 shadow-2xl shadow-black/80'
-                        : 'bg-white/95 border-2 border-emerald-500 shadow-2xl shadow-slate-300'
-                    }`}
-                  >
-                    <div>
-                      {/* Tooltip Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-500/20">
-                        <div className="flex items-center gap-1.5">
-                          <ShieldCheck className="h-4 w-4 text-emerald-400" aria-hidden="true" />
-                          <span className="font-bold text-xs text-emerald-400 uppercase tracking-wider">
-                            NepalAI Verified Spec
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPinnedToolId(null);
-                            setHoveredTool(null);
-                          }}
-                          className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10"
-                          aria-label="Close tooltip overlay"
-                        >
-                          <X className="h-3.5 w-3.5" aria-hidden="true" />
-                        </button>
-                      </div>
-
-                      {/* Tool Title & Summary */}
-                      <h4 className={`text-sm font-bold mt-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        {tool.name}
-                      </h4>
-                      <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        {tool.description}
-                      </p>
-
-                      {/* Deep Capability Breakdown */}
-                      <div className="mt-2.5 space-y-1.5 text-xs">
-                        <div className={`p-2 rounded-lg ${isDark ? 'bg-white/[0.04]' : 'bg-slate-100'}`}>
-                          <span className="font-mono text-[10px] text-emerald-400 block uppercase font-bold">
-                            Standout Capability:
-                          </span>
-                          <span className={`text-[11px] leading-tight ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                            {tool.keyCapability}
-                          </span>
-                        </div>
-
-                        <div className={`p-2 rounded-lg flex items-center justify-between ${isDark ? 'bg-white/[0.04]' : 'bg-slate-100'}`}>
-                          <span className="font-mono text-[10px] text-slate-400 uppercase">
-                            Nepal IP Connectivity:
-                          </span>
-                          <span className={`text-[11px] font-bold ${tool.worksInNepal === 'direct' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                            {tool.worksInNepal === 'direct' ? '✓ Direct (No VPN)' : '⚠ VPN Recommended'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tooltip Actions */}
-                    <div className="pt-2.5 border-t border-slate-500/20 flex items-center justify-between gap-2">
-                      <a
-                        href={tool.officialUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
-                      >
-                        <span>Open Website</span>
-                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                      </a>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleStack(tool.id);
-                        }}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                          isSelected
-                            ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                            : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
-                        }`}
-                      >
-                        {isSelected ? 'Remove from Stack' : '+ Add to AI Stack'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Minimalist Apple-Style Hover Tooltip Component */}
+                <AppleTooltip
+                  isVisible={isTooltipActive}
+                  theme={theme}
+                  language={language}
+                  toolName={tool.name}
+                  category={tool.category}
+                  descriptionEn={tool.description}
+                  descriptionNe={tool.descriptionNe}
+                  supportsQuickPay={supportsQuickPay}
+                  quickPayProvider={tool.quickPayProvider || 'eSewa & Khalti'}
+                  worksInNepal={tool.worksInNepal}
+                  priceLabel={tool.monthlyPriceUsd > 0 ? `$${tool.monthlyPriceUsd}/mo (~NPR ${npr.toLocaleString()})` : 'Free Tier'}
+                  isPinned={pinnedToolId === tool.id}
+                  onClose={() => {
+                    setPinnedToolId(null);
+                    setHoveredTool(null);
+                  }}
+                />
               </motion.article>
             );
           })}
-        </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
       </div>
     </section>

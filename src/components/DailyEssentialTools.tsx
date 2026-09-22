@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ThemeMode, Language } from '../types';
 import { TRANSLATIONS } from '../data/translations';
+import { BentoGridSkeleton } from './BentoGridSkeleton';
 import { 
   FileEdit, 
   Languages, 
@@ -40,6 +42,7 @@ interface DailyEssentialToolsProps {
   theme?: ThemeMode;
   language?: Language;
   onOpenConsultation?: (serviceTitle?: string) => void;
+  isHydrating?: boolean;
 }
 
 type ActiveToolTab = 'letter' | 'voice' | 'ocr' | 'fx' | 'tax' | 'market';
@@ -48,11 +51,21 @@ export const DailyEssentialTools: React.FC<DailyEssentialToolsProps> = ({
   theme = 'dark',
   language = 'en',
   onOpenConsultation,
+  isHydrating = false,
 }) => {
   const [activeTab, setActiveTab] = useState<ActiveToolTab>('letter');
   const [copied, setCopied] = useState<boolean>(false);
+  const [isHydratingLocal, setIsHydratingLocal] = useState<boolean>(true);
   const isDark = theme === 'dark';
   const t = TRANSLATIONS[language];
+
+  // Content-aware initial hydration state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHydratingLocal(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Helper for copy
   const handleCopy = (text: string) => {
@@ -477,11 +490,31 @@ Kathmandu, Nepal • AI Infrastructure & Sovereign Technology
         </div>
 
         {/* Active Tool Interactive Container */}
-        <div className={`mt-5 sm:mt-6 rounded-2xl border p-4 sm:p-6 md:p-7 transition-all ${
-          isDark
-            ? 'border-white/[0.08] bg-[#090d16]'
-            : 'border-slate-200 bg-white shadow-xs'
-        }`}>
+        <AnimatePresence mode="wait">
+          {isHydrating || isHydratingLocal ? (
+            <motion.div
+              key="daily-skeleton"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="mt-5 sm:mt-6"
+            >
+              <BentoGridSkeleton theme={theme} type="daily" count={3} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="daily-content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`mt-5 sm:mt-6 rounded-2xl border p-4 sm:p-6 md:p-7 transition-all ${
+                isDark
+                  ? 'border-white/[0.08] bg-[#090d16]'
+                  : 'border-slate-200 bg-white shadow-xs'
+              }`}
+            >
           
           {/* TAB 0: REAL-TIME USD TO NPR FX & AI SUBSCRIPTION CONVERTER */}
           {activeTab === 'fx' && (
@@ -1483,7 +1516,9 @@ Kathmandu, Nepal • AI Infrastructure & Sovereign Technology
             </div>
           )}
 
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
     </section>

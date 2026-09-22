@@ -26,8 +26,10 @@ import { BackToTop } from './components/BackToTop';
 import { Footer } from './components/Footer';
 import { CustomCursor } from './components/CustomCursor';
 import { BentoSectionDivider } from './components/BentoSectionDivider';
+import { BentoPortalHub } from './components/BentoPortalHub';
+import { PageFlowNavigator } from './components/PageFlowNavigator';
 import { ToastProvider } from './context/ToastContext';
-import { ConsultingOffering, HeroConfig, ThemeMode, Language } from './types';
+import { ConsultingOffering, HeroConfig, ThemeMode, Language, AppPage } from './types';
 import { CONSULTING_OFFERINGS } from './data/consultingOfferings';
 import { DEFAULT_HERO_CONFIG } from './data/defaultHeroConfig';
 import { ambientFocusAudio } from './utils/ambientAudio';
@@ -244,11 +246,76 @@ export default function App() {
     setIsConsultationOpen(true);
   };
 
-  const handleScrollToSection = (sectionId: string) => {
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+  // Modular Page View State - Eliminates long vertical scrolling
+  const [currentPage, setCurrentPage] = useState<AppPage>(() => {
+    try {
+      const hash = window.location.hash.replace('#', '');
+      if (['home', 'directory', 'daily', 'free', 'consulting', 'compliance'].includes(hash)) {
+        return hash as AppPage;
+      }
+      const saved = localStorage.getItem('nepalai_current_page');
+      if (saved && ['home', 'directory', 'daily', 'free', 'consulting', 'compliance'].includes(saved)) {
+        return saved as AppPage;
+      }
+    } catch (e) {
+      console.error('Failed to read page from storage', e);
     }
+    return 'home';
+  });
+
+  const handleSelectPage = (page: AppPage) => {
+    setCurrentPage(page);
+    try {
+      localStorage.setItem('nepalai_current_page', page);
+      window.location.hash = page;
+    } catch (e) {
+      console.error(e);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Listen to hash changes for browser forward/back buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['home', 'directory', 'daily', 'free', 'consulting', 'compliance'].includes(hash)) {
+        setCurrentPage(hash as AppPage);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleScrollToSection = (sectionId: string) => {
+    const sectionPageMap: Record<string, AppPage> = {
+      'home': 'home',
+      'hero': 'home',
+      'about': 'home',
+      'studio': 'home',
+      'tools-directory': 'directory',
+      'tools': 'directory',
+      'directory': 'directory',
+      'daily-tools': 'daily',
+      'daily': 'daily',
+      'free-ai-tools': 'free',
+      'free': 'free',
+      'news': 'free',
+      'consulting': 'consulting',
+      'services': 'consulting',
+      'automation': 'consulting',
+      'faq': 'compliance',
+      'compliance': 'compliance',
+      'contact': 'compliance',
+    };
+
+    const targetPage = sectionPageMap[sectionId] || 'home';
+    handleSelectPage(targetPage);
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
   };
 
   // Hero config updates
@@ -313,7 +380,8 @@ export default function App() {
               <Navbar
                 theme={theme}
                 language={language}
-                onNavigateSection={handleScrollToSection}
+                currentPage={currentPage}
+                onSelectPage={handleSelectPage}
                 onToggleTheme={handleToggleTheme}
                 onToggleLanguage={handleToggleLanguage}
                 onSelectLanguage={handleSelectLanguage}
@@ -465,107 +533,178 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Main Unified Content Flow - All real sections seamlessly organized */}
-        <main className={`flex-1 transition-all duration-300 ${isZenMode ? 'zen-active zen-prose pt-14 pb-16' : ''}`} id="main-content">
-          <div className="space-y-0 transition-opacity duration-300">
-            
-            {/* 1. Hero Platform Introduction */}
-            <Hero
-              config={heroConfig}
-              theme={theme}
-              language={language}
-              onOpenConsultation={() => handleOpenConsultation('General Enterprise AI Advisory')}
-              onExploreConsulting={() => handleScrollToSection('consulting')}
-              onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
-            />
+        {/* Main Modular Content Flow - Fast, organized views without infinite vertical scrolling */}
+        <main
+          className={`flex-1 transition-all duration-300 overflow-x-hidden ${
+            isZenMode ? 'zen-active zen-prose pt-14 pb-16' : ''
+          }`}
+          id="main-content"
+        >
+          <AnimatePresence mode="wait">
+            {currentPage === 'home' && (
+              <motion.div
+                key="page-home"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-0"
+              >
+                {/* 1. Hero Platform Introduction */}
+                <Hero
+                  config={heroConfig}
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={() => handleOpenConsultation('General Enterprise AI Advisory')}
+                  onExploreConsulting={() => handleSelectPage('consulting')}
+                  onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
+                />
 
-            <BentoSectionDivider theme={theme} variant="emerald" />
+                <BentoSectionDivider theme={theme} variant="emerald" />
 
-            {/* 2. Mission Pillars & Sovereign Infrastructure */}
-            <AboutSection
-              theme={theme}
-              language={language}
-              onOpenConsultation={handleOpenConsultation}
-            />
+                {/* 2. Mission Pillars & Sovereign Infrastructure */}
+                <AboutSection
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={handleOpenConsultation}
+                />
 
-            <BentoSectionDivider theme={theme} variant="indigo" />
+                <BentoSectionDivider theme={theme} variant="indigo" />
 
-            {/* 3. NepalAI Studio Workbench Showcase */}
-            <StudioBanner theme={theme} language={language} />
+                {/* 3. NepalAI Studio Workbench Showcase */}
+                <StudioBanner theme={theme} language={language} />
 
-            <BentoSectionDivider theme={theme} variant="emerald" />
+                <BentoSectionDivider theme={theme} variant="emerald" />
 
-            {/* 4. Enterprise Consulting & Dual NPR/USD Pricing */}
-            <ConsultingSection
-              theme={theme}
-              language={language}
-              offerings={consultingOfferings}
-              onOpenConsultation={handleOpenConsultation}
-              onOpenAdminPricing={() => setIsAdminPanelOpen(true)}
-            />
+                {/* 4. Modular Page Navigation Bento Hub */}
+                <BentoPortalHub
+                  onSelectPage={handleSelectPage}
+                  theme={theme}
+                  language={language}
+                />
+              </motion.div>
+            )}
 
-            <BentoSectionDivider theme={theme} variant="indigo" />
+            {currentPage === 'directory' && (
+              <motion.div
+                key="page-directory"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <NepalToolsDirectory
+                  theme={theme}
+                  language={language}
+                  selectedStack={selectedStack}
+                  onToggleStack={handleToggleStack}
+                  onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
+                />
+              </motion.div>
+            )}
 
-            {/* 5. Verified Nepal AI Tools Directory & Dollar Card Guide */}
-            <NepalToolsDirectory
-              theme={theme}
-              language={language}
-              selectedStack={selectedStack}
-              onToggleStack={handleToggleStack}
-              onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
-            />
+            {currentPage === 'daily' && (
+              <motion.div
+                key="page-daily"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <DailyEssentialTools
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={handleOpenConsultation}
+                />
+              </motion.div>
+            )}
 
-            <BentoSectionDivider theme={theme} variant="indigo" />
+            {currentPage === 'free' && (
+              <motion.div
+                key="page-free"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <FreeAIToolsSection
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={handleOpenConsultation}
+                />
+              </motion.div>
+            )}
 
-            {/* 6. Free APIs, Open Source Models & Data Extraction */}
-            <FreeAIToolsSection
-              theme={theme}
-              language={language}
-              onOpenConsultation={handleOpenConsultation}
-            />
+            {currentPage === 'consulting' && (
+              <motion.div
+                key="page-consulting"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-0"
+              >
+                <ConsultingSection
+                  theme={theme}
+                  language={language}
+                  offerings={consultingOfferings}
+                  onOpenConsultation={handleOpenConsultation}
+                  onOpenAdminPricing={() => setIsAdminPanelOpen(true)}
+                />
 
-            <BentoSectionDivider theme={theme} variant="emerald" />
+                <BentoSectionDivider theme={theme} variant="indigo" />
 
-            {/* 7. Daily Sovereign Utilities (OCR, Speech, Tax, Kalimati) */}
-            <DailyEssentialTools
-              theme={theme}
-              language={language}
-              onOpenConsultation={handleOpenConsultation}
-            />
+                <AutomationSection
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={handleOpenConsultation}
+                />
+              </motion.div>
+            )}
 
-            <BentoSectionDivider theme={theme} variant="indigo" />
+            {currentPage === 'compliance' && (
+              <motion.div
+                key="page-compliance"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-0"
+              >
+                <FAQSection
+                  theme={theme}
+                  language={language}
+                  onOpenConsultation={handleOpenConsultation}
+                  onScrollToContact={() => {
+                    const el = document.getElementById('contact');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                />
 
-            {/* 8. Enterprise Automation & Production Pipelines */}
-            <AutomationSection
-              theme={theme}
-              language={language}
-              onOpenConsultation={handleOpenConsultation}
-            />
+                <BentoSectionDivider theme={theme} variant="slate" />
 
-            <BentoSectionDivider theme={theme} variant="emerald" />
+                <ContactSection
+                  theme={theme}
+                  language={language}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            {/* 9. Nepal Rastra Bank FAQ & Compliance */}
-            <FAQSection
-              theme={theme}
-              language={language}
-              onOpenConsultation={handleOpenConsultation}
-              onScrollToContact={() => handleScrollToSection('contact')}
-            />
-
-            <BentoSectionDivider theme={theme} variant="slate" />
-
-            {/* 10. Contact & Advisory Booking */}
-            <ContactSection
-              theme={theme}
-              language={language}
-            />
-          </div>
+          {/* Page Flow Navigator - Elegant bottom pagination between pages */}
+          <PageFlowNavigator
+            currentPage={currentPage}
+            onSelectPage={handleSelectPage}
+            theme={theme}
+            language={language}
+          />
         </main>
 
         {/* Footer */}
         <Footer 
           theme={theme} 
           language={language} 
+          onSelectPage={handleSelectPage}
           onOpenConsultation={() => handleOpenConsultation()}
           onOpenPrivacyPolicy={() => setIsPrivacyPolicyOpen(true)}
         />
