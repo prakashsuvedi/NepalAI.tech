@@ -794,6 +794,10 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
 
   // API 8: Studio.nepalai.tech Admin Dashboard Connection Status & Sync
   app.get("/api/admin/studio-connection", (req, res) => {
+    const newCount = activeLeads.filter(l => l.status === "new").length;
+    const reviewingCount = activeLeads.filter(l => l.status === "reviewing").length;
+    const pendingCount = newCount + reviewingCount;
+
     return res.json({
       success: true,
       status: "connected",
@@ -801,7 +805,10 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
       studioAdminUrl: STUDIO_ADMIN_URL,
       platform: "NepalAI Studio Sovereign Cloud Hub",
       totalLeads: activeLeads.length,
-      newLeadsCount: activeLeads.filter(l => l.status === "new").length,
+      pendingLeadsCount: pendingCount,
+      newLeadsCount: newCount,
+      reviewingLeadsCount: reviewingCount,
+      convertedLeadsCount: activeLeads.filter(l => l.status === "converted").length,
       lastSync: new Date().toISOString(),
       syncSupported: true
     });

@@ -23,7 +23,11 @@ import {
   Layers,
   Globe,
   Inbox,
-  Activity
+  Activity,
+  RefreshCw,
+  ExternalLink,
+  Clock,
+  Radio
 } from 'lucide-react';
 
 interface AdminConfigModalProps {
@@ -209,6 +213,19 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
     }
   };
 
+  // Count calculations reflecting real-time studio.nepalai.tech/admin status
+  const pendingLeadsCount = studioStatus?.pendingLeadsCount !== undefined
+    ? studioStatus.pendingLeadsCount
+    : leads.filter((l) => l.status === 'new' || l.status === 'reviewing').length;
+
+  const newLeadsCount = studioStatus?.newLeadsCount !== undefined
+    ? studioStatus.newLeadsCount
+    : leads.filter((l) => l.status === 'new').length;
+
+  const reviewingLeadsCount = studioStatus?.reviewingLeadsCount !== undefined
+    ? studioStatus.reviewingLeadsCount
+    : leads.filter((l) => l.status === 'reviewing').length;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200"
@@ -223,7 +240,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
       >
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3.5 border-b border-white/10">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
@@ -236,7 +253,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Customize live Hero section content, studio direct links, cultural aesthetics, and consulting rates.
+                Live administration connected with studio.nepalai.tech/admin hub.
               </p>
             </div>
           </div>
@@ -248,6 +265,114 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
+        </div>
+
+        {/* REAL-TIME STATUS TRACKER: studio.nepalai.tech/admin Live Bridge */}
+        <div className="mt-3 p-3 sm:p-3.5 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-black/40 to-emerald-950/30 shadow-inner">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            
+            {/* Left: Live Endpoint Connection Status */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
+                <Activity className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${studioStatus?.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                  <span className={`relative inline-flex rounded-full h-3 w-3 ${studioStatus?.connected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-white font-display">
+                    Studio Status Tracker
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-tight border ${
+                    studioStatus?.connected
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                      : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
+                  }`}>
+                    {studioStatus?.connected ? 'LIVE BRIDGE ACTIVE' : 'CONNECTING...'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono mt-0.5">
+                  <span className="text-indigo-300">studio.nepalai.tech/admin</span>
+                  {studioStatus?.latencyMs !== undefined && (
+                    <>
+                      <span>•</span>
+                      <span>{studioStatus.latencyMs}ms latency</span>
+                    </>
+                  )}
+                  {lastStudioSync && (
+                    <>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline text-slate-400">Synced: {lastStudioSync}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Pending Consulting Leads Counter & Live Action Controls */}
+            <div className="flex items-center flex-wrap gap-2 w-full md:w-auto justify-between md:justify-end">
+              
+              {/* Status Tracker: Current Number of Pending Consulting Leads */}
+              <div 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 cursor-pointer hover:bg-amber-500/15 transition-colors"
+                onClick={() => setActiveTab('leads')}
+                title="View pending consulting leads"
+              >
+                <Clock className="h-4 w-4 text-amber-400 shrink-0" />
+                <div className="text-left">
+                  <div className="text-[10px] uppercase font-mono text-amber-300/80 font-semibold leading-none">
+                    Pending Consulting Leads
+                  </div>
+                  <div className="text-xs font-extrabold text-amber-300 tabular-nums flex items-center gap-1.5 leading-tight mt-0.5">
+                    <span>{pendingLeadsCount} Pending</span>
+                    <span className="text-[10px] font-normal text-amber-400/90 font-mono">
+                      ({newLeadsCount} new, {reviewingLeadsCount} reviewing)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Leads Counter */}
+              <div className="hidden lg:flex flex-col justify-center px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-300">
+                <span className="text-[9px] uppercase font-mono text-slate-400 font-semibold leading-none">
+                  Total Leads
+                </span>
+                <span className="text-xs font-bold text-white tabular-nums leading-tight mt-0.5">
+                  {leads.length} recorded
+                </span>
+              </div>
+
+              {/* Real-Time Sync Action */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleSyncWithStudio}
+                  disabled={isStudioSyncing}
+                  className="px-2.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Pull latest pending leads count from studio.nepalai.tech/admin"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isStudioSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isStudioSyncing ? 'Pulling...' : 'Pull Status'}</span>
+                </button>
+
+                <a
+                  href="https://studio.nepalai.tech/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1 transition-all shadow-xs cursor-pointer"
+                  title="Open studio.nepalai.tech/admin Dashboard (opens in new tab)"
+                >
+                  <span>Studio Admin</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+
+            </div>
+
+          </div>
         </div>
 
         {/* Tab Navigation */}

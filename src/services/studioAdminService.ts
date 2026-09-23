@@ -19,7 +19,10 @@ export interface StudioConnectionStatus {
   studioUrl: string;
   studioAdminUrl: string;
   totalLeads: number;
+  pendingLeadsCount: number;
   newLeadsCount: number;
+  reviewingLeadsCount?: number;
+  convertedLeadsCount?: number;
   lastSync: string;
   syncSupported: boolean;
   latencyMs?: number;
@@ -52,13 +55,20 @@ export async function fetchStudioAdminConnection(): Promise<StudioConnectionStat
 
     if (res.ok) {
       const data = await res.json();
+      const newCount = data.newLeadsCount ?? 0;
+      const reviewingCount = data.reviewingLeadsCount ?? 0;
+      const pendingCount = data.pendingLeadsCount !== undefined ? data.pendingLeadsCount : (newCount + reviewingCount);
+
       return {
         connected: true,
         status: 'connected',
         studioUrl: data.studioUrl || 'https://studio.nepalai.tech',
         studioAdminUrl: data.studioAdminUrl || STUDIO_ADMIN_BASE,
         totalLeads: data.totalLeads ?? 0,
-        newLeadsCount: data.newLeadsCount ?? 0,
+        pendingLeadsCount: pendingCount,
+        newLeadsCount: newCount,
+        reviewingLeadsCount: reviewingCount,
+        convertedLeadsCount: data.convertedLeadsCount ?? 0,
         lastSync: data.lastSync || new Date().toISOString(),
         syncSupported: true,
         latencyMs,
@@ -74,7 +84,10 @@ export async function fetchStudioAdminConnection(): Promise<StudioConnectionStat
       studioUrl: 'https://studio.nepalai.tech',
       studioAdminUrl: STUDIO_ADMIN_BASE,
       totalLeads: 0,
+      pendingLeadsCount: 0,
       newLeadsCount: 0,
+      reviewingLeadsCount: 0,
+      convertedLeadsCount: 0,
       lastSync: new Date().toISOString(),
       syncSupported: true,
       latencyMs: Date.now() - startTime,

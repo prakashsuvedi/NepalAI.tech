@@ -320,6 +320,163 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
         </div>
 
+        {/* PROVENANCE & LEADERSHIP BENTO CARD: SCAMSPIKE SOLUTIONS & PRAKASH SUVEDI */}
+        <motion.div
+          initial={{ opacity: 0, y: 26 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.55, delay: 0.1 }}
+          className={`rounded-3xl border p-7 sm:p-9 mb-8 relative overflow-hidden backdrop-blur-2xl shadow-xl transition-all ${
+            isDark
+              ? 'border-emerald-500/25 bg-gradient-to-br from-[#070b14] via-[#09101d] to-[#0d1627] text-white shadow-emerald-950/20'
+              : 'border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-slate-50 text-slate-900 shadow-lg shadow-emerald-900/5'
+          }`}
+        >
+          {/* Subtle Ambient glow inside founder card */}
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" aria-hidden="true" />
+
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Col: Platform Heritage & Scamspike Solutions Intro */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-tight border ${
+                  isDark
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                    : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                }`}>
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+                  <span>Platform Provenance & Architecture</span>
+                </span>
+
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-mono ${
+                  isDark ? 'bg-white/5 border border-white/10 text-slate-300' : 'bg-slate-100 border border-slate-200 text-slate-700'
+                }`}>
+                  <span>Engineered by Scamspike Solutions</span>
+                </span>
+              </div>
+
+              <h3 className={`text-2xl sm:text-3xl font-extrabold font-display leading-tight ${
+                isDark ? 'text-white' : 'text-slate-950'
+              }`}>
+                {isNepali 
+                  ? 'स्क्यामस्पाइक सोलुसन्स प्रा. लि. र संस्थापक प्रकाश सुवेदीद्वारा डिजाइन तथा निर्मित'
+                  : 'Designed & Created by Scamspike Solutions Pvt. Ltd.'}
+              </h3>
+
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                {isNepali ? (
+                  <span>
+                    नेपालएआई (nepalai.tech) प्लेटफर्मको सम्पूर्ण अवधारणा, सफ्टवेयर संरचना तथा सार्वभौम देवनागरी इन्टेलिजेन्स प्रणाली <strong>स्क्यामस्पाइक सोलुसन्स प्रा. लि. (Scamspike Solutions Pvt. Ltd.)</strong> र यसका संस्थापक <strong>प्रकाश सुवेदी (Prakash Suvedi)</strong> को नेतृत्वमा डिजाइन तथा विकास गरिएको हो। यसको उद्देश्य नेपालमा अत्याधुनिक साइबर सुरक्षा, डाटा सार्वभौमिकता र मौलिक नेपाली एआई पूर्वाधार स्थापना गर्नु हो।
+                  </span>
+                ) : (
+                  <span>
+                    The NepalAI (nepalai.tech) platform is conceived, architected, and engineered by <strong>Scamspike Solutions Pvt. Ltd.</strong> under the leadership of Founder <strong>Prakash Suvedi</strong>. Combining enterprise cybersecurity rigor, sovereign Devanagari AI linguistics, and native Nepali financial rails (FonePay/eSewa/Khalti), the initiative delivers institutional-grade autonomy without foreign cloud lock-in.
+                  </span>
+                )}
+              </p>
+
+              {/* Core Strengths Chips */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border ${
+                  isDark ? 'border-white/10 bg-white/[0.03] text-slate-200' : 'border-slate-200 bg-white text-slate-700 shadow-2xs'
+                }`}>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Cybersecurity & Threat Intelligence</span>
+                </span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border ${
+                  isDark ? 'border-white/10 bg-white/[0.03] text-slate-200' : 'border-slate-200 bg-white text-slate-700 shadow-2xs'
+                }`}>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Sovereign Devanagari AI & LLMs</span>
+                </span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border ${
+                  isDark ? 'border-white/10 bg-white/[0.03] text-slate-200' : 'border-slate-200 bg-white text-slate-700 shadow-2xs'
+                }`}>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-amber-500" />
+                  <span>NRB IT Security & Compliance</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Right Col: Founder Spotlight Profile & Direct Connect */}
+            <div className="lg:col-span-5">
+              <div className={`p-6 sm:p-7 rounded-2xl border transition-all ${
+                isDark
+                  ? 'bg-black/40 border-white/10 hover:border-emerald-500/40 shadow-xl shadow-black/40'
+                  : 'bg-white border-slate-200/90 shadow-md hover:border-emerald-400'
+              }`}>
+                {/* Profile Header */}
+                <div className="flex items-center gap-4 pb-4 border-b border-slate-500/15">
+                  <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-indigo-600 text-white font-bold text-xl shadow-md">
+                    PS
+                    <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-slate-900">
+                      <ShieldCheck className="h-3 w-3 text-slate-950" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className={`text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      Prakash Suvedi
+                    </h4>
+                    <p className={`text-xs font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                      Founder & Principal Architect
+                    </p>
+                    <p className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      Scamspike Solutions Pvt. Ltd.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Company & Founder Links */}
+                <div className="mt-4 space-y-2.5">
+                  <a
+                    href="https://prakashsuvedi.com.np"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`min-h-[44px] w-full px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all group/link cursor-pointer ${
+                      isDark
+                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-400'
+                        : 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 hover:border-emerald-400 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">Founder Portfolio & LinkedIn:</span>
+                      <span className="font-mono text-[11px] underline">prakashsuvedi.com.np</span>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-emerald-500 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                  </a>
+
+                  <a
+                    href="https://scamspike.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`min-h-[44px] w-full px-4 py-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all group/link cursor-pointer ${
+                      isDark
+                        ? 'border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08] hover:text-white hover:border-white/20'
+                        : 'border-slate-300 bg-slate-50 text-slate-800 hover:bg-white hover:border-slate-400 shadow-2xs'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">Parent Company:</span>
+                      <span className="font-mono text-[11px]">scamspike.com</span>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                  </a>
+                </div>
+
+                <div className={`mt-4 pt-3 border-t flex items-center justify-between text-[11px] font-mono ${
+                  isDark ? 'border-white/10 text-slate-400' : 'border-slate-200 text-slate-500'
+                }`}>
+                  <span>Kathmandu, Nepal</span>
+                  <span className="text-emerald-500 font-semibold">Verified Enterprise Entity</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </motion.div>
+
         {/* Four Core Engineering Pillars Bento Grid (Staggered Entrance) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {pillars.map((pillar, idx) => {
