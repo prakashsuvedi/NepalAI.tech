@@ -34,44 +34,88 @@ jobs:
           cd ..
           ls -lh deploy.zip
 
+      - name: 🚀 Deploy to cPanel via FTPS / FTP (Fail-safe Direct Sync)
+        if: ${{ secrets.FTP_SERVER != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
+          local-dir: ./dist/
+
       - name: 🚀 Deploy to cPanel via UAPI Token
+        if: ${{ secrets.FTP_SERVER == '' }}
         env:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-          CPANEL_DEPLOY_DIR: ${{ secrets.CPANEL_DEPLOY_DIR || 'nepalai.tech' }}
+          CPANEL_DEPLOY_DIR: ${{ secrets.CPANEL_DEPLOY_DIR || 'public_html' }}
         run: |
-          echo "🌐 Connecting to cPanel at https://$CPANEL_HOST:2083 ..."
-          echo "🎯 Target deployment directory: $CPANEL_DEPLOY_DIR"
+          echo "=========================================================="
+          echo "🚀 NepalAI Sovereign Platform — cPanel CI/CD Pipeline"
+          echo "=========================================================="
           
-          # 1. Upload deploy.zip to cPanel using UAPI Fileman
-          echo "📤 Uploading build archive to $CPANEL_DEPLOY_DIR..."
-          UPLOAD_RES=$(curl -s -k \
-            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-            -F "dir=$CPANEL_DEPLOY_DIR" \
+          # Clean and sanitize CPANEL_HOST (strip http://, https://, :2083, trailing slashes, whitespace)
+          CLEAN_HOST=$(echo "$CPANEL_HOST" | sed -E 's|^https?://||' | sed -E 's|:.*||' | sed -E 's|/.*||' | xargs)
+          CLEAN_USER=$(echo "$CPANEL_USER" | xargs)
+          CLEAN_TOKEN=$(echo "$CPANEL_API_TOKEN" | xargs)
+          CLEAN_DIR=$(echo "$CPANEL_DEPLOY_DIR" | sed -E 's|^/||' | sed -E 's|/$||' | xargs)
+          
+          echo "🌐 Host: $CLEAN_HOST (Port: 2083)"
+          echo "👤 cPanel User: $CLEAN_USER"
+          echo "🎯 Target Directory: $CLEAN_DIR"
+          
+          # 1. Attempt upload to cPanel via UAPI Fileman
+          echo "📤 Uploading build archive (deploy.zip) to $CLEAN_DIR..."
+          HTTP_CODE=$(curl -s -k -o /tmp/upload_response.json -w "%{http_code}" \
+            -H "Authorization: cpanel $CLEAN_USER:$CLEAN_TOKEN" \
+            -F "dir=$CLEAN_DIR" \
             -F "overwrite=1" \
             -F "file-1=@deploy.zip;filename=deploy.zip" \
-            "https://$CPANEL_HOST:2083/execute/Fileman/upload_files")
+            "https://$CLEAN_HOST:2083/execute/Fileman/upload_files")
           
+          UPLOAD_RES=$(cat /tmp/upload_response.json 2>/dev/null || echo "Empty response")
+          echo "HTTP Status Code: $HTTP_CODE"
           echo "Upload Response: $UPLOAD_RES"
           
           # Check status
           if [[ "$UPLOAD_RES" =~ '"status":1' || "$UPLOAD_RES" =~ '"status": 1' ]]; then
-            echo "✅ Archive uploaded successfully."
+            echo "✅ Archive uploaded successfully to $CLEAN_DIR."
           else
-            echo "❌ Upload failed. Please verify CPANEL_HOST, CPANEL_USER and CPANEL_API_TOKEN."
+            echo "❌ Upload failed with response: $UPLOAD_RES (HTTP $HTTP_CODE)"
+            echo ""
+            echo "=========================================================="
+            echo "🔍 CPANEL TROUBLESHOOTING GUIDE FOR 'Access denied':"
+            echo "1. CPANEL API TOKEN PERMISSIONS (Most Common):"
+            echo "   - Go to cPanel -> Security -> Manage API Tokens."
+            echo "   - When creating your token, ensure 'Full Permissions' is CHECKED."
+            echo "   - If permissions are restricted, cPanel denies access to Fileman."
+            echo ""
+            echo "2. CPANEL USERNAME:"
+            echo "   - In GitHub Secrets, CPANEL_USER must be your cPanel Linux username"
+            echo "     (shown on the top right or right sidebar under 'Current User')."
+            echo "   - Do NOT use your email address (e.g. use 'nepalai', not 'user@example.com')."
+            echo ""
+            echo "3. TARGET DEPLOYMENT DIRECTORY:"
+            echo "   - For primary domain: use 'public_html'."
+            echo "   - For addon domain: use 'nepalai.tech' or 'public_html/nepalai.tech'."
+            echo ""
+            echo "4. ROCK-SOLID ALTERNATIVE: FTP DEPLOYMENT"
+            echo "   - You can also add GitHub Secrets: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD."
+            echo "=========================================================="
             exit 1
           fi
 
           # 2. Extract deploy.zip inside target directory automatically
-          echo "📂 Extracting archive into $CPANEL_DEPLOY_DIR..."
+          echo "📂 Extracting archive into $CLEAN_DIR..."
           EXTRACT_RES=$(curl -s -k \
-            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-            --data-urlencode "dir=$CPANEL_DEPLOY_DIR" \
+            -H "Authorization: cpanel $CLEAN_USER:$CLEAN_TOKEN" \
+            --data-urlencode "dir=$CLEAN_DIR" \
             --data-urlencode "file=deploy.zip" \
-            --data-urlencode "dest=$CPANEL_DEPLOY_DIR" \
+            --data-urlencode "dest=$CLEAN_DIR" \
             --data-urlencode "overwrite=1" \
-            "https://$CPANEL_HOST:2083/execute/Fileman/extract_archive")
+            "https://$CLEAN_HOST:2083/execute/Fileman/extract_archive")
           
           echo "Extract Response: $EXTRACT_RES"
 
@@ -79,23 +123,21 @@ jobs:
           if [[ ! "$EXTRACT_RES" =~ '"status":1' && ! "$EXTRACT_RES" =~ '"status": 1' ]]; then
             echo "⚠️ Primary extract returned notice, trying secondary UAPI extract_files..."
             curl -s -k \
-              -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-              --data-urlencode "dir=$CPANEL_DEPLOY_DIR" \
+              -H "Authorization: cpanel $CLEAN_USER:$CLEAN_TOKEN" \
+              --data-urlencode "dir=$CLEAN_DIR" \
               --data-urlencode "files=deploy.zip" \
-              "https://$CPANEL_HOST:2083/execute/Fileman/extract_files"
+              "https://$CLEAN_HOST:2083/execute/Fileman/extract_files"
           fi
 
           # 3. Clean up the zip file on server (delete deploy.zip)
-          echo "🧹 Automatically removing deploy.zip from server..."
-          # Try delete_files UAPI
+          echo "🧹 Cleaning up deploy.zip on server..."
           curl -s -k \
-            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-            --data-urlencode "files[0]=$CPANEL_DEPLOY_DIR/deploy.zip" \
-            "https://$CPANEL_HOST:2083/execute/Fileman/delete_files" > /dev/null || true
+            -H "Authorization: cpanel $CLEAN_USER:$CLEAN_TOKEN" \
+            --data-urlencode "files[0]=$CLEAN_DIR/deploy.zip" \
+            "https://$CLEAN_HOST:2083/execute/Fileman/delete_files" > /dev/null || true
           
-          # Try fileop unlink as fallback
           curl -s -k \
-            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_API_TOKEN" \
-            "https://$CPANEL_HOST:2083/execute/Fileman/fileop?op=unlink&sourcefiles=$CPANEL_DEPLOY_DIR%2Fdeploy.zip" > /dev/null || true
+            -H "Authorization: cpanel $CLEAN_USER:$CLEAN_TOKEN" \
+            "https://$CLEAN_HOST:2083/execute/Fileman/fileop?op=unlink&sourcefiles=$CLEAN_DIR%2Fdeploy.zip" > /dev/null || true
 
-          echo "🎉 Deployment to cPanel completed and updated automatically!"
+          echo "🎉 Deployment to cPanel completed successfully!"
