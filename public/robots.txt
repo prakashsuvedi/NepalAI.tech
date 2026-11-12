@@ -1,0 +1,45 @@
+# =========================================================================
+# Robots.txt for NepalAI.tech & studio.nepalai.tech
+# Sovereign AI Hub, Enterprise AI Consulting & Devanagari AI Infrastructure
+# Engineered by ScamSpike Solutions Pvt. Ltd. (Lead Architect: Prakash Suvedi)
+# =========================================================================
+
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Disallow: /api/admin/
+Disallow: /admin/private/
+
+# AI Search & LLM Agent Crawlers (Explicitly Allowed for Full Context Indexing)
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+# Canonical Sitemaps & Machine-Readable LLM Context
+Sitemap: https://nepalai.tech/sitemap.xml
+LLMs-Txt: https://nepalai.tech/llms.txt

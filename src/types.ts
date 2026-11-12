@@ -1,6 +1,6 @@
 export type ThemeMode = 'dark' | 'light';
 export type Language = 'en' | 'ne';
-export type AppPage = 'home' | 'directory' | 'daily' | 'free' | 'consulting' | 'compliance';
+export type AppPage = 'home' | 'command-center' | 'dashboard' | 'directory' | 'daily' | 'free' | 'consulting' | 'compliance' | 'commerce';
 
 export interface HeroConfig {
   eyebrowNepali: string;
@@ -61,7 +61,7 @@ export interface ConsultingOffering {
   startingPriceUsd?: string;
 }
 
-export type ToolCategory = 'All' | 'Coding' | 'LLM & Writing' | 'Design & Video' | 'Audio & Voice' | 'Automation';
+export type ToolCategory = 'All' | 'Coding' | 'LLM & Writing' | 'Design & Video' | 'Audio & Voice' | 'Automation' | 'Nepal Sovereign AI';
 
 export interface NepalAITool {
   id: string;

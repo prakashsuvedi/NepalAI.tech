@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ConsultingOffering, HeroConfig, InquiryLead, LeadStatus } from '../types';
 import { AdminLeadsTab } from './AdminLeadsTab';
 import { AdminStudioTab } from './AdminStudioTab';
+import { AdminHealthTab } from './AdminHealthTab';
+import { useAdminData } from '../hooks/useAdminData';
 import { 
   fetchStudioAdminConnection, 
   syncLeadsWithStudioAdmin, 
@@ -27,7 +29,10 @@ import {
   RefreshCw,
   ExternalLink,
   Clock,
-  Radio
+  Radio,
+  Cpu,
+  Users,
+  HardDrive
 } from 'lucide-react';
 
 interface AdminConfigModalProps {
@@ -51,7 +56,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
   onSaveOfferings,
   onResetOfferings,
 }) => {
-  const [activeTab, setActiveTab] = useState<'leads' | 'studio' | 'hero' | 'consulting' | 'cultural'>('leads');
+  const [activeTab, setActiveTab] = useState<'leads' | 'studio' | 'health' | 'hero' | 'consulting' | 'cultural'>('leads');
   const [localHero, setLocalHero] = useState<HeroConfig>(heroConfig);
   const [localOfferings, setLocalOfferings] = useState<ConsultingOffering[]>(offerings);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -61,6 +66,14 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
   const [isStudioSyncing, setIsStudioSyncing] = useState(false);
   const [lastStudioSync, setLastStudioSync] = useState<string | null>(null);
   const [realtimeSyncEnabled, setRealtimeSyncEnabled] = useState(true);
+
+  // Hook fetching real-time metrics (user count, token usage, revenue) from studio.nepalai.tech/api/admin/users
+  const { 
+    metrics: studioMetrics, 
+    users: studioUsers, 
+    isLoading: isAdminDataLoading,
+    refresh: refreshAdminData 
+  } = useAdminData(isOpen ? 12000 : 0);
 
   // Fetch leads and update state
   const fetchLeads = async () => {
@@ -315,6 +328,26 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
             {/* Right: Pending Consulting Leads Counter & Live Action Controls */}
             <div className="flex items-center flex-wrap gap-2 w-full md:w-auto justify-between md:justify-end">
               
+              {/* Live Studio Users & Tokens Metric */}
+              <div 
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                onClick={() => setActiveTab('studio')}
+                title="View studio.nepalai.tech users & token usage ledger"
+              >
+                <Users className="h-4 w-4 text-indigo-400 shrink-0" />
+                <div className="text-left">
+                  <div className="text-[10px] uppercase font-mono text-indigo-300/80 font-semibold leading-none">
+                    Studio Users / Tokens
+                  </div>
+                  <div className="text-xs font-extrabold text-indigo-300 tabular-nums flex items-center gap-1.5 leading-tight mt-0.5">
+                    <span>{studioMetrics.totalUsers} users</span>
+                    <span className="text-[10px] font-normal text-indigo-400/90 font-mono">
+                      ({studioMetrics.totalTokensUsed.toLocaleString()} tok)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Status Tracker: Current Number of Pending Consulting Leads */}
               <div 
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 cursor-pointer hover:bg-amber-500/15 transition-colors"
@@ -338,10 +371,10 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
               {/* Total Leads Counter */}
               <div className="hidden lg:flex flex-col justify-center px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-300">
                 <span className="text-[9px] uppercase font-mono text-slate-400 font-semibold leading-none">
-                  Total Leads
+                  Platform Revenue
                 </span>
-                <span className="text-xs font-bold text-white tabular-nums leading-tight mt-0.5">
-                  {leads.length} recorded
+                <span className="text-xs font-bold text-amber-300 tabular-nums leading-tight mt-0.5">
+                  ${studioMetrics.totalRevenueUSD.toFixed(2)} USD
                 </span>
               </div>
 
@@ -349,13 +382,16 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={handleSyncWithStudio}
-                  disabled={isStudioSyncing}
+                  onClick={async () => {
+                    await handleSyncWithStudio();
+                    await refreshAdminData();
+                  }}
+                  disabled={isStudioSyncing || isAdminDataLoading}
                   className="px-2.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
-                  title="Pull latest pending leads count from studio.nepalai.tech/admin"
+                  title="Pull latest metrics & leads from studio.nepalai.tech"
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 ${isStudioSyncing ? 'animate-spin' : ''}`} />
-                  <span>{isStudioSyncing ? 'Pulling...' : 'Pull Status'}</span>
+                  <RefreshCw className={`h-3.5 w-3.5 ${isStudioSyncing || isAdminDataLoading ? 'animate-spin' : ''}`} />
+                  <span>{isStudioSyncing || isAdminDataLoading ? 'Pulling...' : 'Pull Status'}</span>
                 </button>
 
                 <a
@@ -409,7 +445,22 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Studio.nepalai.tech Dashboard</span>
+            <span>Studio Hub ({studioMetrics.totalUsers} users)</span>
+          </button>
+
+          <button
+            role="tab"
+            aria-selected={activeTab === 'health'}
+            onClick={() => setActiveTab('health')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+              activeTab === 'health'
+                ? 'bg-teal-500 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white'
+            }`}
+          >
+            <Cpu className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+            <span>System Health & Diagnostics</span>
+            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
           </button>
 
           <button
@@ -481,9 +532,17 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
               leadsCount={leads.length}
               pendingCount={leads.filter((l) => l.status === 'new' || l.status === 'reviewing').length}
               studioConnection={studioStatus}
-              onTriggerSync={handleSyncWithStudio}
+              onTriggerSync={async () => {
+                await handleSyncWithStudio();
+                await refreshAdminData();
+              }}
               isSyncing={isStudioSyncing}
             />
+          )}
+
+          {/* TAB 3: SYSTEM HEALTH & DIAGNOSTICS */}
+          {activeTab === 'health' && (
+            <AdminHealthTab onDiagnosticCompleted={refreshAdminData} />
           )}
 
           {/* TAB 3: HERO SECTION CONFIG */}

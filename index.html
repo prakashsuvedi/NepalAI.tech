@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal</title>
     
-    <!-- Core Favicons & Manifest -->
+    <!-- Core Favicons, PWA & Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#06080e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NepalAI" />
     <link rel="canonical" href="https://nepalai.tech" />
     <link rel="alternate" hreflang="en" href="https://nepalai.tech/?lang=en" />
     <link rel="alternate" hreflang="ne" href="https://nepalai.tech/?lang=ne" />
     <link rel="alternate" hreflang="x-default" href="https://nepalai.tech" />
 
     <!-- SEO Meta Tags: Trending Keywords & Search Signals -->
-    <meta name="description" content="Nepal's premier Sovereign AI platform. Discover verified AI tools with eSewa & Khalti payment, Devanagari OCR, Nepali TTS, HamroAI LLM, and enterprise AI consulting in NPR & USD." />
-    <meta name="keywords" content="AI in Nepal, Nepal AI, AI tools Nepal, ChatGPT Nepal, eSewa AI payment, Khalti AI subscription, Dollar Card Nepal, Claude 3.7 Sonnet Nepal, DeepSeek Nepal, Nepali OCR, Devanagari AI, HamroAI, Nepali Text to Speech, Sovereign AI Nepal, AI Consulting Kathmandu, NRB IT AI compliance, Sora 2 video AI Nepal, Free AI tools Nepal, AI price in NPR, artificial intelligence Kathmandu" />
+    <meta name="description" content="Nepal's premier Sovereign AI platform & daily utilities. Features EV road tax & NEA charging calculator, NEPSE broker & CGT terminal, Section 95Ka IT export declaration, Devanagari OCR, Nepali TTS, HamroAI LLM, and enterprise AI consulting." />
+    <meta name="keywords" content="AI in Nepal, Nepal AI, EV road tax Nepal, bluebook renewal fine Nepal, NEA EV charging cost, NEPSE broker commission calculator, SEBON CGT Nepal, Section 95Ka IT export tax, foreign currency bank declaration Nepal, eSewa AI payment, Khalti AI subscription, Dollar Card Nepal, Claude 3.7 Sonnet Nepal, DeepSeek Nepal, Nepali OCR, Devanagari AI, HamroAI, Nepali Text to Speech, Sovereign AI Nepal, AI Consulting Kathmandu" />
     <meta name="author" content="NepalAI.tech Engineering Team" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="rating" content="General" />
@@ -26,12 +30,24 @@
     <meta name="geo.position" content="27.7172;85.3240" />
     <meta name="ICBM" content="27.7172, 85.3240" />
 
+    <!-- AI Agent Search Compatibility & Machine Discovery -->
+    <meta name="ai-search-agent" content="indexed, allowed, discoverable" />
+    <meta name="llms-txt" content="https://nepalai.tech/llms.txt" />
+    <meta name="llms-full-txt" content="https://nepalai.tech/llms-full.txt" />
+    <link rel="llms-txt" href="https://nepalai.tech/llms.txt" />
+    <meta name="publisher" content="ScamSpike Solutions Pvt. Ltd." />
+    <meta name="creator" content="Prakash Suvedi" />
+
     <!-- OpenGraph Social Sharing Metadata -->
     <meta property="og:site_name" content="NepalAI.tech" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://nepalai.tech" />
     <meta property="og:title" content="nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal" />
     <meta property="og:description" content="Nepal's sovereign AI workbench, verified AI tool directory with eSewa & Khalti payment, Devanagari LLMs, and enterprise architecture consulting in NPR & USD." />
+    <meta property="og:image" content="https://nepalai.tech/assets/nepal-ai-og-banner.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NepalAI.tech - Sovereign AI Hub and Enterprise AI Consulting in Nepal" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="ne_NP" />
 
@@ -41,6 +57,8 @@
     <meta name="twitter:creator" content="@NepalAITech" />
     <meta name="twitter:title" content="nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal" />
     <meta name="twitter:description" content="Nepal-ready AI tools, payment solutions (eSewa/Khalti/NPR), Devanagari OCR/TTS, and enterprise AI consulting." />
+    <meta name="twitter:image" content="https://nepalai.tech/assets/nepal-ai-og-banner.png" />
+    <meta name="twitter:image:alt" content="NepalAI - Sovereign AI Hub and Enterprise AI Consulting" />
 
     <!-- Typography & Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +82,37 @@
             "target": "https://nepalai.tech/?search={search_term_string}",
             "query-input": "required name=search_term_string"
           }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://nepalai.tech/#parent-organization",
+          "name": "ScamSpike Solutions Pvt. Ltd.",
+          "url": "https://scamspike.com",
+          "logo": "https://nepalai.tech/favicon.svg",
+          "founder": {
+            "@type": "Person",
+            "name": "Prakash Suvedi",
+            "url": "https://prakashsuvedi.com.np",
+            "jobTitle": "Founder & Lead AI Architect",
+            "sameAs": [
+              "https://prakashsuvedi.com.np",
+              "https://www.linkedin.com/in/prakash-suvedi"
+            ]
+          }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://nepalai.tech/#founder",
+          "name": "Prakash Suvedi",
+          "url": "https://prakashsuvedi.com.np",
+          "jobTitle": "Founder & Chief AI Architect",
+          "worksFor": {
+            "@id": "https://nepalai.tech/#parent-organization"
+          },
+          "sameAs": [
+            "https://prakashsuvedi.com.np",
+            "https://www.linkedin.com/in/prakash-suvedi"
+          ]
         },
         {
           "@type": "Organization",
@@ -365,12 +414,164 @@
               }
             }
           ]
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nepalai.tech/#daily-tools",
+          "name": "Nepal Daily AI Utilities & Sovereign Financial Suite (नेपाली दैनिक एआई उपयोगिता)",
+          "applicationCategory": "BusinessApplication, FinanceApplication",
+          "operatingSystem": "All modern web browsers, Progressive Web App",
+          "description": "Comprehensive suite of 6 verified daily utilities for Nepal: NRB 11-currency exchange rates, AI subscription $500 dollar card audit, 12 official ward nibedan templates with Preeti converter, Devanagari OCR, Nepal Income Tax FY 2081/82 engine with 5% IT software export TDS, and Kalimati produce rates with traditional Ropani/Bigha land converter.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "NPR",
+            "description": "100% Free sovereign utilities with instant report exports."
+          },
+          "featureList": [
+            "Nepal Rastra Bank 11 Major Currencies Live Exchange Rates",
+            "AI Subscription Cost Calculator (ChatGPT, Claude, Cursor) with 3% spread & 2% DST",
+            "12 Official Government & Ward Recommendation Letter Templates",
+            "1-Click Unicode to Preeti Font Bi-directional Converter",
+            "Neural Nepali Voice Synthesizer across 4 Regional Dialects",
+            "Devanagari OCR Document Intelligence for Nagarikta, Lalpurja, and VAT Bills",
+            "Inland Revenue Department (IRD) Nepal Income Tax FY 2081/82 Calculator",
+            "Section 95Ka 5% IT Software Export Freelancer TDS Computation",
+            "Kalimati Agriculture Market Board 20 Daily Produce Wholesale & Retail Rates",
+            "Traditional Land Converter: Hilly Ropani-Aana-Paisa-Daam (RAPD) to Terai Bigha-Kattha-Dhur (BKD)"
+          ]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://nepalai.tech/#breadcrumbs",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://nepalai.tech/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Daily AI Utilities",
+              "item": "https://nepalai.tech/#daily-tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Verified AI Tools Directory",
+              "item": "https://nepalai.tech/#tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "name": "Case Studies",
+              "item": "https://nepalai.tech/#case-studies"
+            },
+            {
+              "@type": "ListItem",
+              "position": 5,
+              "name": "Enterprise Consulting",
+              "item": "https://nepalai.tech/#consulting"
+            },
+            {
+              "@type": "ListItem",
+              "position": 6,
+              "name": "Free AI Developer Tier",
+              "item": "https://nepalai.tech/#free-ai"
+            }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://nepalai.tech/#howto-it-export-tax",
+          "name": "How to Calculate Nepal Income Tax & 5% IT Software Export TDS under Finance Act 2081/82",
+          "description": "Step-by-step guidance for Nepali software engineers and freelance IT contractors billing foreign clients in USD under Section 95Ka of the Nepal Income Tax Act.",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "Select Filing Track",
+              "text": "Choose between Regular Salaried Employment, Section 95Ka IT Freelance Export (5% final TDS), or Registered IT Company (1% TDS)."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Input Annual Income in NPR",
+              "text": "Enter monthly earnings converted via official Nepal Rastra Bank (NRB) buying rates, including 13th-month Dashain bonus if applicable."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Apply Statutory Deductions",
+              "text": "Verify 1% Social Security Fund (SSF) exemption, up to NPR 300,000 EPF/CIT allowance, and NPR 40,000 life insurance deduction."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Download IRD Computation Slip",
+              "text": "Generate and export your verified Inland Revenue Department computation slip for tax filing and banking verification."
+            }
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nepalai.tech/#ev-calculator",
+          "name": "Nepal EV Road Tax, Bluebook & NEA Charging Calculator",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All Modern Browsers",
+          "url": "https://nepalai.tech/#daily-tools",
+          "description": "Calculates provincial annual EV road tax for cars, 2-wheelers, microbuses (HiAce), and public buses with compound bluebook delay fines and NEA Time-of-Day (TOD) off-peak charging cost vs. petrol savings.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "NPR"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nepalai.tech/#nepse-terminal",
+          "name": "NEPSE Trading & Capital Gains Tax (CGT) Terminal",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "All Modern Browsers",
+          "url": "https://nepalai.tech/#daily-tools",
+          "description": "Computes SEBON 5-tier broker commission, short-term (7.5%) & long-term (5%) CGT, DP & SEBON fees, break-even target prices, and bonus/right share adjusted opening prices.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "NPR"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nepalai.tech/#it-export-engine",
+          "name": "Nepal IT Export Remittance & Section 95Ka Declaration Engine",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "All Modern Browsers",
+          "url": "https://nepalai.tech/#daily-tools",
+          "description": "Computes Section 95Ka 5% individual final TDS / 1% company TDS on foreign wire remittances and auto-generates official bilingual bank self-declaration letters.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "NPR"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nepalai.tech/#bullion-terminal",
+          "name": "Nepal Gold & Silver Bullion, Jewelry Tax & Tola Converter",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "All Modern Browsers",
+          "url": "https://nepalai.tech/#daily-tools",
+          "description": "FENEGOSIDA daily rates for 24K Chhapawal, 22K Tejabi, and Fine Silver, Tola-to-Grams converter, making charge & melting wastage auditing, 2% luxury tax, 13% IRD VAT, and 10-year gold investment compounding simulator.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "NPR"
+          }
         }
       ]
     }
     </script>
   </head>
-  <body class="antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+  <body class="antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

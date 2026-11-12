@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -137,7 +138,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
+  background: rgba(6, 182, 212, 0.5);
 }
 
 /* Dark mode specific scrollbar tint */
@@ -148,7 +149,7 @@ body.dark ::-webkit-scrollbar-thumb {
 
 .dark ::-webkit-scrollbar-thumb:hover,
 body.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(52, 211, 153, 0.55);
+  background: rgba(56, 189, 248, 0.55);
 }
 
 /* Custom minimal utilities */
@@ -208,6 +209,18 @@ body.dark ::-webkit-scrollbar-thumb:hover {
   line-height: 1.95;
   letter-spacing: 0.005em;
   word-spacing: 0.03em;
+}
+
+/* Prefers-reduced-motion accessibility compliance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 

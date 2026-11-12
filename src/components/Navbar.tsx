@@ -4,25 +4,28 @@ import {
   ArrowUpRight, 
   Menu, 
   X, 
-  SlidersHorizontal, 
   Sun, 
   Moon, 
-  Languages, 
-  Eye, 
   Search, 
-  Bot, 
-  MoreHorizontal,
   Layers,
-  Home,
   Grid,
   Wrench,
   Briefcase,
-  ShieldCheck
+  ShieldCheck,
+  LayoutDashboard,
+  ChevronDown,
+  User as UserIcon,
+  LogOut,
+  Building2,
+  Check,
+  ShoppingBag
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { ThemeMode, Language, AppPage } from '../types';
 import { NepalAILogo } from './NepalAILogo';
 import { TRANSLATIONS } from '../data/translations';
+import { useAuth } from '../context/AuthContext';
+import { PWAInstallButton } from './pwa/PWAInstallButton';
 
 export interface NavbarProps {
   theme: ThemeMode;
@@ -37,6 +40,7 @@ export interface NavbarProps {
   onOpenAdminPanel: () => void;
   onOpenSearch?: () => void;
   onOpenHamroAI?: () => void;
+  onOpenAuth?: (mode?: 'signin' | 'signup') => void;
   selectedStackCount: number;
   isZenMode?: boolean;
   onToggleZenMode?: () => void;
@@ -48,102 +52,111 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   onSelectPage,
   onToggleTheme,
-  onToggleLanguage,
   onSelectLanguage,
   onOpenConsultation,
   onOpenStackCalculator,
-  onOpenAdminPanel,
   onOpenSearch,
-  onOpenHamroAI,
+  onOpenAuth,
   selectedStackCount,
-  isZenMode = false,
-  onToggleZenMode,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  
+  const moreRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const { user, profile, currentBusiness, businesses, setCurrentBusiness, signOut } = useAuth();
 
   const isDark = theme === 'dark';
-  const t = TRANSLATIONS[language];
+  const t = TRANSLATIONS[language] || TRANSLATIONS.en;
   const isNe = language === 'ne';
 
-  // Close more menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setMoreMenuOpen(false);
-      }
-    };
-    if (moreMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [moreMenuOpen]);
-
-  // The 6 main application pages
-  const navPages: { id: AppPage; labelEn: string; labelNe: string; icon: React.ElementType }[] = [
-    { id: 'home', labelEn: 'Home', labelNe: 'गृहपृष्ठ', icon: Home },
-    { id: 'directory', labelEn: 'Tools Directory', labelNe: 'टुल्स डाइरेक्टरी', icon: Grid },
-    { id: 'daily', labelEn: 'Daily AI', labelNe: 'दैनिक एआई', icon: Wrench },
-    { id: 'free', labelEn: 'Free AI & News', labelNe: 'निःशुल्क एआई', icon: Sparkles },
+  // Core 4 primary destinations (calibrated for laptop width without overstretching)
+  const primaryPages: { id: AppPage; labelEn: string; labelNe: string; icon: React.ElementType }[] = [
+    { id: 'command-center', labelEn: 'Command Center', labelNe: 'कमान्ड सेन्टर', icon: LayoutDashboard },
+    { id: 'directory', labelEn: 'Directory', labelNe: 'डाइरेक्टरी', icon: Grid },
+    { id: 'daily', labelEn: 'Daily Utilities', labelNe: 'दैनिक टुल्स', icon: Wrench },
     { id: 'consulting', labelEn: 'Consulting', labelNe: 'परामर्श सेवा', icon: Briefcase },
+  ];
+
+  // Secondary pages housed under "More" popover to preserve laptop horizontal grid
+  const secondaryPages: { id: AppPage; labelEn: string; labelNe: string; icon: React.ElementType }[] = [
+    { id: 'commerce', labelEn: 'NepalAI Commerce', labelNe: 'नेपालएआई कमर्स', icon: ShoppingBag },
+    { id: 'free', labelEn: 'Free AI & News', labelNe: 'निःशुल्क एआई', icon: Sparkles },
     { id: 'compliance', labelEn: 'Compliance & FAQ', labelNe: 'नियम तथा मद्दत', icon: ShieldCheck },
   ];
+
+  const isSecondaryActive = secondaryPages.some((p) => p.id === currentPage);
+
+  // Close popovers on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   const handlePageSelect = (page: AppPage) => {
     onSelectPage(page);
     setMobileOpen(false);
-    setMoreMenuOpen(false);
+    setMoreOpen(false);
+    setUserMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full border-b transition-colors duration-300 backdrop-blur-xl overflow-x-hidden ${
+      className={`sticky top-0 z-50 w-full border-b transition-colors duration-300 backdrop-blur-xl ${
         isDark
-          ? 'border-white/[0.08] bg-[#07090e]/90 text-slate-100'
-          : 'border-slate-200/90 bg-white/95 text-slate-800 shadow-xs'
+          ? 'border-slate-800/80 bg-[#080d1a]/95 text-slate-100'
+          : 'border-slate-200/90 bg-white/95 text-slate-800 shadow-2xs'
       }`}
       role="banner"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
-        {/* Brand Logo */}
+        {/* Brand Logo Zone */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => handlePageSelect('home')}
-            className="flex items-center group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-lg cursor-pointer"
-            id="navbar-brand"
+            className="flex items-center rounded-lg cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500"
             aria-label="nepalai.tech Home"
           >
-            <NepalAILogo theme={theme} size="md" showDevanagariTag={true} animateOnLoad={true} />
+            <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
           </button>
         </div>
 
-        {/* Desktop Modular Page Navigation Tabs - Clean, no horizontal scroll */}
+        {/* Desktop Navigation Links Zone (Streamlined 4 core items + More dropdown: Fits perfectly on 1024px+ laptops) */}
         <nav
-          className="hidden xl:flex items-center gap-0.5 2xl:gap-1 bg-white/[0.04] dark:bg-black/30 p-1 rounded-full border border-slate-200/80 dark:border-white/[0.08]"
+          className="hidden lg:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 p-1 rounded-full border border-slate-200/80 dark:border-slate-800"
           role="navigation"
           aria-label="Main page navigation"
         >
-          {navPages.map((page) => {
+          {primaryPages.map((page) => {
             const isActive = currentPage === page.id;
             return (
               <button
                 key={page.id}
                 type="button"
                 onClick={() => handlePageSelect(page.id)}
-                className={`relative px-2.5 2xl:px-3 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer min-h-[44px] flex items-center justify-center ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap min-h-[34px] ${
                   isActive
                     ? isDark
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
-                      : 'bg-emerald-600 text-white shadow-xs'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+                      : 'bg-cyan-600 text-white shadow-xs'
                     : isDark
                       ? 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white shadow-2xs'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -152,72 +165,138 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
-          {/* External Studio Link */}
-          <a
-            href="https://studio.nepalai.tech"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center gap-1.5 px-2.5 2xl:px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-all border min-h-[44px] ${
-              isDark
-                ? 'border-indigo-500/30 bg-indigo-950/30 text-indigo-300 hover:text-white hover:border-indigo-400'
-                : 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-            }`}
-            title="Open NepalAI Studio Workbench (new tab)"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-            <span>Studio</span>
-            <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-          </a>
+          {/* "More" Popover Menu for Secondary Pages */}
+          <div className="relative" ref={moreRef}>
+            <button
+              type="button"
+              onClick={() => setMoreOpen(!moreOpen)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1 ${
+                isSecondaryActive
+                  ? isDark
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'bg-cyan-600 text-white'
+                  : isDark
+                    ? 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+              }`}
+              aria-expanded={moreOpen}
+              aria-label="More navigation options"
+            >
+              <span>{isNe ? 'थप' : 'More'}</span>
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {moreOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className={`absolute left-0 mt-2 w-52 rounded-xl border p-1.5 shadow-lg backdrop-blur-xl z-50 ${
+                    isDark
+                      ? 'bg-[#0b1220]/95 border-slate-800 text-slate-200 shadow-cyan-950/20'
+                      : 'bg-white/95 border-slate-200 text-slate-800 shadow-slate-300/40'
+                  }`}
+                >
+                  {secondaryPages.map((page) => {
+                    const Icon = page.icon;
+                    const isActive = currentPage === page.id;
+                    return (
+                      <button
+                        key={page.id}
+                        type="button"
+                        onClick={() => handlePageSelect(page.id)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer ${
+                          isActive
+                            ? isDark
+                              ? 'bg-cyan-500/20 text-cyan-300 font-semibold'
+                              : 'bg-cyan-50 text-cyan-800 font-semibold'
+                            : isDark
+                              ? 'text-slate-300 hover:bg-white/5 hover:text-white'
+                              : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950'
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-cyan-500" />
+                        <span>{isNe ? page.labelNe : page.labelEn}</span>
+                      </button>
+                    );
+                  })}
+
+                  <div className="my-1 border-t border-slate-200 dark:border-slate-800" />
+
+                  {/* External Studio Link */}
+                  <a
+                    href="https://studio.nepalai.tech"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      isDark
+                        ? 'text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-300'
+                        : 'text-slate-700 hover:bg-cyan-50 hover:text-cyan-800'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                      <span>{isNe ? 'नेपालएआई स्टुडियो' : 'NepalAI Studio'}</span>
+                    </span>
+                    <ArrowUpRight className="h-3 w-3 text-cyan-500" />
+                  </a>
+
+                  {/* Stack ROI Calculator */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      onOpenStackCalculator();
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer ${
+                      isDark
+                        ? 'text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-300'
+                        : 'text-slate-700 hover:bg-cyan-50 hover:text-cyan-800'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Layers className="h-3.5 w-3.5 text-cyan-400" />
+                      <span>{t.nav.stackCalculator}</span>
+                    </span>
+                    {selectedStackCount > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
+                        {selectedStackCount}
+                      </span>
+                    )}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </nav>
 
-        {/* Action Controls & Utilities */}
-        <div className="hidden xl:flex items-center gap-1.5 2xl:gap-2 shrink-0">
+        {/* Desktop Action Zone: Search, Language, Theme, Auth & Primary CTA */}
+        <div className="hidden lg:flex items-center gap-2 shrink-0">
           
-          {/* HAMRO AI VERNACULAR CHAT */}
-          {onOpenHamroAI && (
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onOpenHamroAI}
-              className={`flex items-center gap-1.5 rounded-xl border px-2.5 2xl:px-3 text-xs font-semibold transition-all cursor-pointer min-h-[44px] ${
-                isDark
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
-                  : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-              }`}
-              title={isNe ? 'हाम्रो एआई च्याट' : 'Hamro AI Chat'}
-              aria-label="Open Hamro AI Chat"
-            >
-              <Bot className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
-              <span>{isNe ? 'हाम्रो एआई' : 'Hamro AI'}</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </motion.button>
-          )}
-
-          {/* GLOBAL SEARCH COMMAND PALETTE */}
+          {/* Global Search */}
           {onOpenSearch && (
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onOpenSearch}
-              className={`flex items-center justify-center gap-1.5 rounded-xl border px-2.5 text-xs transition-colors cursor-pointer min-h-[44px] min-w-[44px] ${
+              className={`flex items-center justify-center rounded-xl border px-2.5 py-1.5 text-xs cursor-pointer min-h-[38px] min-w-[38px] transition-colors ${
                 isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                  : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950'
+                  ? 'border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-cyan-500/40'
+                  : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950 hover:border-cyan-400/50'
               }`}
-              title="Search tools & documentation (Ctrl+K)"
-              aria-label="Open Global Search"
+              title="Search tools, rates, and docs (Ctrl+K)"
+              aria-label="Open Search"
             >
-              <Search className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
-              <span className="hidden 2xl:inline text-[11px] font-mono text-slate-400">Ctrl+K</span>
-            </motion.button>
+              <Search className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
+            </button>
           )}
 
-          {/* LANGUAGE TOGGLE */}
+          {/* Language Toggle (Compact EN / नेपाली switch) */}
           <div
-            className={`flex items-center rounded-xl border p-0.5 text-xs min-h-[44px] ${
-              isDark ? 'border-white/10 bg-white/[0.04]' : 'border-slate-200 bg-slate-100'
+            className={`flex items-center rounded-xl border p-0.5 text-xs min-h-[38px] ${
+              isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
             }`}
             role="group"
             aria-label="Language selection"
@@ -225,14 +304,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('en')}
-              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[38px] flex items-center justify-center ${
+              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[30px] cursor-pointer ${
                 language === 'en'
                   ? isDark
-                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
-                    : 'bg-white text-emerald-700 font-bold shadow-xs'
-                  : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-950'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                    : 'bg-white text-cyan-800 font-bold shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
               aria-pressed={language === 'en'}
             >
@@ -241,14 +318,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('ne')}
-              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[38px] flex items-center justify-center ${
+              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[30px] cursor-pointer ${
                 language === 'ne'
                   ? isDark
-                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
-                    : 'bg-white text-emerald-700 font-bold shadow-xs'
-                  : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-950'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                    : 'bg-white text-cyan-800 font-bold shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
               aria-pressed={language === 'ne'}
             >
@@ -256,15 +331,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* THEME TOGGLE */}
-          <motion.button
+          {/* PWA In-App Install Button */}
+          <PWAInstallButton />
+
+          {/* Theme Toggle */}
+          <button
             type="button"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
             onClick={onToggleTheme}
-            className={`p-2 rounded-xl border transition-all text-xs cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center ${
+            className={`p-2 rounded-xl border transition-all text-xs cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
               isDark
-                ? 'border-white/10 bg-white/[0.04] text-amber-300 hover:text-white'
+                ? 'border-slate-800 bg-slate-900/60 text-amber-300 hover:text-white'
                 : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950'
             }`}
             title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
@@ -273,204 +349,204 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isDark ? (
               <Sun className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
             ) : (
-              <Moon className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
+              <Moon className="h-3.5 w-3.5 text-cyan-600" aria-hidden="true" />
             )}
-          </motion.button>
+          </button>
 
-          {/* MORE TOOLS DROPDOWN (Zen, Admin Panel, Stack Calculator) */}
-          <div className="relative" ref={moreMenuRef}>
+          {/* User Identity / Sign In Menu Button */}
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium min-h-[38px] cursor-pointer transition-all ${
+                  isDark
+                    ? 'border-slate-800 bg-slate-900/70 hover:border-cyan-500/40 text-slate-200'
+                    : 'border-slate-200 bg-white hover:border-cyan-500/50 text-slate-800 shadow-2xs'
+                }`}
+                aria-expanded={userMenuOpen}
+                aria-label="User account and business menu"
+              >
+                <div className="w-5 h-5 rounded-full bg-cyan-600 text-white font-bold text-[10px] flex items-center justify-center">
+                  {(profile?.fullName || user.email || 'N')[0].toUpperCase()}
+                </div>
+                <span className="font-semibold max-w-[100px] truncate">
+                  {currentBusiness?.name || profile?.fullName || 'Account'}
+                </span>
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* User Account Popover */}
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className={`absolute right-0 mt-2 w-64 rounded-2xl border p-2 shadow-xl backdrop-blur-xl z-50 ${
+                      isDark
+                        ? 'bg-[#0b1220]/95 border-slate-800 text-slate-200 shadow-cyan-950/30'
+                        : 'bg-white/98 border-slate-200 text-slate-800 shadow-slate-300/50'
+                    }`}
+                  >
+                    {/* User profile card */}
+                    <div className="p-2.5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {profile?.fullName || 'NepalAI User'}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {user.email}
+                      </div>
+                      <span className="inline-block mt-1 text-[9px] font-mono px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold uppercase">
+                        {profile?.systemRole === 'super_admin' ? 'Super Admin' : 'Business Owner'}
+                      </span>
+                    </div>
+
+                    {/* Active Business Tenant Switcher */}
+                    <div className="py-2 border-b border-slate-200 dark:border-slate-800">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 px-2.5 mb-1">
+                        {isNe ? 'सक्रिय व्यापार (Tenant):' : 'Active Business:'}
+                      </div>
+                      {businesses.map((biz) => {
+                        const isCurrent = biz.id === currentBusiness?.id;
+                        return (
+                          <button
+                            key={biz.id}
+                            type="button"
+                            onClick={() => {
+                              setCurrentBusiness(biz);
+                              setUserMenuOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
+                              isCurrent
+                                ? isDark
+                                  ? 'bg-cyan-500/20 text-cyan-300'
+                                  : 'bg-cyan-50 text-cyan-800 font-semibold'
+                                : isDark
+                                  ? 'text-slate-300 hover:bg-white/5'
+                                  : 'text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 truncate">
+                              <Building2 className="h-3.5 w-3.5 text-cyan-500 shrink-0" />
+                              <span className="truncate">{biz.name}</span>
+                            </span>
+                            {isCurrent && <Check className="h-3.5 w-3.5 text-cyan-500 shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Sign Out */}
+                    <div className="pt-1.5">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setUserMenuOpen(false);
+                          await signOut();
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        <span>{isNe ? 'लग-आउट गर्नुहोस्' : 'Sign Out'}</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-              className={`p-2 rounded-xl border transition-all text-xs cursor-pointer relative min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                moreMenuOpen
-                  ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-                  : isDark
-                    ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:text-white'
-                    : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950'
+              onClick={() => onOpenAuth?.('signin')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all min-h-[38px] cursor-pointer ${
+                isDark
+                  ? 'border-slate-800 bg-slate-900/60 hover:border-cyan-500/40 text-slate-200 hover:text-white'
+                  : 'border-slate-200 bg-white hover:border-cyan-500/50 text-slate-700 hover:text-slate-950 shadow-2xs'
               }`}
-              title="More Utilities & Settings"
-              aria-label="More tools and utilities"
-              aria-expanded={moreMenuOpen}
             >
-              <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-              {selectedStackCount > 0 && (
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-slate-950">
-                  {selectedStackCount}
-                </span>
-              )}
+              <UserIcon className="h-3.5 w-3.5 text-cyan-500" />
+              <span>{isNe ? 'लग-इन' : 'Sign In'}</span>
             </button>
+          )}
 
-            <AnimatePresence>
-              {moreMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className={`absolute right-0 mt-2 w-56 rounded-2xl border p-2 shadow-2xl z-50 backdrop-blur-xl ${
-                    isDark
-                      ? 'border-white/10 bg-[#090d18]/95 text-slate-200 shadow-black/80'
-                      : 'border-slate-200 bg-white/95 text-slate-800 shadow-xl'
-                  }`}
-                >
-                  {/* Selected Stack Calculator */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMoreMenuOpen(false);
-                      onOpenStackCalculator();
-                    }}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] ${
-                      isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Layers className="h-3.5 w-3.5 text-emerald-400" />
-                      <span>{t.nav.stackCalculator}</span>
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
-                      {selectedStackCount}
-                    </span>
-                  </button>
-
-                  {/* Zen Reading Mode */}
-                  {onToggleZenMode && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMoreMenuOpen(false);
-                        onToggleZenMode();
-                      }}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] ${
-                        isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Eye className="h-3.5 w-3.5 text-indigo-400" />
-                        <span>{t.nav.zenMode}</span>
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400">Z</span>
-                    </button>
-                  )}
-
-                  {/* Admin Configuration Panel */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMoreMenuOpen(false);
-                      onOpenAdminPanel();
-                    }}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] cursor-pointer ${
-                      isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
-                      <span>{t.nav.adminPanel}</span>
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
-                      Leads
-                    </span>
-                  </button>
-
-                  {/* Studio Admin Dashboard Link */}
-                  <a
-                    href="https://studio.nepalai.tech/admin"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMoreMenuOpen(false)}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] cursor-pointer ${
-                      isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-slate-100'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-indigo-400 font-semibold">Studio Admin Hub</span>
-                    </span>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />
-                  </a>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* BOOK CONSULTATION CTA BUTTON */}
-          <motion.button
+          {/* Book Consultation Primary CTA Button (Cyan Sovereign Palette) */}
+          <button
             type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
             onClick={() => onOpenConsultation()}
-            className="flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-3.5 text-xs font-bold text-slate-950 transition-colors shadow-sm cursor-pointer min-h-[44px]"
+            className="flex items-center gap-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 px-3.5 py-2 text-xs font-bold text-white transition-all shadow-xs hover:shadow-cyan-500/20 cursor-pointer min-h-[38px]"
           >
             <span>{t.nav.bookConsultation}</span>
             <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </motion.button>
+          </button>
         </div>
 
-        {/* Mobile & Tablet Top Bar Controls (< 1280px) */}
-        <div className="flex xl:hidden items-center gap-2">
-          {/* Quick Hamro AI */}
-          {onOpenHamroAI && (
+        {/* Mobile & Tablet Bar Controls (< 1024px: Clean 3-element zone, zero stretching) */}
+        <div className="flex lg:hidden items-center gap-1.5 sm:gap-2">
+          
+          {/* Language Switcher in Mobile Top Bar */}
+          <div
+            className={`flex items-center rounded-xl border p-0.5 text-xs min-h-[36px] ${
+              isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
+            }`}
+            role="group"
+            aria-label="Language selection"
+          >
             <button
               type="button"
-              onClick={onOpenHamroAI}
-              className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border text-xs cursor-pointer ${
-                isDark
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-400'
-                  : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+              onClick={() => onSelectLanguage('en')}
+              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all min-h-[28px] cursor-pointer ${
+                language === 'en'
+                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-800 shadow-xs'
+                  : 'text-slate-400'
               }`}
-              title="Hamro AI"
-              aria-label="Open Hamro AI Chat"
             >
-              <Bot className="h-4 w-4" aria-hidden="true" />
+              EN
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => onSelectLanguage('ne')}
+              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all min-h-[28px] cursor-pointer ${
+                language === 'ne'
+                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-800 shadow-xs'
+                  : 'text-slate-400'
+              }`}
+            >
+              नेपाली
+            </button>
+          </div>
 
-          {/* Quick Search */}
-          {onOpenSearch && (
-            <button
-              type="button"
-              onClick={onOpenSearch}
-              className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border text-xs cursor-pointer ${
-                isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-300'
-                  : 'border-slate-200 bg-slate-100 text-slate-700'
-              }`}
-              title="Search"
-              aria-label="Open Global Search"
-            >
-              <Search className="h-4 w-4 text-emerald-400" aria-hidden="true" />
-            </button>
-          )}
+          {/* PWA In-App Install Button */}
+          <PWAInstallButton />
 
           {/* Theme Toggle */}
           <button
             type="button"
             onClick={onToggleTheme}
-            className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border text-xs cursor-pointer ${
+            className={`min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl border text-xs cursor-pointer transition-colors ${
               isDark
-                ? 'border-white/10 bg-white/[0.04] text-amber-300'
-                : 'border-slate-200 bg-slate-100 text-slate-700'
+                ? 'border-slate-800 bg-slate-900/60 text-amber-300 hover:text-amber-200'
+                : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-900'
             }`}
             aria-label="Toggle theme"
           >
             {isDark ? (
-              <Sun className="h-4 w-4 text-amber-400" aria-hidden="true" />
+              <Sun className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
             ) : (
-              <Moon className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+              <Moon className="h-3.5 w-3.5 text-cyan-600" aria-hidden="true" />
             )}
           </button>
 
-          {/* Mobile Menu Hamburger */}
+          {/* Menu Hamburger Button */}
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-hidden rounded-xl border transition-colors cursor-pointer ${
+            className={`min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
               mobileOpen
-                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
+                ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
                 : isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-300'
+                  ? 'border-slate-800 bg-slate-900/60 text-slate-300'
                   : 'border-slate-200 bg-white text-slate-700'
             }`}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -482,7 +558,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </div>
 
-      {/* Sleek Mobile Navigation Drawer */}
+      {/* Clean Mobile & Tablet Navigation Drawer (Structured into logical sections, 0 overflow) */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -490,18 +566,84 @@ export const Navbar: React.FC<NavbarProps> = ({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className={`xl:hidden border-b px-4 py-5 space-y-4 max-h-[85vh] overflow-y-auto overflow-x-hidden ${
-              isDark ? 'border-white/10 bg-[#07090e] text-slate-200' : 'border-slate-200 bg-white text-slate-800'
+            className={`lg:hidden border-b px-4 py-4 space-y-4 max-h-[85vh] overflow-y-auto ${
+              isDark ? 'border-slate-800 bg-[#080d1a] text-slate-200' : 'border-slate-200 bg-white text-slate-800'
             }`}
             role="region"
             aria-label="Mobile navigation menu"
           >
-            {/* Pages Segment List */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 px-2 block mb-2">
-                {isNe ? 'मुख्य खण्डहरू (पृष्ठहरू):' : 'Platform Pages:'}
+            {/* Quick Search Bar in Drawer */}
+            {onOpenSearch && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  onOpenSearch();
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-semibold min-h-[44px] cursor-pointer transition-colors ${
+                  isDark
+                    ? 'border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-cyan-500/40'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-cyan-500/40'
+                }`}
+                aria-label="Search tools and pages"
+              >
+                <span className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-cyan-500" />
+                  <span>{isNe ? 'टुल्स तथा सामग्री खोज्नुहोस्...' : 'Search tools, docs, or pages...'}</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 font-bold">
+                  Ctrl+K
+                </span>
+              </button>
+            )}
+
+            {/* User Account / Sign In in Mobile Drawer */}
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+              {user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-white">
+                        {profile?.fullName || 'User Account'}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {currentBusiness?.name || user.email}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setMobileOpen(false);
+                        await signOut();
+                      }}
+                      className="text-xs text-red-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>{isNe ? 'लग-आउट' : 'Sign Out'}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenAuth?.('signin');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-cyan-600 text-white font-bold text-xs"
+                >
+                  <UserIcon className="h-4 w-4" />
+                  <span>{isNe ? 'नेपालएआई लग-इन / खाता सिर्जना' : 'Sign In / Create Account'}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Core Destinations */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 block mb-1.5">
+                {isNe ? 'प्रमुख खण्डहरू' : 'Core Destinations'}
               </span>
-              {navPages.map((page) => {
+              {[...primaryPages, ...secondaryPages].map((page) => {
                 const isActive = currentPage === page.id;
                 const Icon = page.icon;
                 return (
@@ -509,24 +651,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                     key={page.id}
                     type="button"
                     onClick={() => handlePageSelect(page.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-semibold transition-all min-h-[44px] cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[42px] cursor-pointer ${
                       isActive
                         ? isDark
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
-                          : 'bg-emerald-600 text-white shadow-xs'
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+                          : 'bg-cyan-600 text-white shadow-xs'
                         : isDark
-                          ? 'text-slate-300 hover:bg-white/[0.06] hover:text-white'
-                          : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'text-slate-300 hover:bg-white/[0.04]'
+                          : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4 text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
                       <span className="text-sm">
                         {isNe ? page.labelNe : page.labelEn}
                       </span>
                     </div>
                     {isActive && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 font-bold">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-400 text-slate-950 font-bold">
                         Active
                       </span>
                     )}
@@ -535,39 +677,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               })}
             </div>
 
-            {/* Quick Actions & Language */}
-            <div className="pt-4 border-t border-slate-500/20 space-y-3">
-              {/* Language Switcher */}
-              <div className="flex items-center justify-between px-2">
-                <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                  <Languages className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>{isNe ? 'भाषा चयन:' : 'Language:'}</span>
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onSelectLanguage('en')}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center ${
-                      language === 'en'
-                        ? 'bg-emerald-500 text-slate-950 font-bold'
-                        : isDark ? 'text-slate-400 bg-white/[0.04]' : 'text-slate-600 bg-slate-100'
-                    }`}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onSelectLanguage('ne')}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold min-h-[44px] flex items-center justify-center ${
-                      language === 'ne'
-                        ? 'bg-emerald-500 text-slate-950 font-bold'
-                        : isDark ? 'text-slate-400 bg-white/[0.04]' : 'text-slate-600 bg-slate-100'
-                    }`}
-                  >
-                    नेपाली
-                  </button>
-                </div>
-              </div>
+            {/* Workbenches & External Studio */}
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 block">
+                {isNe ? 'स्टुडियो र उपकरणहरू' : 'Studio & Workbenches'}
+              </span>
 
               {/* Stack Calculator Button */}
               <button
@@ -576,17 +690,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileOpen(false);
                   onOpenStackCalculator();
                 }}
-                className={`w-full flex items-center justify-between p-3.5 rounded-2xl border text-xs font-semibold min-h-[44px] ${
+                className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold min-h-[44px] cursor-pointer ${
                   isDark
-                    ? 'border-white/10 bg-white/[0.03] text-slate-200'
+                    ? 'border-slate-800 bg-slate-900/40 text-slate-200'
                     : 'border-slate-200 bg-slate-50 text-slate-800'
                 }`}
               >
-                <span className="flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-emerald-400" />
+                <span className="flex items-center gap-2.5">
+                  <Layers className="h-4 w-4 text-cyan-500" />
                   <span>{t.nav.stackCalculator}</span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-[10px]">
                   {selectedStackCount} tools
                 </span>
               </button>
@@ -596,61 +710,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 href="https://studio.nepalai.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`w-full flex items-center justify-between p-3.5 rounded-2xl border text-xs font-semibold min-h-[44px] ${
+                className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold min-h-[44px] ${
                   isDark
-                    ? 'border-indigo-500/30 bg-indigo-950/20 text-indigo-300'
-                    : 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                    ? 'border-slate-800 bg-slate-900/40 text-cyan-300'
+                    : 'border-cyan-200 bg-cyan-50/60 text-cyan-800'
                 }`}
               >
-                <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-amber-400" />
+                <span className="flex items-center gap-2.5">
+                  <Sparkles className="h-4 w-4 text-cyan-400" />
                   <span>NepalAI Studio Workbench</span>
                 </span>
                 <ArrowUpRight className="h-4 w-4" />
               </a>
 
-              {/* Admin & Studio Dashboard Row */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    onOpenAdminPanel();
-                  }}
-                  className={`flex items-center justify-center gap-1.5 p-3 rounded-2xl border text-xs font-semibold min-h-[44px] ${
-                    isDark
-                      ? 'border-white/10 bg-white/[0.03] text-slate-200'
-                      : 'border-slate-200 bg-slate-50 text-slate-800'
-                  }`}
-                >
-                  <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
-                  <span>Admin & Leads</span>
-                </button>
-
-                <a
-                  href="https://studio.nepalai.tech/admin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center justify-center gap-1.5 p-3 rounded-2xl border text-xs font-semibold min-h-[44px] ${
-                    isDark
-                      ? 'border-indigo-500/30 bg-indigo-950/20 text-indigo-300'
-                      : 'border-indigo-200 bg-indigo-50 text-indigo-700'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Studio Admin</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </a>
-              </div>
-
-              {/* Book Consultation Button */}
+              {/* Primary Consultation Action Button */}
               <button
                 type="button"
                 onClick={() => {
                   setMobileOpen(false);
                   onOpenConsultation();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md cursor-pointer min-h-[44px]"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-xs cursor-pointer min-h-[44px]"
               >
                 <span>{t.nav.bookConsultation}</span>
                 <ArrowUpRight className="h-4 w-4" />

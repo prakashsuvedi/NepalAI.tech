@@ -14,24 +14,24 @@
       <stop offset="100%" stop-color="#020617"/>
     </linearGradient>
 
-    <!-- Architectural Sovereign Emerald Diagonal Ribbon (Netflix/Apple Style Dimensionality) -->
+    <!-- Architectural Sovereign Electric Cyan Diagonal Ribbon -->
     <linearGradient id="favDiagonalRibbon" x1="13" y1="10" x2="51" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#34D399"/>
-      <stop offset="45%" stop-color="#10B981"/>
-      <stop offset="100%" stop-color="#047857"/>
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="45%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0284C7"/>
     </linearGradient>
 
     <!-- Specular Highlight Line -->
     <linearGradient id="favSpecular" x1="13" y1="10" x2="41" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
-      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.2"/>
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.25"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- Obsidian Armor Squircle Border with Emerald Aura -->
+    <!-- Obsidian Armor Squircle Border with Cyan Aura -->
     <linearGradient id="favSquircleBorder" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#10B981" stop-opacity="0.8"/>
-      <stop offset="50%" stop-color="#059669" stop-opacity="0.3"/>
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#0284C7" stop-opacity="0.3"/>
       <stop offset="100%" stop-color="#1E293B" stop-opacity="0.6"/>
     </linearGradient>
 
@@ -51,12 +51,12 @@
   <!-- Right Architectural Column of 'N' -->
   <path d="M40.5 14 C40.5 11.8 42.3 10 44.5 10 H47.5 C49.7 10 51.5 11.8 51.5 14 V50 C51.5 52.2 49.7 54 47.5 54 H44.5 C42.3 54 40.5 52.2 40.5 50 Z" fill="url(#favRightStem)"/>
 
-  <!-- Dimensional Diagonal Emerald Ribbon across 'N' -->
+  <!-- Dimensional Diagonal Cyan Ribbon across 'N' -->
   <path d="M12.5 10 L51.5 51 C52.2 52 51.6 54 50 54 H41.5 L12.5 14.2 C12.5 12 13.8 10 15.8 10 H23.5 Z" fill="url(#favDiagonalRibbon)" filter="url(#favDropShadow)"/>
 
   <!-- Razor-Sharp Specular Edge on Diagonal Ridge -->
   <path d="M15.8 10 L44.5 53" stroke="url(#favSpecular)" stroke-width="1.4" stroke-linecap="round"/>
 
-  <!-- Emerald Telemetry Beacon in Top Right Corner of 'N' -->
-  <circle cx="46" cy="15" r="2.2" fill="#34D399"/>
+  <!-- Cyan Beacon in Top Right Corner of 'N' -->
+  <circle cx="46" cy="15" r="2.2" fill="#38BDF8"/>
 </svg>

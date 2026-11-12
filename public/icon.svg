@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="iconBg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#080D1A"/>
+      <stop offset="100%" stop-color="#02040A"/>
+    </linearGradient>
+
+    <linearGradient id="iconBorder" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#0284C7" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#1E293B" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <linearGradient id="iconLeftStem" x1="144" y1="80" x2="144" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="60%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <linearGradient id="iconRightStem" x1="368" y1="80" x2="368" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="70%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <linearGradient id="iconRibbon" x1="104" y1="80" x2="408" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="45%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <linearGradient id="iconSpecular" x1="104" y1="80" x2="328" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="iconShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="-8" dy="16" stdDeviation="12" flood-color="#000000" flood-opacity="0.75"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with safe padding -->
+  <rect width="512" height="512" rx="128" fill="url(#iconBg)"/>
+  <rect width="512" height="512" rx="128" stroke="url(#iconBorder)" stroke-width="12"/>
+
+  <!-- Left Column of 'N' -->
+  <rect x="100" y="80" width="88" height="352" rx="28" fill="url(#iconLeftStem)"/>
+
+  <!-- Right Column of 'N' -->
+  <rect x="324" y="80" width="88" height="352" rx="28" fill="url(#iconRightStem)"/>
+
+  <!-- Dimensional Diagonal Ribbon -->
+  <path d="M100 80 L412 408 C418 416 412 432 398 432 H330 L100 114 C100 96 110 80 126 80 H188 Z" fill="url(#iconRibbon)" filter="url(#iconShadow)"/>
+
+  <!-- Razor-Sharp Specular Ridge -->
+  <path d="M126 80 L356 424" stroke="url(#iconSpecular)" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Cyan Beacon -->
+  <circle cx="368" cy="120" r="18" fill="#38BDF8"/>
+</svg>

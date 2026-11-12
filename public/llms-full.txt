@@ -1,0 +1,107 @@
+# NepalAI.tech – Comprehensive Architecture, Regulatory Specifications & Technical Grounding
+
+## 1. Identity & Corporate Entity
+- **Organization**: ScamSpike Solutions Pvt. Ltd. (Registration: Office of the Company Registrar, Tripureshwor, Kathmandu, Nepal)
+- **Product & Platform**: NepalAI Sovereign Platform (https://nepalai.tech)
+- **Founder & Chief Architect**: Prakash Suvedi (https://prakashsuvedi.com.np | Email: prakashsuvedi@gmail.com)
+- **Headquarters**: Kathmandu Sovereign AI Corridor, Bagmati Province, 44600, Nepal
+
+---
+
+## 2. Regulatory & Mathematical Specifications
+
+### A. Nepal Rastra Bank (NRB) Foreign Exchange Framework
+- **Prepaid Dollar Card Directive**: Governed by NRB Foreign Exchange Management Department Directive No. 12/2080.
+- **Card Cap**: Maximum $500 USD per individual fiscal year, reloadable at A-class commercial banks against verified personal PAN.
+- **Bank Card Spread**: Typical 3.0% interbank markup over the NRB official mid-rate.
+- **Digital Services Tax (DST)**: 2.0% levied under Finance Act on foreign digital payments and SaaS platforms.
+- **Value Added Tax (VAT)**: 13.0% if an overseas digital service provider is registered under Nepal's IRD digital portal.
+
+### B. Inland Revenue Department (IRD) Nepal Income Tax Specifications (Finance Act 2081/82)
+- **Individual Resident Slabs (Single)**:
+  - First NPR 500,000: 1% (Waived for contributors to the Social Security Fund - SSF)
+  - Next NPR 200,000 (500,001 - 700,000): 10%
+  - Next NPR 300,000 (700,001 - 1,000,000): 20%
+  - Next NPR 1,000,000 (1,000,001 - 2,000,000): 30%
+  - Next NPR 3,000,000 (2,000,001 - 5,000,000): 36% (Includes 20% surcharge over 30%)
+  - Above NPR 5,000,000: 39% (Includes 30% surcharge over 30%)
+- **Resident Slabs (Married / Couple)**:
+  - First NPR 600,000: 1% (Waived if SSF enrolled)
+  - Next NPR 200,000 (600,001 - 800,000): 10%
+  - Next NPR 300,000 (800,001 - 1,100,000): 20%
+  - Next NPR 900,000 (1,100,001 - 2,000,000): 30%
+  - Next NPR 3,000,000 (2,000,001 - 5,000,000): 36%
+  - Above NPR 5,000,000: 39%
+- **Section 95Ka IT & Software Export Withholding Tax**:
+  - Individual tech contractors, software engineers, and digital content creators receiving foreign currency payments for software export or BPO services are subjected to a **5% final withholding tax (TDS)** deducted at the commercial bank level upon remittance inflow.
+  - Registered IT export companies are subject to **1% advance tax** at credit.
+- **Deductions Cap**:
+  - Employees Provident Fund (EPF) + Citizen Investment Trust (CIT): 1/3 of total taxable income or NPR 300,000, whichever is lower.
+  - Life Insurance Premium: Maximum NPR 40,000.
+  - Health Insurance: Maximum NPR 20,000.
+  - Single Female Rebate: 10% rebate on final computed tax liability for unmarried/single female resident taxpayers earning employment income.
+
+### C. Land Measurement Mathematics
+- **Hilly Region System (काठमाडौं उपत्यका तथा पहाडी भेग)**:
+  - 1 Ropani = 16 Aana = 5,476 Square Feet = 508.74 Square Meters
+  - 1 Aana = 4 Paisa = 342.25 Square Feet = 31.80 Square Meters
+  - 1 Paisa = 4 Daam = 85.56 Square Feet = 7.95 Square Meters
+  - 1 Daam = 21.39 Square Feet = 1.99 Square Meters
+- **Terai System (तराई तथा भित्री मधेश भेग)**:
+  - 1 Bigha = 20 Kattha = 72,900 Square Feet = 6,772.63 Square Meters
+  - 1 Kattha = 20 Dhur = 3,645 Square Feet = 338.63 Square Meters
+  - 1 Dhur = 182.25 Square Feet = 16.93 Square Meters
+  - 1 Bigha ≈ 13.31 Ropani
+
+---
+
+## 3. Server-Authoritative Endpoints & Schema
+
+### `GET /api/forex/nrb`
+Returns current official Nepal Rastra Bank rates and statutory frameworks:
+```json
+{
+  "success": true,
+  "source": "Nepal Rastra Bank (NRB) Official Benchmark",
+  "publishedAt": "2026-10-20",
+  "rates": {
+    "USD": { "buy": 135.30, "sell": 135.90, "mid": 135.60, "unit": 1 },
+    "EUR": { "buy": 144.15, "sell": 144.80, "mid": 144.48, "unit": 1 },
+    "GBP": { "buy": 172.80, "sell": 173.55, "mid": 173.18, "unit": 1 },
+    "AUD": { "buy": 88.75, "sell": 89.20, "mid": 88.98, "unit": 1 },
+    "CAD": { "buy": 98.30, "sell": 98.80, "mid": 98.55, "unit": 1 },
+    "INR": { "buy": 160.00, "sell": 160.15, "mid": 160.00, "unit": 100 },
+    "JPY": { "buy": 8.85, "sell": 8.92, "mid": 8.88, "unit": 10 },
+    "QAR": { "buy": 37.10, "sell": 37.30, "mid": 37.20, "unit": 1 },
+    "AED": { "buy": 36.80, "sell": 37.00, "mid": 36.90, "unit": 1 },
+    "SAR": { "buy": 36.05, "sell": 36.25, "mid": 36.15, "unit": 1 },
+    "CNY": { "buy": 18.70, "sell": 18.85, "mid": 18.78, "unit": 1 }
+  },
+  "regulatoryFramework": {
+    "dollarCardAnnualLimitUsd": 500,
+    "digitalServicesTaxPercent": 2.0,
+    "vatRatePercent": 13.0,
+    "averageBankCardSpreadPercent": 3.0,
+    "itExportFreelancerTdsPercent": 5.0,
+    "itExportCompanyTdsPercent": 1.0
+  }
+}
+```
+
+### `POST /api/extract`
+Accepts Devanagari document payload and returns validated JSON:
+- Request: `{ "text": "...", "extractionType": "nagarikta" | "lalpurja" | "vat_bill" }`
+- Response: `{ "success": true, "extractedData": { ... } }`
+
+### `POST /api/chat`
+Conversational sovereign AI engine for bilingual queries:
+- Request: `{ "message": "...", "language": "en" | "ne", "history": [...] }`
+- Response: `{ "success": true, "reply": "...", "mode": "gemini_grounded" | "fallback_rule_engine" }`
+
+---
+
+## 4. Contact & Enterprise Engagements
+- **Founder**: Prakash Suvedi
+- **Email**: prakashsuvedi@gmail.com
+- **Website**: https://prakashsuvedi.com.np
+- **Portal URL**: https://nepalai.tech

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Grid, Wrench, Sparkles, Briefcase, ShieldCheck, Home } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Grid, Wrench, Sparkles, Briefcase, ShieldCheck, Home, LayoutDashboard, ShoppingBag } from 'lucide-react';
 import { AppPage, ThemeMode, Language } from '../types';
 
 interface PageFlowNavigatorProps {
@@ -31,8 +31,17 @@ export const PAGES_META: PageMeta[] = [
     icon: Home,
   },
   {
-    id: 'directory',
+    id: 'command-center',
     order: 2,
+    labelEn: 'Command Center',
+    labelNe: 'कमान्ड सेन्टर',
+    descEn: 'Real-time NRB telemetry, global search & personal workspace',
+    descNe: 'प्रत्यक्ष वित्तीय विजेट, खोज तथा व्यक्तिगत कार्यस्थल',
+    icon: LayoutDashboard,
+  },
+  {
+    id: 'directory',
+    order: 3,
     labelEn: 'Tools Directory',
     labelNe: 'टुल्स डाइरेक्टरी',
     descEn: '40+ verified AI tools with NPR pricing & Dollar Card guide',
@@ -41,7 +50,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'daily',
-    order: 3,
+    order: 4,
     labelEn: 'Daily AI Tools',
     labelNe: 'दैनिक एआई',
     descEn: 'Devanagari OCR, Nepali Voice, Letter Writer & Salary Tax',
@@ -50,7 +59,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'free',
-    order: 4,
+    order: 5,
     labelEn: 'Free AI & News',
     labelNe: 'निःशुल्क एआई र समाचार',
     descEn: 'Free APIs without cards, document scanner & live intelligence',
@@ -59,7 +68,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'consulting',
-    order: 5,
+    order: 6,
     labelEn: 'Consulting',
     labelNe: 'परामर्श सेवा',
     descEn: 'Enterprise AI pipelines, architecture & dual NPR/USD billing',
@@ -67,8 +76,17 @@ export const PAGES_META: PageMeta[] = [
     icon: Briefcase,
   },
   {
+    id: 'commerce',
+    order: 7,
+    labelEn: 'NepalAI Commerce',
+    labelNe: 'नेपालएआई कमर्स',
+    descEn: 'Multi-tenant e-commerce with eSewa, Khalti, Nepal QR & WhatsApp alerts',
+    descNe: 'ईसेवा, खल्ती, नेपाल क्युआर र ह्वाट्सएप अर्डर इन्जिन',
+    icon: ShoppingBag,
+  },
+  {
     id: 'compliance',
-    order: 6,
+    order: 8,
     labelEn: 'Compliance & FAQ',
     labelNe: 'नियम तथा मद्दत',
     descEn: 'NRB $500 Dollar Card rules, CIB cyber safety & booking',

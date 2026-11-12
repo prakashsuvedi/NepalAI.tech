@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage & Sovereign AI Portal -->
+  <url>
+    <loc>https://nepalai.tech/</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nepalai.tech/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ne" href="https://nepalai.tech/?lang=ne"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nepalai.tech/"/>
+  </url>
+
+  <!-- NepalAI Command Center & Unified Workspace -->
+  <url>
+    <loc>https://nepalai.tech/#command-center</loc>
+    <lastmod>2026-11-03T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.98</priority>
+  </url>
+
+  <!-- Daily Utilities & Sovereign Engines (Forex, EV Road Tax, NEPSE CGT, IT Export 95Ka, Ward Letters, Voice, OCR, Income Tax, Kalimati & Land Units) -->
+  <url>
+    <loc>https://nepalai.tech/#daily-tools</loc>
+    <lastmod>2026-11-09T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.98</priority>
+  </url>
+
+  <!-- Nepal AI Tools Directory & Payment Guide -->
+  <url>
+    <loc>https://nepalai.tech/#tools</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Enterprise AI Case Studies in Nepal -->
+  <url>
+    <loc>https://nepalai.tech/#case-studies</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Enterprise AI Consulting & Packages -->
+  <url>
+    <loc>https://nepalai.tech/#consulting</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Free AI Developer Tier & Open-Source Hub -->
+  <url>
+    <loc>https://nepalai.tech/#free-ai</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- AI Stack Cost Calculator (NPR / USD) -->
+  <url>
+    <loc>https://nepalai.tech/#calculator</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Hamro AI & Devanagari Workbench -->
+  <url>
+    <loc>https://nepalai.tech/#hamroai</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- About ScamSpike Solutions & Founder Prakash Suvedi -->
+  <url>
+    <loc>https://nepalai.tech/#about</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Machine-Readable LLM Context for AI Agents (llms.txt standard) -->
+  <url>
+    <loc>https://nepalai.tech/llms.txt</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://nepalai.tech/llms-full.txt</loc>
+    <lastmod>2026-10-20T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+</urlset>

@@ -14,12 +14,14 @@ import {
 import { ThemeMode, Language, FAQCategory } from '../types';
 import { FAQ_ITEMS } from '../data/faqData';
 import { TRANSLATIONS } from '../data/translations';
+import { Breadcrumbs } from './ui/Breadcrumbs';
 
 interface FAQSectionProps {
   theme: ThemeMode;
   language: Language;
   onOpenConsultation: (serviceTitle?: string) => void;
   onScrollToContact?: () => void;
+  onNavigateHome?: () => void;
 }
 
 export const FAQSection: React.FC<FAQSectionProps> = ({
@@ -27,6 +29,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
   language,
   onOpenConsultation,
   onScrollToContact,
+  onNavigateHome,
 }) => {
   const isDark = theme === 'dark';
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
@@ -79,6 +82,16 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: isNepali ? 'गृहपृष्ठ' : 'Home', onClick: onNavigateHome },
+              { label: isNepali ? 'नियम तथा सोधपुछ' : 'Compliance & FAQ', isCurrent: true },
+            ]}
+          />
+        </div>
+
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center space-y-3 mb-12">
           <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-xs">
@@ -110,148 +123,197 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
           </p>
         </div>
 
-        {/* Search & Filter Bar */}
-        <div className="max-w-4xl mx-auto mb-10 space-y-4">
+        {/* Main Grid: 2 Columns on lg+ (Sidebar with Filters & Guides, Right with Search & Accordion) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Search Box */}
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          {/* Left Column / Sidebar (lg:col-span-4) */}
+          <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+            
+            {/* Category Filter on desktop (vertical) & mobile (horizontal chips) */}
+            <div className={`p-4 rounded-2xl border ${
+              isDark ? 'border-white/10 bg-[#0a0d18]' : 'border-slate-200 bg-slate-50/80 shadow-xs'
+            }`}>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-500 block mb-3">
+                {isNepali ? 'विषयगत वर्गीकरण' : 'Categories & Filters'}
+              </span>
+
+              {/* Desktop vertical list */}
+              <div className="hidden lg:flex flex-col gap-1.5" role="tablist" aria-label="FAQ Categories">
+                {categories.map((cat) => {
+                  const IconComp = cat.icon;
+                  const isSelected = selectedCategory === cat.id;
+                  const count = cat.id === 'All' 
+                    ? FAQ_ITEMS.length 
+                    : FAQ_ITEMS.filter(f => f.category === cat.id).length;
+
+                  return (
+                    <button
+                      key={cat.id}
+                      role="tab"
+                      aria-selected={isSelected}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all text-left cursor-pointer ${
+                        isSelected
+                          ? isDark
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                            : 'bg-emerald-600 text-white shadow-xs'
+                          : isDark
+                            ? 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <IconComp className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{isNepali ? cat.labelNe : cat.labelEn}</span>
+                      </div>
+                      <span className={`text-[11px] font-mono px-1.5 py-0.5 rounded ${
+                        isSelected 
+                          ? isDark ? 'bg-emerald-500/30 text-emerald-200' : 'bg-white/20 text-white'
+                          : isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-200 text-slate-600'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mobile / Tablet horizontal scrollable pills */}
+              <div className="flex lg:hidden flex-wrap items-center gap-1.5" role="tablist" aria-label="FAQ Categories Mobile">
+                {categories.map((cat) => {
+                  const IconComp = cat.icon;
+                  const isSelected = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      role="tab"
+                      aria-selected={isSelected}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all min-h-[38px] ${
+                        isSelected
+                          ? isDark
+                            ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-300 shadow-xs'
+                            : 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-xs'
+                          : isDark
+                            ? 'border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <IconComp className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span>{isNepali ? cat.labelNe : cat.labelEn}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <input
-              type="text"
-              id="faq-search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.faq.searchPlaceholder}
-              aria-label={t.faq.searchPlaceholder}
-              className={`w-full rounded-xl border py-3 pl-10 pr-10 text-xs sm:text-sm transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isDark
-                  ? 'border-white/10 bg-[#0d101d] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                  : 'border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white shadow-2xs'
-              } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white"
-                aria-label="Clear search input"
+
+            {/* Quick Context Guide Cards */}
+            <div className="space-y-3.5">
+              
+              {/* Card 1: Payment Workaround */}
+              <div
+                className={`rounded-2xl border p-4.5 flex items-start gap-3.5 transition-all ${
+                  isDark
+                    ? 'border-indigo-500/20 bg-indigo-950/20 text-slate-200'
+                    : 'border-indigo-200 bg-indigo-50/70 text-slate-800'
+                }`}
               >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            )}
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0">
+                  <CreditCard className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="space-y-1 text-xs min-w-0">
+                  <div className="font-bold flex items-center gap-1.5 text-indigo-400">
+                    <span className="truncate">{t.faq.paymentGuideCardTitle}</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-200 shrink-0">
+                      Guide
+                    </span>
+                  </div>
+                  <p className="text-slate-400 leading-relaxed text-[11px]">
+                    {t.faq.paymentGuideCardDesc}
+                  </p>
+                  <a
+                    href="#tools-directory"
+                    className="inline-flex items-center gap-1 text-indigo-400 hover:underline pt-1 font-semibold text-[11px]"
+                  >
+                    <span>{isNepali ? 'भुक्तानी फिल्टर हेर्नुहोस्' : 'Browse payment filters'}</span>
+                    <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Card 2: Consulting Scopes */}
+              <div
+                className={`rounded-2xl border p-4.5 flex items-start gap-3.5 transition-all ${
+                  isDark
+                    ? 'border-emerald-500/20 bg-emerald-950/20 text-slate-200'
+                    : 'border-emerald-200 bg-emerald-50/70 text-slate-800'
+                }`}
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <Briefcase className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="space-y-1 text-xs min-w-0">
+                  <div className="font-bold flex items-center gap-1.5 text-emerald-400">
+                    <span className="truncate">{t.faq.consultingGuideCardTitle}</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 shrink-0">
+                      Advisory
+                    </span>
+                  </div>
+                  <p className="text-slate-400 leading-relaxed text-[11px]">
+                    {t.faq.consultingGuideCardDesc}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onOpenConsultation('Enterprise AI Advisory Scoping')}
+                    className="inline-flex items-center gap-1 text-emerald-400 hover:underline pt-1 font-semibold text-[11px] cursor-pointer"
+                  >
+                    <span>{isNepali ? 'परामर्श स्प्रिन्ट तालिका मिलाउनुहोस्' : 'Book a 30-min scoping call'}</span>
+                    <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
-          {/* Category Filter Pills */}
-          <div 
-            className="flex flex-wrap items-center gap-2" 
-            role="tablist" 
-            aria-label="FAQ Categories"
-          >
-            {categories.map((cat) => {
-              const IconComp = cat.icon;
-              const isSelected = selectedCategory === cat.id;
-              return (
+          {/* Right Column / Accordion List (lg:col-span-8) */}
+          <div className="lg:col-span-8 space-y-4">
+            
+            {/* Search Box */}
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              </div>
+              <input
+                type="text"
+                id="faq-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.faq.searchPlaceholder}
+                aria-label={t.faq.searchPlaceholder}
+                className={`w-full rounded-xl border py-3 pl-10 pr-10 text-xs sm:text-sm transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  isDark
+                    ? 'border-white/10 bg-[#0d101d] text-white placeholder-slate-500 focus:border-emerald-500/50'
+                    : 'border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white shadow-2xs'
+                } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+              />
+              {searchQuery && (
                 <button
-                  key={cat.id}
-                  role="tab"
-                  aria-selected={isSelected}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                    isSelected
-                      ? isDark
-                        ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-300 shadow-xs'
-                        : 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-xs'
-                      : isDark
-                        ? 'border-white/[0.08] bg-white/[0.02] text-slate-400 hover:border-white/20 hover:text-white'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
-                  } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white"
+                  aria-label="Clear search input"
                 >
-                  <IconComp className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>{isNepali ? cat.labelNe : cat.labelEn}</span>
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
-              );
-            })}
-          </div>
-
-        </div>
-
-        {/* Two Educational Callout Cards for Fast Context */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-10">
-          
-          {/* Card 1: Payment Workaround */}
-          <div
-            className={`rounded-xl border p-4.5 flex items-start gap-3.5 transition-all ${
-              isDark
-                ? 'border-indigo-500/20 bg-indigo-950/20 text-slate-200'
-                : 'border-indigo-200 bg-indigo-50/70 text-slate-800'
-            }`}
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0">
-              <CreditCard className="h-4 w-4" aria-hidden="true" />
+              )}
             </div>
-            <div className="space-y-1 text-xs">
-              <div className="font-bold flex items-center gap-1.5 text-indigo-300">
-                <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
-                  {t.faq.paymentGuideCardTitle}
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-200">
-                  Quick Guide
-                </span>
-              </div>
-              <p className={`text-slate-400 leading-relaxed ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
-                {t.faq.paymentGuideCardDesc}
-              </p>
-              <a
-                href="#tools-directory"
-                className="inline-flex items-center gap-1 text-indigo-400 hover:underline pt-1 font-semibold"
-              >
-                <span>{isNepali ? 'भुक्तानी फिल्टर हेर्नुहोस्' : 'Browse payment filters in directory'}</span>
-                <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
 
-          {/* Card 2: Consulting Scopes */}
-          <div
-            className={`rounded-xl border p-4.5 flex items-start gap-3.5 transition-all ${
-              isDark
-                ? 'border-emerald-500/20 bg-emerald-950/20 text-slate-200'
-                : 'border-emerald-200 bg-emerald-50/70 text-slate-800'
-            }`}
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
-              <Briefcase className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <div className="space-y-1 text-xs">
-              <div className="font-bold flex items-center gap-1.5 text-emerald-400">
-                <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
-                  {t.faq.consultingGuideCardTitle}
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
-                  Enterprise
-                </span>
-              </div>
-              <p className={`text-slate-400 leading-relaxed ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
-                {t.faq.consultingGuideCardDesc}
-              </p>
-              <button
-                type="button"
-                onClick={() => onOpenConsultation('Enterprise AI Advisory Scoping')}
-                className="inline-flex items-center gap-1 text-emerald-400 hover:underline pt-1 font-semibold"
-              >
-                <span>{isNepali ? 'परामर्श स्प्रिन्ट तालिका मिलाउनुहोस्' : 'Book a 30-min scoping call'}</span>
-                <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Accordion FAQ List */}
-        <div className="max-w-4xl mx-auto space-y-3">
+            {/* Accordion FAQ List */}
+            <div className="space-y-3">
           {filteredFaqs.length === 0 ? (
             <div
               className={`text-center py-12 rounded-2xl border ${
@@ -385,6 +447,8 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
               );
             })
           )}
+            </div>
+          </div>
         </div>
 
         {/* Still Have Questions Footer CTA */}

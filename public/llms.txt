@@ -1,0 +1,155 @@
+# NepalAI.tech – Sovereign AI Hub, Daily Utilities & Enterprise AI Consulting in Nepal
+
+> The official machine-readable specification and knowledge ground for Nepal's premier sovereign AI platform, Devanagari multi-modal workbench, verified AI tool directory, and enterprise consulting ecosystem.
+
+- **Canonical URL**: https://nepalai.tech
+- **Lead Architect & Founder**: Prakash Suvedi (https://prakashsuvedi.com.np | Email: prakashsuvedi@gmail.com)
+- **Parent Entity**: ScamSpike Solutions Pvt. Ltd. (https://scamspike.com)
+- **Geographic Base**: Kathmandu, Bagmati Province, Nepal (Coordinates: 27.7172° N, 85.3240° E)
+- **Supported Languages**: English, Nepali (Unicode Devanagari), Romanized Phonetic Nepali (*e.g., 'namaste', 'kasto chha'*)
+
+---
+
+## 1. High-Impact Daily AI Utilities (Free Sovereign Suite)
+
+NepalAI provides 6 verified, operational tools designed specifically for Nepal's legal, financial, agricultural, and linguistic framework:
+
+### A. Live NRB Multi-Currency Exchange & AI Subscription Auditor
+- **Official NRB Benchmark**: Real-time Buying, Selling, and Mid rates for 11 currencies: USD, EUR, GBP, AUD, CAD, INR, JPY, QAR, AED, SAR, and CNY via `/api/forex/nrb`.
+- **AI Subscription Calculator**: Covers ChatGPT Plus ($20), Claude Pro ($20), Cursor Pro ($20), v0 Pro ($20), Lovable ($20), Runway Gen-3 ($15), Midjourney ($30), Perplexity Pro ($20), GitHub Copilot ($10), Gemini Advanced ($19.99), ElevenLabs ($22), and custom spending.
+- **Statutory Card Spread & Taxes**: Automatically computes 3.0% A-Class commercial bank spread, 2.0% Digital Services Tax (DST) under Nepal Finance Act, and tracks utilization against Nepal Rastra Bank's **annual $500 prepaid dollar card quota**.
+
+### B. Official Ward Application Studio & Preeti Font Converter
+- **12 Verified Legal Templates**:
+  1. Kinship Recommendation (नाता प्रमाणित)
+  2. Unmarried Certificate (अविवाहित सिफारिस)
+  3. Commercial Bank $500 Dollar Card Request
+  4. Ward Business Registration (व्यवसाय दर्ता)
+  5. Property Boundary Demarcation (चारकिल्ला प्रमाणित)
+  6. Digital Dynamic QR Payment Setup (FonePay/eSewa)
+  7. Official Office Leave Application
+  8. Right to Information (RTI / सूचनाको हक)
+  9. Electricity & Water Connection (विद्युत तथा खानेपानी)
+  10. Land Title Transfer / Dakhil Kharej (जग्गा नामसारी)
+  11. Personal & Business PAN Registration
+  12. Late Vital Event Registration (जन्म / मृत्यु / विवाह)
+- **Formatting**: Auto-injects current Bikram Sambat date (`२०८१/०८२`), provides instant bi-directional Unicode ↔ Preeti conversion, and exports to Microsoft Word (`.doc`) and print-ready formats.
+
+### C. Neural Nepali Voice & Accent Synthesizer
+- **4 Regional Dialects**: Kathmandu Standard, Gandaki Pokhareli, Eastern Kirati, and Terai Maithili.
+- **Synthesis Engine**: In-browser Web Speech API with pitch and tempo modulators, animated audio waveform, and downloadable `.txt` speech transcripts.
+
+### D. Devanagari Document Intelligence & OCR Engine
+- **Connected Pipeline**: REST `/api/extract` powered by Google Gemini and localized regex parsers.
+- **Document Presets**: Nepali Citizenship ID (नागरिकता), Land Ownership Deeds (जग्गाधनी प्रमाणपुर्जा), and IRD VAT Invoices (कर बिजक).
+- **Features**: Drag-and-drop document upload with image preview, visual card field view, raw JSON inspector, and `.json` structured export.
+
+### E. Nepal Inland Revenue Department (IRD) Income Tax & IT Export TDS Engine
+- **Finance Act 2081/82 Progressive Brackets**:
+  - Single: 1% up to NPR 500k, 10% on next 200k, 20% on next 300k, 30% on next 1M, 36% on next 3M, 39% above 5M.
+  - Married: 1% up to NPR 600k, 10% on next 200k, 20% on next 300k, 30% on next 900k, 36% on next 3M, 39% above 5M.
+- **Section 95Ka IT Software Export**:
+  - Individual freelance software export TDS: 5% final withholding tax.
+  - Registered IT software export company TDS: 1% advance tax.
+- **Statutory Deductions**: SSF 1% tax exemption for enrolled employees, single female 10% tax rebate, EPF/CIT allowance capped at NPR 300,000, life insurance capped at NPR 40,000.
+- **Outputs**: Computes monthly TDS, net take-home salary, effective tax rate, and downloadable IRD computation slip (`.txt`).
+
+### F. Kalimati Produce Board & Traditional Land Unit Converter
+- **Kalimati Commodities**: 20 daily items (tomatoes, local red/white potatoes, dry onions, cauliflower, cabbage, button/shiitake mushrooms, green chillies, lemons, coriander, carrots, radishes, broccoli, okra, bitter gourds, ginger, dry garlic, Mustang apples).
+- **Live Search & Metrics**: Real-time search by English or Devanagari names, wholesale vs. retail margin calculation, and CSV matrix export.
+- **Nepali Weight Units**: Dharni (धार्नी = 2.5 kg), Pau (पाउ = 200 g), Kilograms.
+- **Land Mathematics**:
+  - Hilly System: 1 Ropani = 16 Aana = 64 Paisa = 256 Daam = 5,476 sq. ft. (508.74 m²)
+  - Terai System: 1 Bigha = 20 Kattha = 400 Dhur = 72,900 sq. ft. (6,772.63 m²)
+
+### G. EV Road Tax, Bluebook Delay Penalties & NEA Charging Terminal
+- **Provincial EV Road Tax Slabs**:
+  - Two-Wheelers: 0-1kW (Rs. 1,000), 1-3kW (Rs. 1,500), >3kW (Rs. 2,000).
+  - Four-Wheelers (Cars/SUVs): 0-49kW (Rs. 10,000), 50-99kW (Rs. 15,000), 100-199kW (Rs. 20,000), 200kW+ (Rs. 30,000).
+  - Microbuses (HiAce): Rs. 8,000 | Public Buses: Rs. 4,000.
+- **Bluebook Compound Delay Penalties**: 0-30 days grace (0%), 31-90 days (+5%), 91-180 days (+10%), 181-365 days (+20%), Year 2-5 (+32% compounding), 5+ years (+100% cap).
+- **Nepal Electricity Authority (NEA) TOD Tariff**:
+  - Off-Peak Night (11 PM - 5 AM): Rs. 4.30/kWh
+  - Normal Day: Rs. 8.50/kWh
+  - Peak Evening (5 PM - 11 PM): Rs. 12.00/kWh
+- **Real-World Energy & Route Simulation**: Computes cost per km (~Rs. 1.80/km on night TOD vs. Rs. 10.40/km petrol), annual fuel savings, and battery range deduction over Kathmandu-Pokhara, Kathmandu-Chitwan, and BP Highway routes.
+
+### H. NEPSE Trading, Broker Slabs & Capital Gains Tax (CGT) Terminal
+- **SEBON 5-Tier Broker Commission Slabs**:
+  - Up to Rs. 50,000: 0.40%
+  - Rs. 50,001 to Rs. 5,00,000: 0.37%
+  - Rs. 5,00,001 to Rs. 20,00,000: 0.34%
+  - Rs. 20,00,001 to Rs. 1,00,00,000: 0.30%
+  - Above Rs. 1,00,00,000: 0.27% (Minimum Rs. 10 per transaction).
+- **Regulatory Fees**: SEBON regulatory fee (0.015%), CDS & Clearing DP fee (Rs. 25 per scrip).
+- **Capital Gains Tax (CGT)**:
+  - Individual Short-term (< 365 days): 7.5% on net capital gains.
+  - Individual Long-term (>= 365 days): 5.0% on net capital gains.
+  - Corporate Entities: 10.0% on net capital gains.
+- **Targets & Adjustments**: Computes exact break-even sell price (accounting for buy + sell commissions, DP, SEBON) and bonus/right share book-close adjusted opening prices.
+
+### I. IT Software Export Inward Remittance & Section 95Ka Declaration Engine
+- **Income Tax Act 2058 Section 95Ka (दफा ९५क)**:
+  - Individual tech freelancers: 5% final withholding TDS deducted directly at the commercial bank level upon foreign wire credit.
+  - Registered tech companies: 1% advance withholding TDS.
+- **Commercial Bank Declaration Exporter**: Auto-generates official bilingual self-declaration letters (*स्वघोषणा पत्र*) for Nabil Bank, NIC Asia, Global IME, Rastriya Banijya Bank, etc.
+
+### J. Gold & Silver Bullion, Jewelry Tax & Tola Converter
+- **FENEGOSIDA Benchmark Grounding**: Real-time reference rates for 24K Chhapawal Gold (रू १,६२,०००+/tola), 22K Tejabi Gold, and Fine Silver.
+- **Traditional Weight System**: 1 Tola = 11.664 Grams = 16 Aana = 10 Lal (1 Aana = 0.625 Lal).
+- **Customer Protection Audit**:
+  - Making Charges (ज्याला) computation (Flat per tola, Total flat, or % of bullion).
+  - Melting Wastage (जर्ती) auditing (typical 1.5% - 3.5%).
+  - Finance Act Surcharges: 2% Luxury Tax and 13% IRD VAT on official jeweler billing.
+  - Transparent markup percentage indicator (+X% over raw bullion).
+- **Historical Investment Compounding Simulator**: 10-year growth comparison: Gold (~11.8% NPR CAGR) vs. NEPSE (~9.2% CAGR) vs. Bank Fixed Deposit (~8.0% interest).
+
+---
+
+## 2. Curated Nepal-Ready AI Tools Directory (45+ Tools)
+
+Categories:
+- **Nepal Sovereign AI**: Hamro Patro AI, Fusemachines Studio, Sarvam AI, Khalti Copilot, DocSumo, Leapfrog AI.
+- **Coding**: Cursor AI, Claude Coding, GitHub Copilot, v0 by Vercel, Lovable, Bolt.new, Windsurf, Replit Agent, DeepSeek Coder.
+- **LLM & Writing**: ChatGPT Plus, Claude 3.7 Sonnet, Gemini Advanced, Perplexity Pro, DeepSeek R1, Grok 3, Mistral Le Chat, Poe AI, NotebookLM.
+- **Design & Video**: Midjourney, Runway Gen-3, Flux Pro, Sora 2, Kling AI, Luma Dream Machine, Ideogram, Recraft, Canva Magic Studio.
+- **Audio & Voice**: ElevenLabs, Whisper Large-v3, Suno AI, Udio, Descript, Speechify.
+- **Automation**: Make.com, n8n (Self-hosted), Zapier, Relevance AI, Activepieces, Bardeen.
+
+All listings verify payment compatibility via eSewa, Khalti, or NRB Dollar Card, pricing tiers, and direct website links.
+
+---
+
+## 3. Enterprise AI Case Studies in Nepal
+
+1. **Himalayan Commercial Financial Group**: Automated Devanagari Nagarikta & PAN OCR pipeline reducing KYC verification time from 4 days to 6.2 seconds with 99.4% accuracy.
+2. **High Himalaya Treks & Alpine Safety Council**: Offline Edge AI Sherpa guide running a 4-bit quantized SLM (840 MB) on budget Android phones along Everest Base Camp for Acute Mountain Sickness (AMS) triage.
+3. **SajiloMart E-Commerce Network**: Multilingual Romanized and Devanagari code-switching conversational bot resolving 78% of support inquiries with direct eSewa/Khalti checkout prompts.
+4. **Karnali Telemedicine Initiative**: Low-bandwidth Edge AI diagnostic triage assistant for rural health posts.
+5. **Ilam Organic Tea Estate**: Computer vision crop health & tea pest detection running on edge drone feeds.
+6. **Bagmati Legal Aid Counsel**: Devanagari legal RAG synthesizing Supreme Court precedents and Nepal Acts.
+
+---
+
+## 4. Enterprise AI Consulting & Sprint Architecture
+
+Turnkey engineering with full intellectual property transfer. Dual pricing in NPR and USD:
+- **AI Readiness & Opportunity Audit**: NPR 1,80,000 / $1,400 USD (2 weeks)
+- **Custom Nepali LLMs, RAG & Autonomous Agents**: NPR 4,50,000 / $3,400 USD (Production grade)
+- **Devanagari OCR & Computer Vision Pipeline**: NPR 3,80,000 / $2,800 USD (Banking & KYC grade)
+- **Nepal Payment Gateway & Proxy Bridge**: NPR 1,20,000 / $900 USD (NRB-compliant)
+- **Executive AI Masterclass & Team Bootcamp**: NPR 95,000 / $750 USD (Corporate training)
+- **Fractional Chief AI Officer Retainer**: NPR 1,50,000 / $1,150 USD per month
+
+---
+
+## 5. Machine Discovery & API Endpoints
+
+- `GET /api/forex/nrb` - Live 11-currency Nepal Rastra Bank exchange benchmark with statutory spread.
+- `POST /api/extract` - Devanagari document field extraction (Nagarikta, Lalpurja, VAT Invoice).
+- `POST /api/chat` - Sovereign Hamro AI conversational assistant in Devanagari and English.
+- `GET /api/nepal-ai-news` - Real-time curated Nepal AI policy, NRB directives, and ecosystem updates.
+- `GET /llms.txt` - This machine-readable overview.
+- `GET /llms-full.txt` - Exhaustive architectural and regulatory specification.
+
+For technical consulting inquiries, contact `prakashsuvedi@gmail.com` or schedule a consultation at `https://nepalai.tech/#consulting`.

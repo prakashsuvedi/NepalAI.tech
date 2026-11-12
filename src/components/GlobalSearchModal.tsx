@@ -53,6 +53,7 @@ interface GlobalSearchModalProps {
   onOpenConsultation?: (serviceTitle?: string) => void;
   onOpenStackCalculator?: () => void;
   onOpenHamroAI?: () => void;
+  onOpenAdminPanel?: () => void;
   onSelectLanguage?: (lang: Language) => void;
 }
 
@@ -65,6 +66,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onOpenConsultation,
   onOpenStackCalculator,
   onOpenHamroAI,
+  onOpenAdminPanel,
   onSelectLanguage,
 }) => {
   const [query, setQuery] = useState('');
@@ -214,6 +216,18 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         keywords: ['contact', 'email', 'phone', 'whatsapp', 'address', 'kathmandu', 'samparka'],
         actionType: 'navigate',
         targetId: 'contact',
+      },
+      {
+        id: 'sec-admin',
+        category: 'section',
+        titleEn: 'Admin Control Center & Leads Hub',
+        titleNe: 'प्रशासक प्यानल (Admin Dashboard & Studio Sync)',
+        descriptionEn: 'Live administrative dashboard, pending consulting leads tracker, and studio.nepalai.tech synchronization.',
+        descriptionNe: 'प्रत्यक्ष परामर्श लिड, स्टुडियो प्रयोगकर्ता र मूल्य निर्धारण व्यवस्थापन।',
+        badge: 'Admin Panel',
+        keywords: ['admin', 'panel', 'dashboard', 'leads', 'studio', 'config', 'settings', 'prashasak', 'tokens'],
+        actionType: 'navigate',
+        targetId: 'admin-modal',
       },
     ];
     items.push(...sections);
@@ -386,6 +400,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
     if (item.actionType === 'consultation' && onOpenConsultation) {
       onOpenConsultation(item.consultingServiceTitle || item.titleEn);
+    } else if (item.targetId === 'admin-modal') {
+      if (onOpenAdminPanel) {
+        onOpenAdminPanel();
+      }
     } else if (item.actionType === 'navigate' || item.actionType === 'faq') {
       if (item.targetId) {
         if (onNavigateSection) {

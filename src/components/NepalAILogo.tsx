@@ -96,13 +96,13 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
           iconSizes[size]
         } ${
           isDark
-            ? 'bg-gradient-to-b from-[#0e1424] via-[#090d16] to-[#04060a] border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.6)] group-hover:border-emerald-500/80 group-hover:shadow-[0_0_24px_rgba(16,185,129,0.4),inset_0_0_12px_rgba(16,185,129,0.18)]'
-            : 'bg-white border border-slate-200/90 shadow-sm group-hover:border-emerald-500/80 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+            ? 'bg-gradient-to-b from-[#0f172a] via-[#090e1c] to-[#050813] border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.6)] group-hover:border-cyan-400/80 group-hover:shadow-[0_0_24px_rgba(6,182,212,0.4),inset_0_0_12px_rgba(56,189,248,0.18)]'
+            : 'bg-white border border-slate-200/90 shadow-sm group-hover:border-cyan-500/80 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'
         }`}
       >
-        {/* Soft Glowing Emerald Outline Aura on Hover */}
+        {/* Soft Glowing Cyan Outline Aura on Hover */}
         <div
-          className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 ring-1 ring-emerald-400/60 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+          className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 ring-1 ring-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.35)]"
           aria-hidden="true"
         />
 
@@ -128,17 +128,17 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
               <stop offset="100%" stopColor={isDark ? '#020617' : '#475569'} />
             </linearGradient>
 
-            {/* Signature Sovereign Emerald Diagonal Ribbon (Netflix/Apple style depth) */}
+            {/* Signature Sovereign Cyan & Sky Blue Diagonal Ribbon */}
             <linearGradient id="nDiagonalRibbon" x1="9" y1="7" x2="35" y2="37" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#34D399" />
-              <stop offset="45%" stopColor="#10B981" />
-              <stop offset="100%" stopColor="#047857" />
+              <stop offset="0%" stopColor="#38BDF8" />
+              <stop offset="45%" stopColor="#06B6D4" />
+              <stop offset="100%" stopColor="#0284C7" />
             </linearGradient>
 
             {/* Subtle Specular Highlight Edge */}
             <linearGradient id="nSpecularEdge" x1="8.5" y1="7" x2="28.5" y2="37" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
-              <stop offset="40%" stopColor="#FFFFFF" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
+              <stop offset="40%" stopColor="#FFFFFF" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
             </linearGradient>
 
@@ -147,8 +147,8 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
               <feDropShadow dx="-0.8" dy="1.2" stdDeviation="1" floodColor="#000000" floodOpacity={isDark ? '0.6' : '0.25'} />
             </filter>
 
-            {/* Soft Emerald Glow Filter on Hover */}
-            <filter id="nEmeraldGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+            {/* Soft Cyan Glow Filter on Hover */}
+            <filter id="nCyanGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="1.5" result="glow" />
               <feComposite in="SourceGraphic" in2="glow" operator="over" />
             </filter>
@@ -220,7 +220,7 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
               <motion.path
                 d={diagonalRibbonPath}
                 fill="none"
-                stroke="#10B981"
+                stroke="#06B6D4"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -237,7 +237,7 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
               <motion.path
                 d={rightStemPath}
                 fill="none"
-                stroke="#34D399"
+                stroke="#38BDF8"
                 strokeWidth="1.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -267,14 +267,14 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
             </>
           )}
 
-          {/* Interactive Glowing Emerald Outline Contour (Glows softly on hover) */}
+          {/* Interactive Glowing Cyan Outline Contour (Glows softly on hover) */}
           <path
             d="M8.5 9.5 C8.5 8.1 9.6 7 11 7 H15.5 L35.5 35 C36 35.7 35.6 37 34.5 37 H31 C29.6 37 28.5 35.9 28.5 34.5 V14 L12 7 H11 C9.6 7 8.5 8.1 8.5 9.5 Z"
-            stroke="#10B981"
+            stroke="#06B6D4"
             strokeWidth="0.8"
             fill="none"
             className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            filter="url(#nEmeraldGlowFilter)"
+            filter="url(#nCyanGlowFilter)"
           />
 
           {/* Subtle Apex Telemetry Node */}
@@ -282,7 +282,7 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
             cx="32"
             cy="10.5"
             r="1.4"
-            fill="#34D399"
+            fill="#38BDF8"
             initial={animateOnLoad ? { scale: 0, opacity: 0 } : false}
             animate={
               hasFinishedLoading
@@ -294,10 +294,10 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
           />
         </svg>
 
-        {/* Ambient Subtle Emerald Pulse */}
+        {/* Ambient Subtle Cyan Pulse */}
         <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_6px_#10B981]"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500 shadow-[0_0_6px_#06B6D4]"></span>
         </span>
       </div>
 
@@ -317,8 +317,8 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
             epal
           </span>
 
-          {/* 'AI' in signature Sovereign Emerald */}
-          <span className={`font-black ${textSizes[size]} text-emerald-500 tracking-tight ml-0.5`}>
+          {/* 'AI' in signature Sovereign Cyan */}
+          <span className={`font-black ${textSizes[size]} text-cyan-500 dark:text-cyan-400 tracking-tight ml-0.5`}>
             AI
           </span>
 
@@ -327,8 +327,8 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
             <span
               className={`font-mono font-bold uppercase tracking-widest ${badgeSizes[size]} rounded-md border transition-all ${
                 isDark
-                  ? 'border-emerald-500/30 bg-emerald-950/50 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)] group-hover:border-emerald-400/60 group-hover:bg-emerald-900/40'
-                  : 'border-emerald-300 bg-emerald-50 text-emerald-800 shadow-2xs group-hover:border-emerald-500 group-hover:bg-emerald-100'
+                  ? 'border-cyan-500/30 bg-cyan-950/40 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/60 group-hover:bg-cyan-900/40'
+                  : 'border-cyan-300 bg-cyan-50 text-cyan-800 shadow-2xs group-hover:border-cyan-500 group-hover:bg-cyan-100'
               }`}
             >
               .tech

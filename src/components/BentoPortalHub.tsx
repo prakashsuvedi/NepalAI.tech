@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { 
   Grid, 
   Wrench, 
@@ -7,10 +6,8 @@ import {
   Briefcase, 
   ShieldCheck, 
   ArrowRight,
-  CreditCard,
-  FileText,
-  FileSearch,
-  CheckCircle2
+  LayoutDashboard,
+  ShoppingBag
 } from 'lucide-react';
 import { AppPage, ThemeMode, Language } from '../types';
 
@@ -35,116 +32,110 @@ export const BentoPortalHub: React.FC<BentoPortalHubProps> = ({
 
   const portals = [
     {
-      id: 'directory' as AppPage,
-      titleEn: 'Verified Tools Directory',
-      titleNe: 'प्रमाणित टुल्स डाइरेक्टरी',
-      descEn: 'Browse 40+ curated AI tools with NPR converted pricing, Nepal IP readiness, and eSewa / Khalti & Dollar Card support.',
-      descNe: '४०+ प्रमाणित एआई टुल्स, नेपाली रूपैयाँमा रूपान्तरण, र डलर कार्ड तथा इसेवा/खल्ती भुक्तानी स्थिति।',
-      icon: Grid,
-      color: 'emerald',
-      badgeEn: '40+ Tools Listed',
-      badgeNe: '४०+ टुल्स सूचीकृत',
-      featuresEn: ['NPR vs USD Price Converter', 'Nepal IP & VPN verification', 'Interactive AI Stack Builder'],
-      featuresNe: ['नेपाली रूपैयाँ रूपान्तरक', 'नेपाल आइपी अनुकूलता', 'स्ट्याक क्याल्कुलेटर'],
+      id: 'command-center' as AppPage,
+      titleEn: 'Command Center',
+      titleNe: 'कमान्ड सेन्टर',
+      descEn: 'All-in-one workspace with real-time NRB forex, tax estimator, and land converter.',
+      descNe: 'राष्ट्र बैंक विनिमय दर, आयकर हिसाब र जग्गा रूपान्तरणको एकीकृत कार्यथलो।',
+      icon: LayoutDashboard,
+      tag: '01',
     },
     {
       id: 'daily' as AppPage,
-      titleEn: 'Daily Sovereign AI Utilities',
+      titleEn: 'Daily AI Utilities',
       titleNe: 'दैनिक एआई सेवाहरू',
-      descEn: 'Hands-on sovereign tools tailored for Nepal: Devanagari application writer, Nepali voice synthesis, document OCR, and salary tax calculator.',
-      descNe: 'नेपाल-केन्द्रित दैनिक एआई: नेपाली सरकारी निवेदन लेखक, देवनागरी आवाज, कागजात स्क्यानर र तलब कर क्याल्कुलेटर।',
+      descEn: 'Ward Nibedan application studio, Devanagari OCR, 24kHz voice, and Kalimati rates.',
+      descNe: 'वडा निवेदन स्टुडियो, देवनागरी ओसीआर, न्युरल आवाज र कालिमाटी बजार दर।',
       icon: Wrench,
-      color: 'indigo',
-      badgeEn: 'Zero Configuration',
-      badgeNe: 'तत्काल प्रयोग गर्न सकिने',
-      featuresEn: ['Devanagari Letter & Application Writer', 'Nepali Speech-to-Text & TTS', 'NPR Salary & Remittance Tax Engine'],
-      featuresNe: ['सरकारी तथा व्यक्तिगत निवेदन', 'नेपाली बोली तथा आवाज', 'नेपाल तलब तथा कर क्याल्कुलेटर'],
+      tag: '02',
+    },
+    {
+      id: 'directory' as AppPage,
+      titleEn: 'Tools Directory',
+      titleNe: 'टुल्स डाइरेक्टरी',
+      descEn: 'Browse 40+ curated AI tools with NPR pricing, Nepal IP readiness, and eSewa / Khalti billing.',
+      descNe: '४०+ प्रमाणित एआई टुल्स, नेपाली रूपैयाँमा रूपान्तरण र स्थानीय भुक्तानी स्थिति।',
+      icon: Grid,
+      tag: '03',
     },
     {
       id: 'free' as AppPage,
-      titleEn: 'Free AI & Intelligence Hub',
+      titleEn: 'Free AI & Intelligence',
       titleNe: 'निःशुल्क एआई र समाचार',
-      descEn: 'Explore top free AI APIs requiring no credit cards, multimodal data extractor for Nepali documents, and live Nepal AI bulletins.',
-      descNe: 'कुनै अन्तर्राष्ट्रिय कार्ड बिना चल्ने निःशुल्क एआई एपीआईहरू, नागरिकता/लालपुर्जा डेटा एक्सट्र्याक्टर र ताजा समाचार।',
+      descEn: 'Credit card-free AI APIs, multimodal document extractor, and Nepal AI regulatory bulletins.',
+      descNe: 'कुनै कार्ड बिना चल्ने निःशुल्क एआई एपीआईहरू र ताजा नीतिगत सूचनाहरू।',
       icon: Sparkles,
-      color: 'amber',
-      badgeEn: '$0 / Month APIs',
-      badgeNe: 'रु ० निःशुल्क एपीआई',
-      featuresEn: ['Multimodal Nepali Document Extractor', 'Credit Card-free LLM Endpoints', 'Live Nepal AI Intelligence News'],
-      featuresNe: ['नेपाली कागजात डेटा एक्सट्र्याक्टर', 'निःशुल्क मोडेल एपीआईहरू', 'नेपाल एआई तथा नियमन समाचार'],
+      tag: '04',
     },
     {
       id: 'consulting' as AppPage,
-      titleEn: 'Enterprise Consulting & Pipelines',
-      titleNe: 'संस्थागत परामर्श तथा इन्जिनियरिङ',
-      descEn: 'Custom AI architecture for banks, fintech, hospitals, and enterprises. Dual invoicing in NPR (PAN/VAT) & USD with full IP transfer.',
-      descNe: 'नेपाली बैंक, वित्तीय संस्था, अस्पताल र उद्यमहरूका लागि सुरक्षित एआई पूर्वाधार र भ्याट बिलिङसहितको परामर्श सेवा।',
+      titleEn: 'Enterprise Advisory',
+      titleNe: 'संस्थागत परामर्श',
+      descEn: 'Fixed-scope engineering sprints with senior architects in Kathmandu and full IP ownership.',
+      descNe: 'नेपाली बैंक तथा उद्यमहरूका लागि सुरक्षित एआई पूर्वाधार र भ्याट बिलिङसहितको सेवा।',
       icon: Briefcase,
-      color: 'blue',
-      badgeEn: 'NPR PAN/VAT Billing',
-      badgeNe: 'आधिकारिक भ्याट बिलिङ',
-      featuresEn: ['On-premise & Private VPC Deployments', 'Sovereign Devanagari LLM Fine-tuning', 'Fixed-Scope Sprints & Retainers'],
-      featuresNe: ['स्थानीय डाटा सेन्टर पूर्वाधार', 'नेपाली भाषा मोडेल तालिम', 'निश्चित स्कोप तथा स्प्रिन्ट'],
+      tag: '05',
+    },
+    {
+      id: 'commerce' as AppPage,
+      titleEn: 'NepalAI Commerce',
+      titleNe: 'नेपालएआई कमर्स',
+      descEn: 'Multi-tenant storefront & merchant portal with eSewa, Khalti, Nepal QR and instant WhatsApp order alerts.',
+      descNe: 'ईसेवा, खल्ती, नेपाल क्युआर र ह्वाट्सएप अर्डर प्रेषणसहितको बहु-व्यापारिक डिजिटल स्टोर।',
+      icon: ShoppingBag,
+      tag: '06',
     },
     {
       id: 'compliance' as AppPage,
-      titleEn: 'Compliance & Cyber Safety',
-      titleNe: 'नियम, सुरक्षा तथा सोधपुछ',
-      descEn: 'Official Nepal Rastra Bank $500 Dollar Card regulations, CIB cyber safety guidelines, frequently asked questions, and direct support.',
-      descNe: 'नेपाल राष्ट्र बैंकको $५०० डलर कार्ड नियमन, सीआईबी साइबर सुरक्षा सल्लाह, प्रायः सोधिने प्रश्न र प्रत्यक्ष सम्पर्क।',
+      titleEn: 'Compliance & FAQ',
+      titleNe: 'नियम तथा मद्दत',
+      descEn: 'Official NRB $500 Dollar Card regulations, CIB cybersecurity advice, and direct support.',
+      descNe: 'राष्ट्र बैंकको $५०० डलर कार्ड नियम, साइबर सुरक्षा उपाय र प्रत्यक्ष सोधपुछ।',
       icon: ShieldCheck,
-      color: 'rose',
-      badgeEn: 'NRB & CIB Verified',
-      badgeNe: 'राष्ट्र बैंक तथा सीआईबी नियम',
-      featuresEn: ['Dollar Card $500 Annual Cap Guidance', 'CIB Cyber Fraud & Malicious App Alerts', 'Instant Consultation & Direct Inquiries'],
-      featuresNe: ['वार्षिक $५०० डलर कार्ड सल्लाह', 'साइबर ठगी र नक्कली एपबाट बच्ने उपाय', 'परामर्श बुकिङ तथा सोधपुछ'],
+      tag: '07',
     },
   ];
 
   return (
     <section
-      className={`py-16 transition-colors ${
-        isDark ? 'bg-[#06080e]' : 'bg-[#f8fafc]'
+      className={`py-12 sm:py-16 md:py-20 border-t transition-colors ${
+        isDark ? 'border-white/10 bg-[#06080e]' : 'border-slate-200 bg-white'
       }`}
       aria-label="Platform page portals"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-semibold mb-4">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{isNe ? 'प्लेटफर्मका प्रमुख खण्डहरू' : 'Modular Platform Hub'}</span>
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+          <div className="text-[11px] sm:text-xs font-mono font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 uppercase">
+            {isNe ? 'निर्देशिका · प्लेटफर्म' : 'Directory · Platform'}
           </div>
-          <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-            isDark ? 'text-white' : 'text-slate-900'
+          <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-display ${
+            isDark ? 'text-white' : 'text-slate-950'
           }`}>
-            {isNe 
-              ? 'लामो स्क्रोलिङ बिना आवश्यक खण्डमा तुरुन्तै पुग्नुहोस्' 
-              : 'Direct Page Navigation — Zero Endless Scrolling'}
+            {isNe ? 'नेपालएआई सेवाहरू' : 'Explore NepalAI'}
           </h2>
-          <p className={`mt-3 text-sm leading-relaxed ${
-            isDark ? 'text-slate-400' : 'text-slate-600'
+          <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
+            isDark ? 'text-slate-300' : 'text-slate-600'
           }`}>
             {isNe
-              ? 'नेपाल एआई प्लेटफर्मलाई ५ वटा व्यवस्थित र छिटो खुल्ने खण्डहरूमा विभाजन गरिएको छ। आफूलाई चाहिने खण्डमा क्लिक गर्नुहोस्:'
-              : 'The platform is organized into dedicated, lightweight pages so you can focus directly on the tools, directory, or advisory you need without infinite vertical scrolling:'}
+              ? 'उत्पादकता, नियमन र दैनिक एआई उपकरणहरू — एकै क्लिकमा।'
+              : 'Direct access to productivity, compliance, and developer tools.'}
           </p>
         </div>
 
-        {/* Bento Portal Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Clean 6-Portal Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {portals.map((portal) => {
             const Icon = portal.icon;
             return (
-              <motion.div
+              <div
                 key={portal.id}
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.2 }}
                 onClick={() => handleNavigate(portal.id)}
-                className={`relative p-6 sm:p-7 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between group ${
+                className={`p-5 sm:p-6 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between group ${
                   isDark
-                    ? 'bg-[#090d18]/80 border-white/[0.08] hover:border-emerald-500/40 hover:bg-[#0c1222] shadow-[0_4px_24px_rgba(0,0,0,0.4)]'
-                    : 'bg-white border-slate-200/90 hover:border-emerald-400 hover:shadow-md shadow-xs'
+                    ? 'bg-white/[0.02] border-white/10 hover:border-emerald-500/40 hover:bg-white/[0.04]'
+                    : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 hover:bg-white shadow-2xs hover:shadow-xs'
                 }`}
                 role="button"
                 tabIndex={0}
@@ -156,71 +147,52 @@ export const BentoPortalHub: React.FC<BentoPortalHubProps> = ({
                 aria-label={`Open ${portal.titleEn}`}
               >
                 <div>
-                  {/* Top Badge & Icon */}
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center justify-between mb-3.5">
                     <div
-                      className={`p-3 rounded-2xl border transition-colors ${
+                      className={`p-2.5 rounded-xl border transition-colors ${
                         isDark
-                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20'
-                          : 'border-emerald-200 bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100'
+                          ? 'border-white/10 bg-white/[0.04] text-slate-200 group-hover:border-emerald-500/40 group-hover:text-emerald-400'
+                          : 'border-slate-200 bg-white text-slate-800 group-hover:border-emerald-400 group-hover:text-emerald-700 shadow-2xs'
                       }`}
                     >
-                      <Icon className="h-6 w-6" aria-hidden="true" />
+                      <Icon className="h-5 w-5" aria-hidden="true" />
                     </div>
-                    <span
-                      className={`text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full border ${
-                        isDark
-                          ? 'border-white/10 bg-white/[0.04] text-slate-300'
-                          : 'border-slate-200 bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {isNe ? portal.badgeNe : portal.badgeEn}
+                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-semibold">
+                      {portal.tag}
                     </span>
                   </div>
 
-                  {/* Title & Description */}
                   <h3
-                    className={`text-lg font-bold transition-colors group-hover:text-emerald-400 ${
+                    className={`text-base font-bold font-display transition-colors group-hover:text-emerald-600 dark:group-hover:text-emerald-400 ${
                       isDark ? 'text-white' : 'text-slate-900'
                     }`}
                   >
                     {isNe ? portal.titleNe : portal.titleEn}
                   </h3>
+
                   <p
-                    className={`mt-2 text-xs leading-relaxed ${
-                      isDark ? 'text-slate-400' : 'text-slate-600'
+                    className={`mt-2 text-xs sm:text-sm leading-relaxed ${
+                      isDark ? 'text-slate-300' : 'text-slate-600'
                     }`}
                   >
                     {isNe ? portal.descNe : portal.descEn}
                   </p>
-
-                  {/* Feature Checkmarks */}
-                  <div className="mt-5 space-y-2 border-t border-slate-500/15 pt-4">
-                    {(isNe ? portal.featuresNe : portal.featuresEn).map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-                        <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                          {feat}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                {/* Bottom CTA Button */}
-                <div className="mt-6 pt-4 border-t border-slate-500/15 flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
-                    <span>{isNe ? 'पृष्ठ खोल्नुहोस्' : 'Explore Page'}</span>
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <div className="mt-5 pt-3.5 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 group-hover:gap-1.5 transition-all">
+                    <span>{isNe ? 'खोल्नुहोस्' : 'Open'}</span>
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                   </span>
-                  <span className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                    nepalai.tech/{portal.id}
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                    /{portal.id}
                   </span>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
+
       </div>
     </section>
   );

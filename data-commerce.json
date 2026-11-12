@@ -1,0 +1,294 @@
+{
+  "categories": [
+    {
+      "id": "cat_agro_01",
+      "businessId": "biz_default",
+      "name": "Himalayan Organic Agro & Coffee",
+      "slug": "himalayan-organic-agro",
+      "description": "Direct mountain farm products with organic traceability",
+      "imageUrl": "/api/storage/mock-media?key=categories/coffee.jpg",
+      "displayOrder": "1"
+    },
+    {
+      "id": "cat_tech_02",
+      "businessId": "biz_default",
+      "name": "Sovereign AI Appliances & Kits",
+      "slug": "sovereign-ai-hardware",
+      "description": "Local Devanagari OCR scanners and air-gapped edge devices",
+      "imageUrl": "/api/storage/mock-media?key=categories/ai_device.jpg",
+      "displayOrder": "2"
+    },
+    {
+      "id": "cat_handicraft_03",
+      "businessId": "biz_default",
+      "name": "Handcrafted Heritage & Dhaka",
+      "slug": "heritage-dhaka",
+      "description": "Authentic Palpali Dhaka textiles and Pashmina shawls",
+      "imageUrl": "/api/storage/mock-media?key=categories/dhaka.jpg",
+      "displayOrder": "3"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_coffee_101",
+      "businessId": "biz_default",
+      "categoryId": "cat_agro_01",
+      "title": "Single-Origin Nuwakot Highland Coffee (500g)",
+      "slug": "single-origin-nuwakot-coffee",
+      "description": "Grown at 1,450m elevation in Nuwakot. Hand-picked, washed Arabica beans with hints of dark cocoa and Himalayan citrus. Perfect for espresso and French press.",
+      "priceNpr": "1250",
+      "compareAtPriceNpr": "1450",
+      "costPerItemNpr": "800",
+      "sku": "NWK-COF-500",
+      "barcode": "8901234567890",
+      "inventoryQuantity": "42",
+      "trackQuantity": true,
+      "status": "active",
+      "images": [
+        {
+          "key": "tenants/biz_default/products/coffee-beans.jpg",
+          "url": "/api/storage/mock-media?key=products/coffee-beans.jpg",
+          "alt": "Nuwakot Highland Coffee"
+        }
+      ],
+      "metadata": {
+        "weightGrams": 500,
+        "origin": "Nuwakot, Nepal",
+        "roaster": "Kathmandu Artisan Roasters"
+      }
+    },
+    {
+      "id": "prod_ocr_device_102",
+      "businessId": "biz_default",
+      "categoryId": "cat_tech_02",
+      "title": "NepalAI Devanagari OCR Scanner Appliance V2",
+      "slug": "nepalai-devanagari-ocr-scanner",
+      "description": "Plug-and-play local edge document scanner with onboard Devanagari OCR model. Scans Nepali Citizenship Cards, Lalpurja land deeds, and Ward bills in 350ms with zero cloud egress.",
+      "priceNpr": "28500",
+      "compareAtPriceNpr": "32000",
+      "costPerItemNpr": "19000",
+      "sku": "NEP-OCR-HW02",
+      "barcode": "8909876543210",
+      "inventoryQuantity": "14",
+      "trackQuantity": true,
+      "status": "active",
+      "images": [
+        {
+          "key": "tenants/biz_default/products/ocr-scanner.jpg",
+          "url": "/api/storage/mock-media?key=products/ocr-scanner.jpg",
+          "alt": "NepalAI Sovereign OCR Scanner"
+        }
+      ],
+      "metadata": {
+        "warrantyMonths": 12,
+        "interface": "USB-C & Gigabit LAN",
+        "chip": "Hailo-8 / Edge LPU"
+      }
+    },
+    {
+      "id": "prod_tea_103",
+      "businessId": "biz_default",
+      "categoryId": "cat_agro_01",
+      "title": "Ilam First Flush Golden Tips Organic Tea (250g)",
+      "slug": "ilam-first-flush-golden-tips",
+      "description": "Certified organic orthodox black tea harvested from high-altitude gardens of Ilam, Eastern Nepal. Rich muscatel bouquet and smooth finish.",
+      "priceNpr": "950",
+      "compareAtPriceNpr": "1150",
+      "costPerItemNpr": "550",
+      "sku": "ILM-TEA-250",
+      "barcode": "8905671234567",
+      "inventoryQuantity": "68",
+      "trackQuantity": true,
+      "status": "active",
+      "images": [
+        {
+          "key": "tenants/biz_default/products/ilam-tea.jpg",
+          "url": "/api/storage/mock-media?key=products/ilam-tea.jpg",
+          "alt": "Ilam First Flush Tea"
+        }
+      ],
+      "metadata": {
+        "harvestSeason": "Spring 2026",
+        "altitudeM": 1800,
+        "grade": "FTGFOP1"
+      }
+    },
+    {
+      "id": "prod_dhaka_104",
+      "businessId": "biz_default",
+      "categoryId": "cat_handicraft_03",
+      "title": "Palpali Handwoven Dhaka Executive Sleeve (14-inch)",
+      "slug": "palpali-handwoven-dhaka-laptop-sleeve",
+      "description": "Traditional geometric hand-loomed Palpali Dhaka pattern lined with shock-absorbent wool felt. Fits MacBook Pro 14 and standard ultrabooks.",
+      "priceNpr": "2200",
+      "compareAtPriceNpr": "2600",
+      "costPerItemNpr": "1300",
+      "sku": "PLP-DHK-SLV14",
+      "barcode": "8903456789012",
+      "inventoryQuantity": "25",
+      "trackQuantity": true,
+      "status": "active",
+      "images": [
+        {
+          "key": "tenants/biz_default/products/dhaka-sleeve.jpg",
+          "url": "/api/storage/mock-media?key=products/dhaka-sleeve.jpg",
+          "alt": "Palpali Dhaka Sleeve"
+        }
+      ],
+      "metadata": {
+        "weave": "100% Cotton Handloom",
+        "location": "Tansen, Palpa"
+      }
+    }
+  ],
+  "customers": [
+    {
+      "id": "cust_101",
+      "businessId": "biz_default",
+      "fullName": "Aayush Maharjan",
+      "phone": "+977 9841234567",
+      "email": "aayush.m@gmail.com",
+      "address": "Patan Dhoka, Lalitpur",
+      "city": "Lalitpur",
+      "totalOrders": "2",
+      "totalSpendNpr": "4100"
+    },
+    {
+      "id": "cust_102",
+      "businessId": "biz_default",
+      "fullName": "Sujata Gurung",
+      "phone": "+977 9801987654",
+      "email": "sujata.g@techhub.np",
+      "address": "Lakeside, Pokhara",
+      "city": "Pokhara",
+      "totalOrders": "1",
+      "totalSpendNpr": "28500"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_2081_1001",
+      "businessId": "biz_default",
+      "customerId": "cust_101",
+      "orderNumber": "ORD-2081-1001",
+      "subtotalNpr": "3450",
+      "deliveryChargeNpr": "150",
+      "discountNpr": "0",
+      "totalNpr": "3600",
+      "paymentMethod": "esewa",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "delivered",
+      "shippingAddress": {
+        "fullName": "Aayush Maharjan",
+        "phone": "+977 9841234567",
+        "address": "Patan Dhoka, Ward 3",
+        "city": "Lalitpur",
+        "province": "Bagmati"
+      },
+      "items": [
+        {
+          "id": "item_01",
+          "productId": "prod_coffee_101",
+          "title": "Single-Origin Nuwakot Highland Coffee (500g)",
+          "unitPriceNpr": "1250",
+          "quantity": "2",
+          "totalPriceNpr": "2500"
+        },
+        {
+          "id": "item_02",
+          "productId": "prod_tea_103",
+          "title": "Ilam First Flush Golden Tips Organic Tea (250g)",
+          "unitPriceNpr": "950",
+          "quantity": "1",
+          "totalPriceNpr": "950"
+        }
+      ],
+      "notes": "Deliver before 4 PM to Patan office",
+      "createdAt": "2026-11-08T02:51:33.727Z",
+      "updatedAt": "2026-11-10T03:01:03.608Z"
+    },
+    {
+      "id": "ord_2081_1002",
+      "businessId": "biz_default",
+      "customerId": "cust_102",
+      "orderNumber": "ORD-2081-1002",
+      "subtotalNpr": "28500",
+      "deliveryChargeNpr": "0",
+      "discountNpr": "0",
+      "totalNpr": "28500",
+      "paymentMethod": "khalti",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "processing",
+      "shippingAddress": {
+        "fullName": "Sujata Gurung",
+        "phone": "+977 9801987654",
+        "address": "Lakeside Street 6, Pokhara",
+        "city": "Pokhara",
+        "province": "Gandaki"
+      },
+      "items": [
+        {
+          "id": "item_03",
+          "productId": "prod_ocr_device_102",
+          "title": "NepalAI Devanagari OCR Scanner Appliance V2",
+          "unitPriceNpr": "28500",
+          "quantity": "1",
+          "totalPriceNpr": "28500"
+        }
+      ],
+      "notes": "Corporate warranty certificate required",
+      "createdAt": "2026-11-09T21:51:33.727Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay_hook_1794279663608",
+      "orderId": "ord_2081_1001",
+      "businessId": "biz_default",
+      "gateway": "esewa",
+      "transactionId": "ESW-TST-WEBHOOK",
+      "amountNpr": "1250",
+      "status": "verified",
+      "rawResponse": {
+        "mode": "webhook_callback",
+        "verification": {
+          "mode": "mock_test",
+          "refId": "ESW-TST-WEBHOOK",
+          "status": "COMPLETE",
+          "total_amount": 1250
+        }
+      },
+      "verifiedAt": "2026-11-10T03:01:03.608Z"
+    },
+    {
+      "id": "pay_01",
+      "orderId": "ord_2081_1001",
+      "businessId": "biz_default",
+      "gateway": "esewa",
+      "transactionId": "ESW-9840129",
+      "amountNpr": "3600",
+      "status": "verified",
+      "rawResponse": {
+        "mode": "esewa_epay",
+        "refId": "ESW-9840129",
+        "status": "COMPLETE"
+      },
+      "verifiedAt": "2026-11-08T02:51:33.727Z"
+    },
+    {
+      "id": "pay_02",
+      "orderId": "ord_2081_1002",
+      "businessId": "biz_default",
+      "gateway": "khalti",
+      "transactionId": "KHLTI-8910471",
+      "amountNpr": "28500",
+      "status": "verified",
+      "rawResponse": {
+        "mode": "khalti_v2",
+        "pidx": "KHLTI-8910471",
+        "status": "Completed"
+      },
+      "verifiedAt": "2026-11-09T21:51:33.727Z"
+    }
+  ]
+}

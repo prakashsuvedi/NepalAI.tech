@@ -4,13 +4,15 @@ import { Briefcase, CheckCircle2, ArrowRight, SlidersHorizontal, Sparkles } from
 import { TRANSLATIONS } from '../data/translations';
 import { motion, AnimatePresence } from 'motion/react';
 import { BentoGridSkeleton } from './BentoGridSkeleton';
+import { Breadcrumbs } from './ui/Breadcrumbs';
 
 interface ConsultingSectionProps {
   theme?: ThemeMode;
   language?: Language;
   offerings: ConsultingOffering[];
   onOpenConsultation: (serviceTitle?: string) => void;
-  onOpenAdminPricing: () => void;
+  onOpenAdminPricing?: () => void;
+  onNavigateHome?: () => void;
   isHydrating?: boolean;
 }
 
@@ -20,6 +22,7 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
   offerings,
   onOpenConsultation,
   onOpenAdminPricing,
+  onNavigateHome,
   isHydrating = false,
 }) => {
   const [selectedIndustry, setSelectedIndustry] = useState('Banking & Fintech');
@@ -79,6 +82,16 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
+        {/* Breadcrumb Navigation */}
+        <div className="mb-4">
+          <Breadcrumbs
+            items={[
+              { label: isNepali ? 'गृहपृष्ठ' : 'Home', onClick: onNavigateHome },
+              { label: isNepali ? 'संस्थागत परामर्श' : 'Enterprise Consulting', isCurrent: true },
+            ]}
+          />
+        </div>
+
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -124,32 +137,14 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Admin Panel Customization Button with 44px min touch target */}
             <motion.button
               type="button"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={onOpenAdminPricing}
-              data-cursor="Pricing"
-              className={`min-h-[44px] px-4 py-2.5 rounded-full border text-xs font-mono transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isDark
-                  ? 'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white'
-                  : 'border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-950 shadow-xs'
-              }`}
-              title="Customize service rates and scopes from Admin Panel"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500 shrink-0" aria-hidden="true" />
-              <span>Admin Rates (रू/$)</span>
-            </motion.button>
-
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onOpenConsultation('General Enterprise Advisory')}
               data-cursor="Book"
               aria-label="Schedule a general enterprise AI advisory session"
-              className={`min-h-[44px] px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              className={`min-h-[44px] px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 isDark 
                   ? 'bg-white text-slate-950 hover:bg-slate-200' 
                   : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20'

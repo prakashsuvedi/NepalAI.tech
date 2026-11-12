@@ -229,27 +229,56 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
     setInputText('');
     setIsGenerating(true);
 
-    // Analyze intent
+    // Call real /api/chat with resilient fallback
     const lower = text.toLowerCase();
     const match = KNOWLEDGE_RESPONSES.find((k) =>
       k.triggers.some((t) => lower.includes(t))
     );
 
-    setTimeout(() => {
+    const historyPayload = messages.slice(-5).map(m => ({
+      role: m.sender === 'user' ? 'user' : 'model',
+      text: m.text
+    }));
+
+    (async () => {
       let replyText = '';
       let code = match?.code;
 
-      if (match) {
-        replyText = language === 'ne' || inputMode === 'unicode' || lower.includes('nepali') || lower.includes('namaste')
-          ? match.responseNe
-          : match.responseEn;
-      } else {
-        if (inputMode === 'romanized' || lower.includes('cha') || lower.includes('kasto') || lower.includes('garnu')) {
-          replyText = `तपाईंको प्रश्न प्राप्त भयो। नेपालएआईको **काठमाडौं क्लस्टर ०१** ले रोमन नेपाली र देवनागरी दुवैलाई बुझेर इन्टरप्राइज-ग्रेड नतिजा दिन्छ।\n\n• **स्थानीय पूर्वाधार**: ४२ms लेटन्सी, शून्य विदेशी डाटा जोखिम।\n• **भुक्तानी सुविधा**: ईसेवा, खल्ती, र फोनपे मार्फत NPR मा सिधै बिलिङ।\n• **कन्सल्टिङ**: $७५० (रू ९५,०००) देखि सुरु हुने व्यावहारिक एआई रोडम्याप।`;
-        } else if (language === 'ne' || inputMode === 'unicode') {
-          replyText = `नमस्ते! नेपालएआई (NepalAI) को सार्वभौम क्लस्टरले नेपाली बजारका लागि इन्टरप्राइज एआई मोडलिङ, देवनागरी ओसीआर (OCR), र राष्ट्र बैंक अनुपालन सुनिश्चित गर्दछ। थप विस्तृत रणनीतिको लागि हामीसँग प्रत्यक्ष परामर्श बुक गर्न सक्नुहुन्छ।`;
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            language: language,
+            history: historyPayload
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.reply) {
+            replyText = data.reply;
+          }
+        }
+      } catch {
+        // network or server fallback
+      }
+
+      // If API didn't return text, use domain knowledge responses
+      if (!replyText) {
+        if (match) {
+          replyText = language === 'ne' || inputMode === 'unicode' || lower.includes('nepali') || lower.includes('namaste')
+            ? match.responseNe
+            : match.responseEn;
         } else {
-          replyText = `Thank you for your inquiry. NepalAI operates sovereign 42ms low-latency clusters tailored for Nepal's regulatory landscape, offering dual NPR/USD pricing, localized Devanagari RAG, and seamless eSewa/Khalti integration.`;
+          if (inputMode === 'romanized' || lower.includes('cha') || lower.includes('kasto') || lower.includes('garnu')) {
+            replyText = `तपाईंको प्रश्न प्राप्त भयो। नेपालएआईको **काठमाडौं क्लस्टर ०१** ले रोमन नेपाली र देवनागरी दुवैलाई बुझेर इन्टरप्राइज-ग्रेड नतिजा दिन्छ।\n\n• **स्थानीय पूर्वाधार**: ४२ms लेटन्सी, शून्य विदेशी डाटा जोखिम।\n• **भुक्तानी सुविधा**: ईसेवा, खल्ती, र फोनपे मार्फत NPR मा सिधै बिलिङ।\n• **कन्सल्टिङ**: $७५० (रू ९५,०००) देखि सुरु हुने व्यावहारिक एआई रोडम्याप।`;
+          } else if (language === 'ne' || inputMode === 'unicode') {
+            replyText = `नमस्ते! नेपालएआई (NepalAI) को सार्वभौम क्लस्टरले नेपाली बजारका लागि इन्टरप्राइज एआई मोडलिङ, देवनागरी ओसीआर (OCR), र राष्ट्र बैंक अनुपालन सुनिश्चित गर्दछ। थप विस्तृत रणनीतिको लागि हामीसँग प्रत्यक्ष परामर्श बुक गर्न सक्नुहुन्छ।`;
+          } else {
+            replyText = `Thank you for your inquiry. NepalAI operates sovereign 42ms low-latency clusters tailored for Nepal's regulatory landscape, offering dual NPR/USD pricing, localized Devanagari RAG, and seamless eSewa/Khalti integration.`;
+          }
         }
       }
 
@@ -267,7 +296,7 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
 
       setMessages((prev) => [...prev, botMsg]);
       setIsGenerating(false);
-    }, 700);
+    })();
   };
 
   const handleCopyMessage = (id: string, text: string) => {

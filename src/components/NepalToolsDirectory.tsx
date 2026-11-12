@@ -6,6 +6,7 @@ import { Search, CheckCircle, AlertTriangle, ExternalLink, Plus, Check, Layers, 
 import { TRANSLATIONS } from '../data/translations';
 import { BentoGridSkeleton } from './BentoGridSkeleton';
 import { AppleTooltip } from './AppleTooltip';
+import { Breadcrumbs } from './ui/Breadcrumbs';
 
 interface NepalToolsDirectoryProps {
   theme?: ThemeMode;
@@ -13,11 +14,13 @@ interface NepalToolsDirectoryProps {
   selectedStack: string[];
   onToggleStack: (toolId: string) => void;
   onOpenStackCalculator: () => void;
+  onNavigateHome?: () => void;
   isHydrating?: boolean;
 }
 
 const CATEGORIES: ToolCategory[] = [
   'All',
+  'Nepal Sovereign AI',
   'Coding',
   'LLM & Writing',
   'Design & Video',
@@ -31,6 +34,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
   selectedStack,
   onToggleStack,
   onOpenStackCalculator,
+  onNavigateHome,
   isHydrating = false,
 }) => {
   const [search, setSearch] = useState('');
@@ -121,6 +125,16 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
+        {/* Breadcrumb Navigation */}
+        <div className="mb-4">
+          <Breadcrumbs
+            items={[
+              { label: language === 'ne' ? 'गृहपृष्ठ' : 'Home', onClick: onNavigateHome },
+              { label: language === 'ne' ? 'टुल्स डाइरेक्टरी' : 'Tools Directory', isCurrent: true },
+            ]}
+          />
+        </div>
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-500/20">
           <div className="max-w-2xl">
@@ -251,7 +265,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900'
               }`}
             >
-              {c === 'All' ? t.tools.allCategories : c}
+              {c === 'All' ? t.tools.allCategories : c === 'Nepal Sovereign AI' ? (language === 'ne' ? '🇳🇵 स्वदेशी एआई (Nepal Sovereign)' : '🇳🇵 Nepal Sovereign AI') : c}
             </motion.button>
           ))}
         </div>
@@ -320,11 +334,15 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
           </div>
         </div>
 
-        {/* Hover Tooltip Overlay Indicator & Live Sync Trigger */}
+        {/* Tooltip Overlay Indicator & Live Sync Trigger */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400 animate-pulse" aria-hidden="true" />
-            <span className="font-medium">{language === 'ne' ? 'टुल्सको संक्षिप्त नेपाली तथा अंग्रेजी विवरण हेर्न माउस होभर वा ट्याप गर्नुहोस्' : 'Hover or tap on any tool card for instant Apple-style bilingual tooltip & specs'}</span>
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+            <span className="font-medium">
+              {language === 'ne' 
+                ? 'विस्तृत विवरण र भुक्तानी गाइड हेर्न कुनै पनि टुलमा क्लिक गर्नुहोस्' 
+                : 'Click or hover any tool card for specifications and payment guidelines'}
+            </span>
           </span>
 
           <div className="flex items-center gap-3">
@@ -338,7 +356,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:text-white hover:border-emerald-500/40'
                   : 'border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:border-emerald-500/40'
               }`}
-              title={language === 'ne' ? 'टुल्स डाटा पुनः लोड गर्नुहोस्' : 'Simulate live data fetch and test bento skeleton loading'}
+              title={language === 'ne' ? 'टुल्स डाटा पुनः लोड गर्नुहोस्' : 'Refresh tools directory'}
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 text-emerald-400 shrink-0 ${
@@ -422,21 +440,18 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                         {tool.category}
                       </span>
 
-                      {/* Small Visual Quick Pay Badge with Subtle Green Pulse Effect */}
+                      {/* Visual Quick Pay Badge */}
                       {supportsQuickPay && (
                         <span
                           id={`quick-pay-badge-${tool.id}`}
                           className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight border transition-colors ${
                             isDark
-                              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.18)]'
-                              : 'bg-emerald-50 border-emerald-300/80 text-emerald-800 shadow-2xs'
+                              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
+                              : 'bg-emerald-50 border-emerald-300/80 text-emerald-800'
                           }`}
                           title={language === 'ne' ? 'नेपालमा इसेवा वा खल्तीबाट सिधै भुक्तानी गर्न सकिने' : 'Direct payment via eSewa or Khalti supported'}
                         >
-                          <span className="relative flex h-2 w-2" aria-hidden="true">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                          </span>
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
                           <span>Quick Pay</span>
                           <span className={`text-[9px] font-medium hidden sm:inline ${
                             isDark ? 'text-emerald-400/90' : 'text-emerald-700'

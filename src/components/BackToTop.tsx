@@ -6,9 +6,10 @@ import { TRANSLATIONS } from '../data/translations';
 interface BackToTopProps {
   theme?: ThemeMode;
   language?: Language;
+  className?: string;
 }
 
-export const BackToTop: React.FC<BackToTopProps> = ({ theme = 'dark', language = 'en' }) => {
+export const BackToTop: React.FC<BackToTopProps> = ({ theme = 'dark', language = 'en', className = '' }) => {
   const [visible, setVisible] = useState(false);
   const isDark = theme === 'dark';
   const langKey = language && TRANSLATIONS[language] ? language : 'en';
@@ -36,12 +37,12 @@ export const BackToTop: React.FC<BackToTopProps> = ({ theme = 'dark', language =
 
   const label = t?.backToTop?.label || 'Back to Top';
 
+  if (!visible) return null;
+
   return (
     <div
-      className={`fixed bottom-6 right-6 z-40 transition-all duration-300 ${
-        visible
-          ? 'opacity-100 translate-y-0 pointer-events-auto'
-          : 'opacity-0 translate-y-4 pointer-events-none'
+      className={`transition-all duration-300 ${
+        className ? className : 'fixed bottom-6 right-6 z-40'
       }`}
     >
       <button

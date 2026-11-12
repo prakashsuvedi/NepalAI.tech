@@ -28,11 +28,13 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { BentoGridSkeleton } from './BentoGridSkeleton';
+import { Breadcrumbs } from './ui/Breadcrumbs';
 
 interface FreeAIToolsSectionProps {
   theme: ThemeMode;
   language: Language;
   onOpenConsultation?: (serviceTitle?: string) => void;
+  onNavigateHome?: () => void;
 }
 
 interface FreeServiceProvider {
@@ -213,6 +215,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
   theme,
   language,
   onOpenConsultation,
+  onNavigateHome,
 }) => {
   const isDark = theme === 'dark';
   const isNepali = language === 'ne';
@@ -455,6 +458,16 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: isNepali ? 'गृहपृष्ठ' : 'Home', onClick: onNavigateHome },
+              { label: isNepali ? 'निःशुल्क एआई' : 'Free AI Hub', isCurrent: true },
+            ]}
+          />
+        </div>
+
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center space-y-3 mb-14">
           <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-xs">
