@@ -103,13 +103,13 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
           }`}
         >
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 mb-2.5">
+            <div className="flex items-center gap-2 text-xs text-cyan-700 dark:text-cyan-400 mb-2.5">
               <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="font-semibold">
-                {isNepali ? 'इन्टरप्राइज एआई परामर्श (Enterprise AI)' : 'Enterprise AI Advisory & Engineering'}
+                {isNepali ? 'संस्थागत एआई परामर्श' : 'Enterprise AI Advisory'}
               </span>
-              <span className={isDark ? 'text-slate-600' : 'text-slate-300'} aria-hidden="true">•</span>
-              <span className={`font-mono uppercase tracking-wider text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <span className={isDark ? 'text-slate-500' : 'text-slate-400'} aria-hidden="true">•</span>
+              <span className={`font-mono uppercase tracking-wider text-xs ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                 {t.consulting.badge}
               </span>
             </div>
@@ -117,44 +117,42 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
             <h2
               id="consulting-heading"
               className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display ${
-                isDark ? 'text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400' : 'text-slate-950'
+                isDark ? 'text-white' : 'text-slate-950'
               }`}
             >
               <span>{t.consulting.title}</span>
             </h2>
 
-            <p className={`mt-3 text-xs sm:text-sm leading-relaxed ${
-              isDark ? 'text-slate-300' : 'text-slate-600'
+            <p className={`mt-3 text-sm sm:text-base leading-relaxed ${
+              isDark ? 'text-slate-200' : 'text-slate-700'
             }`}>
               {t.consulting.subtitle}
             </p>
 
-            <div className="mt-2 flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">
-              <span>Dual Invoicing: NPR (नेपाली रुपैयाँ रू) & USD ($)</span>
+            <div className="mt-2.5 flex items-center gap-2 text-xs font-mono font-semibold text-cyan-700 dark:text-cyan-300">
+              <span>NPR (रू) & USD ($) Billing</span>
               <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>•</span>
-              <span>100% IP Transfer</span>
+              <span>100% IP Ownership</span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => onOpenConsultation('General Enterprise Advisory')}
               data-cursor="Book"
               aria-label="Schedule a general enterprise AI advisory session"
-              className={`min-h-[44px] px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              className={`min-h-[44px] px-6 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                 isDark 
-                  ? 'bg-white text-slate-950 hover:bg-slate-200' 
-                  : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20'
+                  ? 'bg-cyan-500 text-slate-950 hover:bg-cyan-400' 
+                  : 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-cyan-600/20'
               }`}
             >
               <span>
                 {t.consulting.bookAdvisory}
               </span>
               <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            </motion.button>
+            </button>
           </div>
         </motion.div>
 
@@ -176,30 +174,29 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
               {offerings.map((offering, idx) => (
                 <motion.article
                   key={offering.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.5, delay: 0.08 * idx }}
-                  whileHover={{ y: -4, scale: 1.01 }}
+                  transition={{ duration: 0.4, delay: 0.06 * idx }}
                   data-cursor="Scope"
                   onClick={() => onOpenConsultation(offering.title)}
-                  className={`flex flex-col justify-between rounded-3xl border p-7 transition-all duration-300 group shadow-sm cursor-pointer ${
+                  className={`flex flex-col justify-between rounded-2xl border p-6 transition-colors duration-200 group shadow-xs cursor-pointer ${
                     isDark
-                      ? 'border-white/10 bg-white/[0.02] hover:border-emerald-500/50 hover:bg-white/[0.04]'
-                      : 'border-slate-200 bg-white hover:border-emerald-500 hover:shadow-md'
+                      ? 'border-slate-700/80 bg-[#0c1324] hover:border-cyan-400'
+                      : 'border-slate-200 bg-white hover:border-cyan-600 hover:shadow-md'
                   }`}
                 >
                   <div>
                     {/* Header Tag */}
-                    <div className="flex items-center justify-between text-[11px] mb-4">
-                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wide">
+                    <div className="flex items-center justify-between text-xs mb-3">
+                      <span className="font-mono text-cyan-700 dark:text-cyan-300 font-bold tracking-wide">
                         {offering.tier} • {offering.duration}
                       </span>
                       {offering.badge && (
-                        <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-mono ${
+                        <span className={`rounded-md border px-2 py-0.5 text-[11px] font-mono font-semibold ${
                           isDark
-                            ? 'bg-white/[0.04] border-white/10 text-slate-300'
-                            : 'bg-slate-100 border-slate-200 text-slate-700'
+                            ? 'bg-white/[0.06] border-white/15 text-slate-200'
+                            : 'bg-slate-100 border-slate-300 text-slate-800'
                         }`}>
                           {offering.badge}
                         </span>
@@ -207,31 +204,31 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                     </div>
 
                     {/* Title */}
-                    <h3 className={`text-lg font-bold font-display transition-colors leading-snug group-hover:text-emerald-500 ${
-                      isDark ? 'text-white' : 'text-slate-900'
+                    <h3 className={`text-lg font-bold font-display transition-colors leading-snug group-hover:text-cyan-600 dark:group-hover:text-cyan-300 ${
+                      isDark ? 'text-white' : 'text-slate-950'
                     }`}>
                       {offering.title}
                     </h3>
                     
-                    <p className={`text-xs mt-2 mb-4 leading-relaxed ${
-                      isDark ? 'text-slate-300' : 'text-slate-600'
+                    <p className={`text-sm mt-2 mb-4 leading-relaxed ${
+                      isDark ? 'text-slate-200' : 'text-slate-700'
                     }`}>
                       {offering.subtitle}
                     </p>
 
                     {/* Pricing Pill with Dual NPR (रू) and USD ($) */}
-                    <div className={`rounded-2xl border p-3.5 mb-5 flex items-center justify-between text-xs ${
-                      isDark ? 'bg-black/40 border-white/10' : 'bg-slate-50 border-slate-200'
+                    <div className={`rounded-xl border p-3.5 mb-4 flex items-center justify-between text-xs ${
+                      isDark ? 'bg-black/40 border-slate-700' : 'bg-slate-50 border-slate-200'
                     }`}>
-                      <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <span className={`text-xs font-mono font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                         {isNepali ? 'सुरुवाती लागत' : t.consulting.startingFrom}:
                       </span>
                       <div className="text-right">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-xs">
+                        <span className="font-bold text-cyan-700 dark:text-cyan-300 font-mono text-xs sm:text-sm">
                           {offering.startingPriceNpr || 'Custom Scoped'}
                         </span>
                         {offering.startingPriceUsd && (
-                          <span className={`text-[11px] font-mono ml-1.5 ${isDark ? 'text-indigo-300' : 'text-indigo-600 font-semibold'}`}>
+                          <span className={`text-xs font-mono ml-1.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                             ({offering.startingPriceUsd})
                           </span>
                         )}
@@ -239,11 +236,11 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                     </div>
 
                     {/* Key Deliverables */}
-                    <div className="space-y-2.5 mb-5">
+                    <div className="space-y-2 mb-5">
                       {offering.deliverables.slice(0, 3).map((item, dIdx) => (
-                        <div key={dIdx} className="flex items-start gap-2 text-xs">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
-                          <span className={`line-clamp-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                        <div key={dIdx} className="flex items-start gap-2 text-xs sm:text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" aria-hidden="true" />
+                          <span className={`line-clamp-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                             {item}
                           </span>
                         </div>
@@ -252,16 +249,16 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
                   </div>
 
                   {/* Action */}
-                  <div className={`pt-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                  <div className={`pt-4 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                     <div
-                      className={`w-full min-h-[44px] py-2.5 px-4 rounded-full border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                      className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${
                         isDark
-                          ? 'bg-white/[0.04] border-white/10 group-hover:bg-emerald-500 group-hover:text-slate-950 text-slate-200'
-                          : 'bg-slate-50 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white text-slate-800'
+                          ? 'bg-white/[0.06] border-slate-700 group-hover:bg-cyan-500 group-hover:text-slate-950 text-white'
+                          : 'bg-slate-50 border-slate-300 group-hover:bg-cyan-600 group-hover:text-white text-slate-900'
                       }`}
                     >
                       <span className={isNepali ? "font-['Noto_Sans_Devanagari']" : ''}>
-                        {t.consulting.bookAdvisory} (रू & $)
+                        {t.consulting.bookAdvisory}
                       </span>
                       <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     </div>
@@ -272,20 +269,20 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Interactive Scope Scenarios Builder (Apple Bento Style) */}
+        {/* Interactive Scope Scenarios Builder */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className={`mt-10 rounded-3xl border p-6 sm:p-7 transition-all shadow-sm ${
-            isDark ? 'border-white/10 bg-black/50' : 'border-slate-200 bg-slate-50'
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className={`mt-10 rounded-2xl border p-6 sm:p-7 transition-colors shadow-xs ${
+            isDark ? 'border-slate-700 bg-[#0c1324]' : 'border-slate-200 bg-slate-50'
           }`}
         >
           <div className="flex items-center gap-2.5 mb-4">
-            <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
-            <h3 className={`text-sm font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {isNepali ? 'उद्योग अनुसार सिफारिस गरिएको आर्किटेक्चर र लागत' : 'Targeted Architecture & Pricing by Industry'}
+            <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400 shrink-0" aria-hidden="true" />
+            <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
+              {isNepali ? 'उद्योग अनुसार सिफारिस गरिएको सेवा र लागत' : 'Recommended Solutions by Industry'}
             </h3>
           </div>
 
@@ -295,64 +292,57 @@ export const ConsultingSection: React.FC<ConsultingSectionProps> = ({
             aria-label="Filter recommended architectures by industry"
           >
             {industries.map((ind) => (
-              <motion.button
+              <button
                 key={ind}
                 role="tab"
                 type="button"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
                 aria-selected={selectedIndustry === ind}
                 aria-label={`Select industry: ${ind}`}
                 onClick={() => handleIndustryChange(ind)}
                 data-cursor="Industry"
-                className={`min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center justify-center cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center justify-center cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                   selectedIndustry === ind
                     ? isDark 
-                      ? 'bg-white text-slate-950 font-bold shadow-md' 
-                      : 'bg-slate-900 text-white font-bold shadow-md'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs' 
+                      : 'bg-cyan-600 text-white font-bold shadow-xs'
                     : isDark
-                    ? 'bg-white/[0.04] text-slate-400 hover:text-white border border-white/5'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+                    ? 'bg-white/[0.06] text-slate-200 hover:text-white border border-slate-700'
+                    : 'bg-white border border-slate-300 text-slate-800 hover:border-cyan-600'
                 }`}
               >
                 {ind}
-              </motion.button>
+              </button>
             ))}
           </div>
 
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
             {objectivesByIndustry[selectedIndustry]?.map((item, i) => (
-              <motion.button
+              <button
                 key={i}
                 type="button"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                whileHover={{ scale: 1.02, y: -1 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedObjective(item.en);
                   onOpenConsultation(`${selectedIndustry}: ${item.en} (${item.price})`);
                 }}
                 data-cursor="Inquire"
                 aria-label={`Consult about: ${item.en}`}
-                className={`min-h-[76px] p-4 rounded-2xl border text-left text-xs transition-all flex flex-col justify-between group cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                className={`min-h-[80px] p-4 rounded-2xl border text-left text-xs transition-colors flex flex-col justify-between group cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                   selectedObjective === item.en
-                    ? isDark ? 'border-emerald-500/60 bg-emerald-950/30 text-white shadow-lg' : 'border-emerald-500 bg-emerald-50 text-emerald-950 shadow-xs'
-                    : isDark ? 'border-white/10 bg-white/[0.015] text-slate-300 hover:border-white/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 shadow-xs'
+                    ? isDark ? 'border-cyan-400 bg-cyan-950/40 text-white' : 'border-cyan-600 bg-cyan-50 text-slate-950'
+                    : isDark ? 'border-slate-700 bg-white/[0.03] text-slate-100 hover:border-cyan-400/70' : 'border-slate-200 bg-white text-slate-800 hover:border-cyan-600 shadow-2xs'
                 }`}
               >
                 <div>
-                  <div className="font-semibold line-clamp-1">{isNepali ? item.ne : item.en}</div>
-                  <div className={`text-[11px] font-mono mt-0.5 line-clamp-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{isNepali ? item.en : item.ne}</div>
+                  <div className="font-bold text-sm line-clamp-1">{isNepali ? item.ne : item.en}</div>
+                  <div className={`text-xs font-mono mt-1 line-clamp-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{isNepali ? item.en : item.ne}</div>
                 </div>
                 <div className={`mt-3 pt-2 border-t flex items-center justify-between ${
-                  isDark ? 'border-white/10' : 'border-slate-200'
+                  isDark ? 'border-slate-700' : 'border-slate-200'
                 }`}>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">{item.price}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" aria-hidden="true" />
+                  <span className="font-mono text-cyan-700 dark:text-cyan-300 font-bold text-xs">{item.price}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0 ml-2" aria-hidden="true" />
                 </div>
-              </motion.button>
+              </button>
             ))}
           </div>
         </motion.div>

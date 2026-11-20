@@ -22,12 +22,74 @@
     <priority>0.98</priority>
   </url>
 
-  <!-- Daily Utilities & Sovereign Engines (Forex, EV Road Tax, NEPSE CGT, IT Export 95Ka, Ward Letters, Voice, OCR, Income Tax, Kalimati & Land Units) -->
+  <!-- Daily Utilities & Sovereign Engines Overview -->
   <url>
     <loc>https://nepalai.tech/#daily-tools</loc>
-    <lastmod>2026-11-09T00:00:00+05:45</lastmod>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.98</priority>
+  </url>
+
+  <!-- Individual Daily Utility Tool URLs (Indexed Separately with Custom OG + Schema.org WebApplication) -->
+  <url>
+    <loc>https://nepalai.tech/tools/ev-tax</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/nepse</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/it-export</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/bullion</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/forex</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.92</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/ward-letter</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.92</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/income-tax</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.92</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/land-kalimati</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.92</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/nepali-ocr</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://nepalai.tech/tools/nepali-voice</loc>
+    <lastmod>2026-11-13T00:00:00+05:45</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
   </url>
 
   <!-- Nepal AI Tools Directory & Payment Guide -->

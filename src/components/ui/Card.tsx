@@ -10,13 +10,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <div
         ref={ref}
-        className={`rounded-xl border bg-white dark:bg-[#0a0e19] transition-all duration-200 ${
+        className={`rounded-2xl border bg-white dark:bg-[#0c1324] transition-colors duration-200 ${
           selected
-            ? 'border-emerald-500/60 dark:border-emerald-400/60 ring-1 ring-emerald-500/30 shadow-sm'
-            : 'border-slate-200 dark:border-white/10 shadow-xs'
+            ? 'border-cyan-600 dark:border-cyan-400 ring-2 ring-cyan-500/30 shadow-md shadow-cyan-500/10'
+            : 'border-slate-200 dark:border-white/15 shadow-xs'
         } ${
           hoverable
-            ? 'hover:border-slate-300 dark:hover:border-white/20 hover:shadow-sm hover:-translate-y-[1px]'
+            ? 'hover:border-cyan-600/70 dark:hover:border-cyan-400/70 hover:shadow-md hover:shadow-cyan-500/10'
             : ''
         } ${className}`}
         {...props}
@@ -30,7 +30,7 @@ Card.displayName = 'Card';
 
 export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ children, className = '', ...props }, ref) => (
-    <div ref={ref} className={`px-5 py-4 border-b border-slate-100 dark:border-white/5 ${className}`} {...props}>
+    <div ref={ref} className={`px-5 py-4 border-b border-slate-200/80 dark:border-white/10 ${className}`} {...props}>
       {children}
     </div>
   )
@@ -41,7 +41,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttribut
   ({ children, className = '', ...props }, ref) => (
     <h3
       ref={ref}
-      className={`text-base font-bold font-display text-slate-900 dark:text-slate-100 tracking-tight leading-snug ${className}`}
+      className={`text-base sm:text-lg font-bold font-display text-slate-950 dark:text-white tracking-tight leading-snug ${className}`}
       {...props}
     >
       {children}
@@ -54,7 +54,7 @@ export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTML
   ({ children, className = '', ...props }, ref) => (
     <p
       ref={ref}
-      className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${className}`}
+      className={`text-sm text-slate-700 dark:text-slate-200 mt-1 leading-relaxed ${className}`}
       {...props}
     >
       {children}

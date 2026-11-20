@@ -23,9 +23,9 @@ export const Alert: React.FC<AlertProps> = ({
       titleColor: 'text-sky-950 dark:text-sky-100',
     },
     success: {
-      container: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200',
-      icon: <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />,
-      titleColor: 'text-emerald-950 dark:text-emerald-100',
+      container: 'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200 dark:border-cyan-800/50 text-cyan-950 dark:text-cyan-100',
+      icon: <CheckCircle2 className="h-4 w-4 text-cyan-700 dark:text-cyan-300 shrink-0 mt-0.5" aria-hidden="true" />,
+      titleColor: 'text-cyan-950 dark:text-white',
     },
     warning: {
       container: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200',

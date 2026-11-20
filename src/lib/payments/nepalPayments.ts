@@ -2,14 +2,48 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * NepalAI Commerce Payment Gateway Integration & Order Notification Engine
- * Supports eSewa epay, Khalti v2 ePayment, FonePay QR, and WhatsApp Alert Link Generation.
+ * Supports eSewa ePay v2 (HMAC-SHA256), Khalti v2 ePayment, Nepal QR (EMVCo),
+ * and Bilingual WhatsApp Order Alert Generation.
  */
+
+import crypto from 'node:crypto';
+
+const ESEWA_SANDBOX_SECRET = '8gBm/:&EnhH.1/q';
+
+export interface EsewaV2FormParams {
+  amt: number | string;
+  taxAmt?: number | string;
+  serviceCharge?: number | string;
+  deliveryCharge?: number | string;
+  totalAmt?: number | string;
+  transactionUuid: string;
+  productCode?: string;
+  successUrl: string;
+  failureUrl: string;
+  secretKey?: string;
+}
 
 export interface EsewaVerificationParams {
   amt: number | string;
   oid: string; // Order / Transaction UUID
-  refId: string; // eSewa reference ID
+  refId?: string; // eSewa reference ID
   scd?: string; // Merchant Code (defaults to 'EPAYTEST' or process.env.ESEWA_MERCHANT_CODE)
+  encodedData?: string; // Base64 JSON response returned by eSewa v2 callback
+  secretKey?: string;
+}
+
+export interface KhaltiInitiationParams {
+  amountNpr: number | string;
+  purchaseOrderId: string;
+  purchaseOrderName: string;
+  returnUrl: string;
+  websiteUrl: string;
+  customerInfo?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  secretKey?: string;
 }
 
 export interface KhaltiVerificationParams {
@@ -48,9 +82,167 @@ function getEnv(key: string, defaultValue = ''): string {
   return defaultValue;
 }
 
+function isProductionGatewayMode(): boolean {
+  return getEnv('NODE_ENV') === 'production';
+}
+
+export function getGatewayReadinessStatus() {
+  const esewaMerchant = getEnv('ESEWA_MERCHANT_CODE', 'EPAYTEST');
+  const esewaSecret = getEnv('ESEWA_SECRET_KEY', '');
+  const khaltiSecret = getEnv('KHALTI_SECRET_KEY', 'test_secret_key_nepalai');
+
+  return {
+    esewa: {
+      mode: esewaMerchant !== 'EPAYTEST' && !!esewaSecret ? 'live' : 'sandbox',
+      merchantCode: esewaMerchant === 'EPAYTEST' ? 'EPAYTEST' : `${esewaMerchant.slice(0, 3)}***`,
+      v2SignatureEnabled: true,
+    },
+    khalti: {
+      mode: khaltiSecret.startsWith('live_secret_key_') ? 'live' : 'sandbox',
+      v2LookupEnabled: true,
+    },
+    fonepayQr: {
+      mode: 'live_emvco',
+      currencyCode: '524 (NPR)',
+    },
+    whatsapp: {
+      mode: 'wa_me_bilingual_dispatch',
+    },
+  };
+}
+
+/**
+ * Generates eSewa ePay v2 HMAC-SHA256 Base64 signature and form payload
+ */
+export function createEsewaV2FormPayload(params: EsewaV2FormParams): {
+  endpointUrl: string;
+  mode: 'live' | 'sandbox';
+  fields: {
+    amount: string;
+    tax_amount: string;
+    total_amount: string;
+    transaction_uuid: string;
+    product_code: string;
+    product_service_charge: string;
+    product_delivery_charge: string;
+    success_url: string;
+    failure_url: string;
+    signed_field_names: string;
+    signature: string;
+  };
+} {
+  const amtNum = Number(params.amt) || 0;
+  const taxNum = Number(params.taxAmt ?? 0) || 0;
+  const serviceNum = Number(params.serviceCharge ?? 0) || 0;
+  const deliveryNum = Number(params.deliveryCharge ?? 0) || 0;
+  const totalNum = params.totalAmt !== undefined ? Number(params.totalAmt) : amtNum + taxNum + serviceNum + deliveryNum;
+
+  const productCode = params.productCode || getEnv('ESEWA_MERCHANT_CODE', 'EPAYTEST');
+  const isLive = productCode !== 'EPAYTEST' && Boolean(params.secretKey || getEnv('ESEWA_SECRET_KEY'));
+  const secret = params.secretKey || getEnv('ESEWA_SECRET_KEY') || ESEWA_SANDBOX_SECRET;
+
+  const totalStr = Number.isInteger(totalNum) ? String(totalNum) : totalNum.toFixed(2);
+  const message = `total_amount=${totalStr},transaction_uuid=${params.transactionUuid},product_code=${productCode}`;
+  const signature = crypto.createHmac('sha256', secret).update(message).digest('base64');
+
+  return {
+    endpointUrl: isLive
+      ? 'https://epay.esewa.com.np/api/epay/main/v2/form'
+      : 'https://rc-epay.esewa.com.np/api/epay/main/v2/form',
+    mode: isLive ? 'live' : 'sandbox',
+    fields: {
+      amount: Number.isInteger(amtNum) ? String(amtNum) : amtNum.toFixed(2),
+      tax_amount: Number.isInteger(taxNum) ? String(taxNum) : taxNum.toFixed(2),
+      total_amount: totalStr,
+      transaction_uuid: params.transactionUuid,
+      product_code: productCode,
+      product_service_charge: Number.isInteger(serviceNum) ? String(serviceNum) : serviceNum.toFixed(2),
+      product_delivery_charge: Number.isInteger(deliveryNum) ? String(deliveryNum) : deliveryNum.toFixed(2),
+      success_url: params.successUrl,
+      failure_url: params.failureUrl,
+      signed_field_names: 'total_amount,transaction_uuid,product_code',
+      signature,
+    },
+  };
+}
+
+/**
+ * Verifies eSewa ePay v2 Base64 encoded `data` payload using HMAC-SHA256
+ */
+export function verifyEsewaV2EncodedResponse(
+  encodedData: string,
+  secretKey?: string
+): {
+  verified: boolean;
+  transactionUuid: string;
+  transactionCode: string;
+  totalAmount: number;
+  status: string;
+  payload: Record<string, any> | null;
+  message: string;
+} {
+  try {
+    const decodedJson = Buffer.from(encodedData, 'base64').toString('utf8');
+    const payload = JSON.parse(decodedJson);
+
+    const signedFieldNames = String(payload?.signed_field_names || '');
+    const signature = String(payload?.signature || '');
+    if (!signedFieldNames || !signature) {
+      return {
+        verified: false,
+        transactionUuid: String(payload?.transaction_uuid || ''),
+        transactionCode: String(payload?.transaction_code || ''),
+        totalAmount: Number(payload?.total_amount || 0),
+        status: String(payload?.status || 'INVALID'),
+        payload,
+        message: 'Missing signed_field_names or signature in eSewa v2 response',
+      };
+    }
+
+    const secret = secretKey || getEnv('ESEWA_SECRET_KEY') || ESEWA_SANDBOX_SECRET;
+    const message = signedFieldNames
+      .split(',')
+      .map((field) => `${field.trim()}=${payload[field.trim()] ?? ''}`)
+      .join(',');
+
+    const expectedSig = crypto.createHmac('sha256', secret).update(message).digest('base64');
+
+    const sigBuf = Buffer.from(signature, 'utf8');
+    const expBuf = Buffer.from(expectedSig, 'utf8');
+    const signatureValid = sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
+
+    const status = String(payload?.status || '').toUpperCase();
+    const isComplete = status === 'COMPLETE' || status === 'SUCCESS';
+
+    return {
+      verified: signatureValid && isComplete,
+      transactionUuid: String(payload?.transaction_uuid || ''),
+      transactionCode: String(payload?.transaction_code || ''),
+      totalAmount: parseFloat(String(payload?.total_amount || '0').replace(/,/g, '')) || 0,
+      status,
+      payload,
+      message: !signatureValid
+        ? 'eSewa v2 HMAC signature mismatch'
+        : isComplete
+        ? 'eSewa v2 HMAC signature verified successfully'
+        : `eSewa v2 status is ${status}`,
+    };
+  } catch {
+    return {
+      verified: false,
+      transactionUuid: '',
+      transactionCode: '',
+      totalAmount: 0,
+      status: 'PARSE_ERROR',
+      payload: null,
+      message: 'Failed to decode eSewa v2 Base64 callback payload',
+    };
+  }
+}
+
 /**
  * Verifies eSewa Transaction
- * Supports eSewa ePay 2.0 status verification and test sandbox fallback.
+ * Supports eSewa ePay v2 Base64 signed callbacks, status API lookup, and sandbox test verification.
  */
 export async function verifyEsewaPayment(params: EsewaVerificationParams): Promise<{
   verified: boolean;
@@ -61,7 +253,28 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
   rawResponse: Record<string, any>;
   message: string;
 }> {
-  const { amt, oid, refId, scd = getEnv('ESEWA_MERCHANT_CODE', 'EPAYTEST') } = params;
+  const {
+    amt,
+    oid,
+    refId = '',
+    scd = getEnv('ESEWA_MERCHANT_CODE', 'EPAYTEST'),
+    encodedData,
+    secretKey,
+  } = params;
+
+  if (encodedData) {
+    const v2Check = verifyEsewaV2EncodedResponse(encodedData, secretKey);
+    return {
+      verified: v2Check.verified,
+      gateway: 'esewa',
+      transactionId: v2Check.transactionCode || refId,
+      amountNpr: v2Check.totalAmount || (typeof amt === 'string' ? parseFloat(amt) : amt) || 0,
+      orderId: v2Check.transactionUuid || oid,
+      rawResponse: { mode: 'esewa_v2_hmac', ...(v2Check.payload || {}) },
+      message: v2Check.message,
+    };
+  }
+
   const numAmt = typeof amt === 'string' ? parseFloat(amt) : amt;
 
   if (!oid || !refId || isNaN(numAmt) || numAmt <= 0) {
@@ -76,8 +289,10 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
     };
   }
 
-  // Fast test resolution for mock identifiers
-  if (refId.startsWith('ESW-TST-') || refId.startsWith('MOCK-') || scd === 'MOCK') {
+  const isSandboxMode = scd === 'EPAYTEST' || scd === 'MOCK' || !getEnv('ESEWA_SECRET_KEY');
+
+  // Fast test resolution for sandbox/mock identifiers only outside live merchant config
+  if (isSandboxMode && (refId.startsWith('ESW-TST-') || refId.startsWith('MOCK-') || scd === 'MOCK')) {
     return {
       verified: true,
       gateway: 'esewa',
@@ -85,19 +300,17 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
       amountNpr: numAmt,
       orderId: oid,
       rawResponse: { mode: 'mock_test', refId, status: 'COMPLETE', total_amount: numAmt },
-      message: 'eSewa transaction verified via fast-path test switch',
+      message: 'eSewa transaction verified via sandbox test switch',
     };
   }
 
-  // Attempt real remote call if not strictly local mock or test credentials
-  const isTestMerchant = scd === 'EPAYTEST' || scd === 'test' || !getEnv('ESEWA_SECRET_KEY');
-  const endpoint = isTestMerchant
+  const endpoint = isSandboxMode
     ? `https://rc-epay.esewa.com.np/api/epay/transaction/status/?product_code=${encodeURIComponent(scd)}&total_amount=${numAmt}&transaction_uuid=${encodeURIComponent(oid)}`
     : `https://epay.esewa.com.np/api/epay/transaction/status/?product_code=${encodeURIComponent(scd)}&total_amount=${numAmt}&transaction_uuid=${encodeURIComponent(oid)}`;
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 4500);
 
     const response = await fetch(endpoint, {
       method: 'GET',
@@ -110,10 +323,10 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
 
     if (response.ok) {
       const data = await response.json();
-      const status = (data?.status || '').toUpperCase();
+      const status = String(data?.status || '').toUpperCase();
       const isComplete = status === 'COMPLETE' || status === 'SUCCESS';
-      
-      if (isComplete || !isTestMerchant) {
+
+      if (isComplete || !isSandboxMode) {
         return {
           verified: isComplete,
           gateway: 'esewa',
@@ -125,11 +338,22 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
         };
       }
     }
-  } catch (err: any) {
-    // If external call aborts or network fails in test environment, validate refId pattern
+  } catch {
+    // Fallback below only in sandbox mode
   }
 
-  // Fallback for sandboxed / test verification when remote test endpoint is unreachable or mock ID tested
+  if (!isSandboxMode && isProductionGatewayMode()) {
+    return {
+      verified: false,
+      gateway: 'esewa',
+      transactionId: refId,
+      amountNpr: numAmt,
+      orderId: oid,
+      rawResponse: { mode: 'live_verification_failed', merchantCode: scd },
+      message: 'Could not verify transaction against live eSewa gateway',
+    };
+  }
+
   const isLikelyValidRef = refId.length >= 6;
   return {
     verified: isLikelyValidRef,
@@ -148,6 +372,78 @@ export async function verifyEsewaPayment(params: EsewaVerificationParams): Promi
     message: isLikelyValidRef
       ? 'eSewa payment verified via sandbox switch'
       : 'Invalid eSewa reference ID',
+  };
+}
+
+/**
+ * Initiates a Khalti v2 ePayment Checkout Session
+ */
+export async function initiateKhaltiPayment(params: KhaltiInitiationParams): Promise<{
+  success: boolean;
+  mode: 'live' | 'sandbox';
+  pidx: string;
+  paymentUrl: string;
+  amountPaisa: number;
+  message: string;
+}> {
+  const numAmt = typeof params.amountNpr === 'string' ? parseFloat(params.amountNpr) : params.amountNpr;
+  const amountPaisa = Math.max(1000, Math.round((numAmt || 0) * 100));
+  const secretKey = params.secretKey || getEnv('KHALTI_SECRET_KEY', 'test_secret_key_nepalai');
+  const isLive = secretKey.startsWith('live_secret_key_');
+  const hasRealKey = !secretKey.includes('nepalai');
+
+  const initUrl = isLive
+    ? 'https://khalti.com/api/v2/epayment/initiate/'
+    : 'https://a.khalti.com/api/v2/epayment/initiate/';
+
+  if (hasRealKey) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4500);
+      const res = await fetch(initUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${secretKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          return_url: params.returnUrl,
+          website_url: params.websiteUrl,
+          amount: amountPaisa,
+          purchase_order_id: params.purchaseOrderId,
+          purchase_order_name: params.purchaseOrderName,
+          customer_info: params.customerInfo,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.pidx) {
+          return {
+            success: true,
+            mode: isLive ? 'live' : 'sandbox',
+            pidx: data.pidx,
+            paymentUrl: data.payment_url || '',
+            amountPaisa,
+            message: 'Khalti v2 payment session initiated',
+          };
+        }
+      }
+    } catch {
+      // Fall back to sandbox session below when unreachable in dev
+    }
+  }
+
+  const sandboxPidx = `KHLTI_SANDBOX_${params.purchaseOrderId.replace(/[^A-Za-z0-9]/g, '')}_${Date.now().toString(36).toUpperCase()}`;
+  return {
+    success: true,
+    mode: 'sandbox',
+    pidx: sandboxPidx,
+    paymentUrl: `${params.returnUrl}${params.returnUrl.includes('?') ? '&' : '?'}pidx=${encodeURIComponent(sandboxPidx)}&status=Completed`,
+    amountPaisa,
+    message: 'Khalti v2 sandbox payment session created',
   };
 }
 
@@ -176,8 +472,10 @@ export async function verifyKhaltiPayment(params: KhaltiVerificationParams): Pro
     };
   }
 
-  // Fast test resolution for mock identifiers
-  if (pidx.startsWith('KHLTI_SANDBOX') || pidx.startsWith('MOCK-')) {
+  const isLive = secretKey.startsWith('live_secret_key_');
+
+  // Fast test resolution for mock/sandbox identifiers only when not live
+  if (!isLive && (pidx.startsWith('KHLTI_SANDBOX') || pidx.startsWith('MOCK-'))) {
     const numAmt = amountNpr ? (typeof amountNpr === 'string' ? parseFloat(amountNpr) : amountNpr) : 1000;
     return {
       verified: true,
@@ -189,14 +487,13 @@ export async function verifyKhaltiPayment(params: KhaltiVerificationParams): Pro
     };
   }
 
-  const isLive = secretKey.startsWith('live_secret_key_');
   const lookupUrl = isLive
     ? 'https://khalti.com/api/v2/epayment/lookup/'
     : 'https://a.khalti.com/api/v2/epayment/lookup/';
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 4500);
 
     const response = await fetch(lookupUrl, {
       method: 'POST',
@@ -211,7 +508,7 @@ export async function verifyKhaltiPayment(params: KhaltiVerificationParams): Pro
 
     if (response.ok) {
       const data = await response.json();
-      const status = (data?.status || '').toUpperCase();
+      const status = String(data?.status || '').toUpperCase();
       const isCompleted = status === 'COMPLETED';
       const returnedAmtNpr = (data?.total_amount || 0) / 100;
 
@@ -224,11 +521,21 @@ export async function verifyKhaltiPayment(params: KhaltiVerificationParams): Pro
         message: isCompleted ? 'Khalti payment verified successfully' : `Khalti status: ${status}`,
       };
     }
-  } catch (err: any) {
-    // Network fallback
+  } catch {
+    // Network fallback below for sandbox
   }
 
-  // Resilient sandbox fallback for demo & test suites
+  if (isLive && isProductionGatewayMode()) {
+    return {
+      verified: false,
+      gateway: 'khalti',
+      transactionId: pidx,
+      amountNpr: 0,
+      rawResponse: { mode: 'live_lookup_failed', pidx },
+      message: 'Could not verify transaction with live Khalti lookup API',
+    };
+  }
+
   const isPidxValid = pidx.length >= 8;
   const numAmt = amountNpr ? (typeof amountNpr === 'string' ? parseFloat(amountNpr) : amountNpr) : 1000;
   return {
@@ -260,17 +567,6 @@ export function generateNepalQRInvoicePayload(params: QrInvoiceParams): {
   const numAmt = typeof amountNpr === 'string' ? parseFloat(amountNpr) : amountNpr;
   const invoiceNumber = `INV-${orderNumber.replace(/[^A-Za-z0-9]/g, '')}`;
 
-  // Nepal EMVCo QR standard fields
-  // 00: Format Indicator (01)
-  // 01: Point of Initiation (12 = Dynamic)
-  // 26: Merchant PAN & Switch ID
-  // 52: Merchant Category Code (5411)
-  // 53: Currency Code (524 = NPR)
-  // 54: Amount
-  // 58: Country Code (NP)
-  // 59: Merchant Name
-  // 60: Merchant City
-  // 62: Additional Data (Order Reference)
   const qrPayload = [
     `000201`,
     `010212`,
@@ -314,7 +610,6 @@ export function generateWhatsAppOrderAlert(params: WhatsAppNotificationParams): 
     paymentStatus,
   } = params;
 
-  // Clean phone number to 977 standard
   let cleanPhone = customerPhone.replace(/[^0-9]/g, '');
   if (cleanPhone.startsWith('977') && cleanPhone.length === 13) {
     // Already has 977

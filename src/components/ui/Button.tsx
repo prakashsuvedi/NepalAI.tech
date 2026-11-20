@@ -35,17 +35,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantClasses = {
       primary:
-        'bg-cyan-600 hover:bg-cyan-500 text-white shadow-xs focus-visible:ring-2 focus-visible:ring-cyan-500/40 active:translate-y-[1px]',
+        'bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:via-sky-500 hover:to-blue-500 text-white font-semibold shadow-md shadow-cyan-500/20 hover:shadow-lg hover:shadow-cyan-500/30 focus-visible:ring-2 focus-visible:ring-cyan-400',
       secondary:
-        'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] dark:text-slate-200 focus-visible:ring-2 focus-visible:ring-slate-400/40',
+        'bg-slate-100 hover:bg-slate-200 text-slate-950 dark:bg-white/[0.10] dark:hover:bg-white/[0.18] dark:text-white font-semibold border border-slate-300 dark:border-white/20 focus-visible:ring-2 focus-visible:ring-cyan-400/50',
       outline:
-        'border border-slate-300 hover:bg-slate-50 text-slate-800 dark:border-white/15 dark:hover:bg-white/[0.06] dark:text-slate-200 focus-visible:ring-2 focus-visible:ring-cyan-500/40',
+        'border border-slate-300 hover:border-cyan-600 hover:bg-cyan-50 text-slate-900 dark:border-white/25 dark:hover:border-cyan-400 dark:hover:bg-cyan-500/15 dark:text-white font-semibold focus-visible:ring-2 focus-visible:ring-cyan-500/50',
       ghost:
-        'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-slate-400/40',
+        'text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/[0.10] focus-visible:ring-2 focus-visible:ring-cyan-400/40',
       gold:
-        'bg-amber-600 hover:bg-amber-700 text-white shadow-xs focus-visible:ring-2 focus-visible:ring-amber-500/40 active:translate-y-[1px]',
+        'bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-bold shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/40',
       destructive:
-        'bg-red-600 hover:bg-red-700 text-white shadow-xs focus-visible:ring-2 focus-visible:ring-red-500/40 active:translate-y-[1px]',
+        'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-semibold shadow-md shadow-red-500/20 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-red-500/40',
     }[variant];
 
     return (

@@ -34,6 +34,7 @@ import { calculateNepalIncomeTax } from '../utils/nepalTaxCalculator';
 import { convertFromRopaniSystem, convertFromSqFeet } from '../utils/nepalUnitsConverter';
 import { getCurrentBikramSambatDate } from '../utils/nepaliTextConverter';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
@@ -69,6 +70,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   const isDark = theme === 'dark';
   const isNe = language === 'ne';
   const { showToast } = useToast();
+  const { user, getIdToken } = useAuth();
 
   // Search & Command State
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,6 +114,37 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   // Active Workspace Tab
   const [workspaceTab, setWorkspaceTab] = useState<'pinned' | 'recent' | 'saved' | 'preferences'>('pinned');
 
+  // Hydrate pinned/recent tools and saved calculations from Cloud SQL when signed in
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    (async () => {
+      try {
+        const token = await getIdToken();
+        if (!token || !active) return;
+        const res = await fetch('/api/workspace/state', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok || !active) return;
+        const data = await res.json();
+        if (data?.preferences?.pinnedTools && Array.isArray(data.preferences.pinnedTools)) {
+          setPinnedToolIds(data.preferences.pinnedTools);
+        }
+        if (data?.preferences?.recentTools && Array.isArray(data.preferences.recentTools)) {
+          setRecentToolIds(data.preferences.recentTools);
+        }
+        if (Array.isArray(data?.savedCalculations)) {
+          setSavedCalculations(data.savedCalculations);
+        }
+      } catch {
+        // Keep local fallback seamlessly
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user, getIdToken]);
+
   // Mini-Widget 1: Live NRB Forex Data
   const [nrbForexData, setNrbForexData] = useState<{
     publishedAt: string;
@@ -128,7 +161,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
     eurBuy: 144.15,
     gbpBuy: 172.80,
     inrBuy: 160.00,
-    isLive: true,
+    isLive: false,
   });
 
   useEffect(() => {
@@ -145,7 +178,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               eurBuy: data.rates.EUR?.buy || 144.15,
               gbpBuy: data.rates.GBP?.buy || 172.80,
               inrBuy: data.rates.INR?.buy || 160.00,
-              isLive: true,
+              isLive: Boolean(data.live),
             });
           }
         }
@@ -186,6 +219,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       } catch (e) {
         console.error(e);
       }
+      if (user) {
+        getIdToken().then((token) => {
+          if (!token) return;
+          fetch('/api/workspace/preferences', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ recentTools: updated }),
+          }).catch(() => {});
+        });
+      }
       return updated;
     });
 
@@ -217,6 +263,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         localStorage.setItem('nepalai_pinned_tools', JSON.stringify(updated));
       } catch (err) {
         console.error(err);
+      }
+      if (user) {
+        getIdToken().then((token) => {
+          if (!token) return;
+          fetch('/api/workspace/preferences', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ pinnedTools: updated }),
+          }).catch(() => {});
+        });
       }
       showToast(
         isPinned ? 'Unpinned' : 'Pinned to Dashboard',
@@ -323,6 +382,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
     } catch (e) {
       console.error(e);
     }
+    if (user) {
+      getIdToken().then((token) => {
+        if (!token) return;
+        fetch('/api/workspace/calculations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newCalc),
+        }).catch(() => {});
+      });
+    }
     showToast('Saved', isNe ? 'आयकर हिसाब सुरक्षित गरियो' : 'Calculation saved to Workspace', 'success', 2000);
   };
 
@@ -334,6 +406,15 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       localStorage.setItem('nepalai_saved_calculations', JSON.stringify(updated));
     } catch (e) {
       console.error(e);
+    }
+    if (user) {
+      getIdToken().then((token) => {
+        if (!token) return;
+        fetch(`/api/workspace/calculations/${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      });
     }
   };
 
@@ -388,51 +469,65 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         {/* =========================================================================
             SECTION A: COMPACT WELCOME & GLOBAL COMMAND SEARCH
            ========================================================================= */}
-        <div className={`rounded-2xl border p-5 sm:p-7 mb-8 transition-all ${
+        <div className={`rounded-3xl border p-5 sm:p-7 mb-8 transition-all relative overflow-hidden ${
           isDark
-            ? 'border-white/10 bg-gradient-to-b from-[#0b0f19] to-[#080b13] shadow-lg'
-            : 'border-slate-200 bg-white shadow-xs'
+            ? 'border-cyan-500/20 bg-gradient-to-b from-[#0d1629] via-[#09101f] to-[#070b15] shadow-xl shadow-cyan-950/20'
+            : 'border-slate-200/90 bg-gradient-to-b from-white via-cyan-50/20 to-white shadow-md shadow-slate-200/50'
         }`}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/60 dark:border-white/10">
+          {/* Ambient Lighting Beam */}
+          <div
+            className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-40 dark:opacity-60"
+            style={{
+              background: isDark
+                ? 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%)',
+            }}
+            aria-hidden="true"
+          />
+
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/70 dark:border-white/10 relative z-10">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-1">
+              <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-1">
                 <span>{isNe ? 'कमान्ड सेन्टर' : 'Command Center'}</span>
-                <span className="text-slate-400 dark:text-slate-600">·</span>
+                <span className="text-slate-400 dark:text-slate-500">·</span>
                 <span>{getCurrentBikramSambatDate().formattedBs}</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white">
-                {greeting}, {isNe ? 'कार्यथलोमा स्वागत छ' : 'Welcome to NepalAI'}
+              <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-950 dark:text-white">
+                {greeting},{' '}
+                <span className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 dark:from-cyan-400 dark:via-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
+                  {isNe ? 'कार्यथलोमा स्वागत छ' : 'Welcome to NepalAI'}
+                </span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xl leading-relaxed">
+              <p className="text-sm text-slate-700 dark:text-slate-200 mt-1 max-w-xl leading-relaxed">
                 {isNe 
-                  ? 'दैनिक विनिमय दर, आयकर हिसाब, र प्रमाणित उपयोगिताहरू — एकै ठाउँमा।' 
-                  : 'Real-time exchange rates, income tax calculations, and daily utilities at a glance.'}
+                  ? 'दैनिक विनिमय दर, आयकर हिसाब, र प्रमाणित सेवाहरू — एकै ठाउँमा।' 
+                  : 'Real-time exchange rates, income tax, and daily tools in one clean view.'}
               </p>
             </div>
 
             {/* Quick Live Indicators */}
             <div className="flex items-center gap-2 flex-wrap text-xs">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono text-[11px]">
+              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-cyan-500/50 bg-cyan-500/15 text-cyan-900 dark:text-cyan-200 font-mono text-xs font-bold shadow-xs">
                 <span>NRB USD: रू {nrbForexData.usdBuy.toFixed(2)}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 font-mono text-[11px]">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/20 bg-white dark:bg-white/[0.08] text-slate-900 dark:text-slate-100 font-mono text-xs font-semibold shadow-2xs">
                 <span>FY 2081/82 IRD</span>
               </div>
             </div>
           </div>
 
           {/* Prominent Global Command Search Bar */}
-          <div className="mt-5">
+          <div className="mt-5 relative z-10">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-cyan-500 shrink-0 pointer-events-none" aria-hidden="true" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-cyan-600 dark:text-cyan-400 shrink-0 pointer-events-none" aria-hidden="true" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder={isNe ? 'कमान्ड खोज्नुहोस् (उदा: डलर दर, आयकर, वडा निवेदन, ओसीआर, कालिमाटी, Ropani)...' : 'Type a command or search (NRB Forex, Income Tax, Ward Nibedan, OCR, Kalimati, Ropani)...'}
-                className="w-full pl-12 pr-28 py-3.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-[#06080e] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm sm:text-base focus:outline-hidden focus:ring-2 focus:ring-cyan-500/40 shadow-xs transition-all"
+                placeholder={isNe ? 'खोज्नुहोस्: डलर दर, आयकर, वडा निवेदन, ओसीआर, कालिमाटी...' : 'Search NRB Forex, Income Tax, Ward Nibedan, OCR, Kalimati, Ropani...'}
+                className="w-full pl-12 pr-28 py-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#070b16] text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 text-sm sm:text-base focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 shadow-xs transition-colors"
                 aria-label="Global utility search"
               />
               <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -440,13 +535,13 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    className="p-1 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white cursor-pointer"
                     aria-label="Clear search"
                   >
                     <XCircle className="h-4 w-4" />
                   </button>
                 ) : (
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded-md bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10 select-none">
+                  <span className="hidden sm:inline-flex items-center gap-1 text-xs font-mono px-2 py-1 rounded-md bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-white/15 select-none">
                     <span>Ctrl</span>
                     <span>+</span>
                     <span>K</span>
@@ -458,7 +553,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             {/* Category Filter Badges */}
             <div className="mt-3 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mr-1">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 mr-1">
                   {isNe ? 'श्रेणी:' : 'Filter:'}
                 </span>
                 {[
@@ -474,12 +569,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id as UtilityCategory)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer select-none whitespace-nowrap min-h-[30px] ${
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer select-none whitespace-nowrap min-h-[34px] ${
                       selectedCategory === cat.id
-                        ? 'bg-cyan-600 text-white shadow-xs font-semibold'
+                        ? 'bg-cyan-600 text-white shadow-xs font-bold'
                         : isDark
-                          ? 'bg-white/[0.04] text-slate-400 hover:text-white border border-white/5'
-                          : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
+                          ? 'bg-white/[0.06] text-slate-200 hover:text-white border border-slate-700'
+                          : 'bg-slate-100 text-slate-800 hover:text-slate-950 border border-slate-300'
                     }`}
                   >
                     {isNe ? cat.labelNe : cat.labelEn}
@@ -487,8 +582,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 ))}
               </div>
 
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden md:inline">
-                {isNe ? 'नेभिगेसन: ↑ ↓ इन्टर' : 'Use ↑ ↓ to navigate, Enter to launch'}
+              <span className="text-xs text-slate-700 dark:text-slate-200 hidden md:inline font-medium">
+                {isNe ? 'नेभिगेसन: ↑ ↓ इन्टर' : 'Use ↑ ↓ then Enter'}
               </span>
             </div>
 
@@ -591,11 +686,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-bold font-display text-slate-900 dark:text-white">
-                {isNe ? 'प्रत्यक्ष वित्तीय तथा नियामक विजेटहरू' : 'Live Financial & Regulatory Telemetry'}
+              <h2 className="text-lg sm:text-xl font-bold font-display text-slate-950 dark:text-white">
+                {isNe ? 'प्रत्यक्ष वित्तीय तथा नियामक विजेटहरू' : 'Quick Calculators & Live Rates'}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {isNe ? 'आधिकारिक स्रोतहरूबाट सिधै हिसाब र विनिमय विश्लेषण' : 'Source-grounded calculators powered by official government frameworks'}
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                {isNe ? 'आधिकारिक स्रोतहरूबाट सिधै हिसाब र विनिमय' : 'Check rates, tax, and land conversions right here'}
               </p>
             </div>
             <Badge variant="info" size="sm">
@@ -611,54 +706,56 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-md bg-cyan-500/10 text-cyan-500">
+                      <div className="p-1.5 rounded-md bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">
                         <ArrowRightLeft className="h-4 w-4" />
                       </div>
-                      <CardTitle className="text-sm">NRB Forex Rates</CardTitle>
+                      <CardTitle className="text-sm sm:text-base">NRB Forex Rates</CardTitle>
                     </div>
-                    <span className="text-[10px] font-mono text-cyan-500 font-semibold">Live Benchmark</span>
+                    <span className="text-xs font-mono text-cyan-700 dark:text-cyan-300 font-bold">
+                      {nrbForexData.isLive ? 'Live' : 'Benchmark'}
+                    </span>
                   </div>
-                  <CardDescription className="text-[11px]">
+                  <CardDescription className="text-xs">
                     Nepal Rastra Bank daily peg
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-3 pb-3 space-y-2">
+                <CardContent className="pt-3 pb-3 space-y-2.5">
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5">
-                      <span className="text-[10px] text-slate-400 block font-mono">USD Buy / Sell</span>
-                      <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                      <span className="text-[11px] text-slate-700 dark:text-slate-200 block font-mono">USD Buy / Sell</span>
+                      <span className="font-bold font-mono text-slate-950 dark:text-white">
                         रू {nrbForexData.usdBuy.toFixed(2)} / {nrbForexData.usdSell.toFixed(2)}
                       </span>
                     </div>
-                    <div className="p-2 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5">
-                      <span className="text-[10px] text-slate-400 block font-mono">EUR Buy</span>
-                      <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                      <span className="text-[11px] text-slate-700 dark:text-slate-200 block font-mono">EUR Buy</span>
+                      <span className="font-bold font-mono text-slate-950 dark:text-white">
                         रू {nrbForexData.eurBuy.toFixed(2)}
                       </span>
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-cyan-500/5 border border-cyan-500/20 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs text-slate-800 dark:text-slate-100">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium">$500 Dollar Card Quota:</span>
-                      <span className="font-mono text-cyan-500 font-bold">Cap Active</span>
+                      <span className="font-semibold">$500 Card Quota:</span>
+                      <span className="font-mono text-cyan-800 dark:text-cyan-300 font-bold">Active</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-tight">
-                      Statutory 3.0% bank spread + 2.0% DST applies automatically.
+                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">
+                      3.0% spread + 2.0% DST included.
                     </p>
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="pt-2 pb-2">
-                <span className="text-[10px] text-slate-400 font-mono">
-                  Pub: {nrbForexData.publishedAt}
+              <CardFooter className="pt-2.5 pb-2.5">
+                <span className="text-xs text-slate-700 dark:text-slate-200 font-mono">
+                  {nrbForexData.publishedAt}
                 </span>
                 <button
                   type="button"
                   onClick={() => onNavigatePage('daily', 'fx')}
-                  className="text-xs text-cyan-500 hover:text-cyan-400 font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-cyan-700 dark:text-cyan-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <span>Convert</span>
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </CardFooter>
             </Card>
@@ -669,35 +766,35 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-md bg-sky-500/10 text-sky-500">
+                      <div className="p-1.5 rounded-md bg-sky-500/15 text-sky-700 dark:text-sky-300">
                         <Calculator className="h-4 w-4" />
                       </div>
-                      <CardTitle className="text-sm">Income Tax & TDS</CardTitle>
+                      <CardTitle className="text-sm sm:text-base">Income Tax & TDS</CardTitle>
                     </div>
                     <Badge variant="unboxed" size="sm">FY 2081/82</Badge>
                   </div>
-                  <CardDescription className="text-[11px]">
-                    Inland Revenue Department brackets
+                  <CardDescription className="text-xs">
+                    IRD Nepal tax brackets
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-3 pb-3 space-y-2">
+                <CardContent className="pt-3 pb-3 space-y-2.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[11px] text-slate-500">Monthly Salary:</span>
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">Monthly Salary:</span>
                     <input
                       type="number"
                       step={5000}
                       value={miniSalaryNpr}
                       onChange={(e) => setMiniSalaryNpr(Math.max(0, Number(e.target.value)))}
-                      className="w-24 px-2 py-0.5 rounded border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] text-right font-mono text-xs focus:outline-hidden"
+                      className="w-24 px-2 py-1 rounded border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/[0.06] text-right font-mono text-xs font-bold text-slate-950 dark:text-white focus:outline-hidden"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between gap-1 p-1 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[11px]">
+                  <div className="flex items-center justify-between gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-xs">
                     <button
                       type="button"
                       onClick={() => setMiniTaxMarital('single')}
-                      className={`flex-1 py-0.5 rounded font-medium text-center cursor-pointer ${
-                        miniTaxMarital === 'single' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold' : 'text-slate-500'
+                      className={`flex-1 py-1 rounded-md font-semibold text-center cursor-pointer ${
+                        miniTaxMarital === 'single' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-xs font-bold' : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Single
@@ -705,8 +802,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                     <button
                       type="button"
                       onClick={() => setMiniTaxMarital('married')}
-                      className={`flex-1 py-0.5 rounded font-medium text-center cursor-pointer ${
-                        miniTaxMarital === 'married' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold' : 'text-slate-500'
+                      className={`flex-1 py-1 rounded-md font-semibold text-center cursor-pointer ${
+                        miniTaxMarital === 'married' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-xs font-bold' : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Married
@@ -714,37 +811,37 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                    <div className="p-1.5 rounded bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5">
-                      <span className="text-[10px] text-slate-400 block font-mono">Monthly TDS</span>
-                      <span className="font-bold font-mono text-cyan-600 dark:text-cyan-400">
+                    <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                      <span className="text-[11px] text-slate-700 dark:text-slate-200 block font-mono">Monthly TDS</span>
+                      <span className="font-bold font-mono text-cyan-700 dark:text-cyan-300">
                         रू {Math.round(miniTaxResult.monthlyTaxTds).toLocaleString()}
                       </span>
                     </div>
-                    <div className="p-1.5 rounded bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5">
-                      <span className="text-[10px] text-slate-400 block font-mono">Take Home</span>
-                      <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                    <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                      <span className="text-[11px] text-slate-700 dark:text-slate-200 block font-mono">Take Home</span>
+                      <span className="font-bold font-mono text-slate-950 dark:text-white">
                         रू {Math.round(miniTaxResult.monthlyNetTakeHome).toLocaleString()}
                       </span>
                     </div>
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="pt-2 pb-2">
+              <CardFooter className="pt-2.5 pb-2.5">
                 <button
                   type="button"
                   onClick={handleSaveTaxCalc}
-                  className="text-[10px] text-slate-400 hover:text-cyan-500 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
                 >
-                  <Bookmark className="h-3 w-3" />
+                  <Bookmark className="h-3.5 w-3.5" />
                   <span>Save</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onNavigatePage('daily', 'tax')}
-                  className="text-xs text-sky-500 hover:text-sky-400 font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-cyan-700 dark:text-cyan-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <span>Full Tax Slip</span>
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </CardFooter>
             </Card>
@@ -755,19 +852,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
+                      <div className="p-1.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300">
                         <TrendingUp className="h-4 w-4" />
                       </div>
-                      <CardTitle className="text-sm">Kalimati Produce</CardTitle>
+                      <CardTitle className="text-sm sm:text-base">Kalimati Produce</CardTitle>
                     </div>
-                    <span className="text-[10px] font-mono text-amber-500 font-semibold">20 Items</span>
+                    <span className="text-xs font-mono text-amber-700 dark:text-amber-300 font-bold">20 Items</span>
                   </div>
-                  <CardDescription className="text-[11px]">
-                    Kalimati market daily rates (रू/kg)
+                  <CardDescription className="text-xs">
+                    Kalimati daily rates (रू/kg)
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2 pb-2">
-                  <div className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
+                  <div className="divide-y divide-slate-200 dark:divide-white/10 text-xs">
                     {[
                       { name: 'Tomato Big (गोलभेँडा)', price: 75, wholesale: 60 },
                       { name: 'Potato Red (रातो आलु)', price: 58, wholesale: 48 },
@@ -775,29 +872,29 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                       { name: 'Mushroom (च्याउ)', price: 220, wholesale: 180 },
                     ].map((item, idx) => (
                       <div key={idx} className="py-1.5 flex items-center justify-between">
-                        <span className="truncate max-w-[130px] text-slate-700 dark:text-slate-300 text-[11px]">
+                        <span className="truncate max-w-[130px] text-slate-800 dark:text-slate-100 text-xs font-medium">
                           {item.name}
                         </span>
-                        <div className="flex items-center gap-2 font-mono text-[11px]">
-                          <span className="font-bold text-slate-800 dark:text-slate-200">रू {item.price}</span>
-                          <span className="text-[10px] text-slate-400">(W: {item.wholesale})</span>
+                        <div className="flex items-center gap-2 font-mono text-xs">
+                          <span className="font-bold text-slate-950 dark:text-white">रू {item.price}</span>
+                          <span className="text-[11px] text-slate-600 dark:text-slate-300">(W: {item.wholesale})</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="pt-2 pb-2">
-                <span className="text-[10px] text-slate-400 font-mono">
-                  Board: Kalimati
+              <CardFooter className="pt-2.5 pb-2.5">
+                <span className="text-xs text-slate-700 dark:text-slate-200 font-mono">
+                  Kalimati Board
                 </span>
                 <button
                   type="button"
                   onClick={() => onNavigatePage('daily', 'market')}
-                  className="text-xs text-amber-500 hover:text-amber-400 font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-amber-700 dark:text-amber-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
                 >
-                  <span>CSV Matrix</span>
-                  <ArrowRight className="h-3 w-3" />
+                  <span>Full Rates</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </CardFooter>
             </Card>
@@ -808,69 +905,69 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
+                      <div className="p-1.5 rounded-md bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">
                         <Compass className="h-4 w-4" />
                       </div>
-                      <CardTitle className="text-sm">Land Converter</CardTitle>
+                      <CardTitle className="text-sm sm:text-base">Land Converter</CardTitle>
                     </div>
                     <Badge variant="unboxed" size="sm">Hills ↔ Terai</Badge>
                   </div>
-                  <CardDescription className="text-[11px]">
+                  <CardDescription className="text-xs">
                     Ropani-Aana to Bigha-Kattha
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-3 pb-3 space-y-2">
+                <CardContent className="pt-3 pb-3 space-y-2.5">
                   <div className="flex items-center gap-2 text-xs">
                     <div className="flex-1">
-                      <label className="text-[10px] text-slate-400 block font-mono">Ropani</label>
+                      <label className="text-xs text-slate-700 dark:text-slate-200 block font-mono mb-0.5">Ropani</label>
                       <input
                         type="number"
                         min={0}
                         value={miniRopani}
                         onChange={(e) => setMiniRopani(Math.max(0, Number(e.target.value)))}
-                        className="w-full px-2 py-1 rounded border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] font-mono text-xs focus:outline-hidden"
+                        className="w-full px-2.5 py-1 rounded border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/[0.06] font-mono text-xs font-bold text-slate-950 dark:text-white focus:outline-hidden"
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="text-[10px] text-slate-400 block font-mono">Aana</label>
+                      <label className="text-xs text-slate-700 dark:text-slate-200 block font-mono mb-0.5">Aana</label>
                       <input
                         type="number"
                         min={0}
                         max={15}
                         value={miniAana}
                         onChange={(e) => setMiniAana(Math.max(0, Math.min(15, Number(e.target.value))))}
-                        className="w-full px-2 py-1 rounded border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] font-mono text-xs focus:outline-hidden"
+                        className="w-full px-2.5 py-1 rounded border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/[0.06] font-mono text-xs font-bold text-slate-950 dark:text-white focus:outline-hidden"
                       />
                     </div>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 space-y-1 text-xs font-mono">
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 space-y-1 text-xs font-mono">
                     <div className="flex justify-between">
-                      <span className="text-slate-400 text-[11px]">Sq. Feet:</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200">
+                      <span className="text-slate-700 dark:text-slate-200 text-xs">Sq. Feet:</span>
+                      <span className="font-bold text-slate-950 dark:text-white">
                         {miniLandResult.sqFeet.toLocaleString()} sq ft
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400 text-[11px]">Terai System:</span>
-                      <span className="font-bold text-cyan-600 dark:text-cyan-400">
+                      <span className="text-slate-700 dark:text-slate-200 text-xs">Terai:</span>
+                      <span className="font-bold text-cyan-700 dark:text-cyan-300">
                         {miniLandResult.bigha} Bigha {miniLandResult.kattha} Kattha
                       </span>
                     </div>
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="pt-2 pb-2">
-                <span className="text-[10px] text-slate-400 font-mono">
+              <CardFooter className="pt-2.5 pb-2.5">
+                <span className="text-xs text-slate-700 dark:text-slate-200 font-mono">
                   1 Ropani = 5,476 sq ft
                 </span>
                 <button
                   type="button"
                   onClick={() => onNavigatePage('daily', 'market')}
-                  className="text-xs text-indigo-500 hover:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-cyan-700 dark:text-cyan-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <span>Full Units</span>
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </CardFooter>
             </Card>
@@ -884,44 +981,44 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         <div>
           {/* Workspace Tabs Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-white/10">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => setWorkspaceTab('pinned')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] ${
                   workspaceTab === 'pinned'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-xs font-bold'
+                    : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <Pin className="h-3.5 w-3.5" />
-                <span>{isNe ? 'पिन गरिएका उपयोगिताहरू' : 'Pinned Shortcuts'} ({pinnedTools.length})</span>
+                <span>{isNe ? 'पिन गरिएका' : 'Pinned'} ({pinnedTools.length})</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setWorkspaceTab('recent')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] ${
                   workspaceTab === 'recent'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-xs font-bold'
+                    : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <Clock className="h-3.5 w-3.5" />
-                <span>{isNe ? 'हालै चलाइएका' : 'Recently Used'} ({recentTools.length})</span>
+                <span>{isNe ? 'हालै चलाइएका' : 'Recent'} ({recentTools.length})</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setWorkspaceTab('saved')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px] ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] ${
                   workspaceTab === 'saved'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-xs font-bold'
+                    : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <Bookmark className="h-3.5 w-3.5" />
-                <span>{isNe ? 'सुरक्षित हिसाब' : 'Saved Records'} ({savedCalculations.length})</span>
+                <span>{isNe ? 'सुरक्षित हिसाब' : 'Saved'} ({savedCalculations.length})</span>
               </button>
             </div>
 
@@ -931,7 +1028,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               onClick={() => onNavigatePage('directory')}
               rightIcon={<ArrowUpRight className="h-3.5 w-3.5" />}
             >
-              {isNe ? 'सबै टुल्स हेर्नुहोस्' : 'Browse All 28+ Utilities'}
+              {isNe ? 'सबै टुल्स हेर्नुहोस्' : 'Browse All Tools'}
             </Button>
           </div>
 
@@ -943,9 +1040,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   icon={<Pin className="h-6 w-6 text-slate-400" />}
                   title={isNe ? 'कुनै पनि उपयोगिता पिन गरिएको छैन' : 'No Pinned Shortcuts Yet'}
                   description={isNe 
-                    ? 'कुनै पनि उपयोगिताको माथिल्लो दायाँ भागमा रहेको पिन आइकन थिचेर यहाँ तुरुन्तै पहुँचका लागि राख्नुहोस्।' 
-                    : 'Click the pin icon on any tool card to keep your most frequented Nepal utilities at the top of your Command Center.'}
-                  actionLabel={isNe ? 'डाइरेक्टरी हेर्नुहोस्' : 'Explore Tools Directory'}
+                    ? 'कुनै पनि उपयोगिताको माथिल्लो दायाँ भागमा रहेको पिन आइकन थिचेर यहाँ राख्नुहोस्।' 
+                    : 'Click the pin icon on any tool card to keep your favorite Nepal utilities here.'}
+                  actionLabel={isNe ? 'डाइरेक्टरी हेर्नुहोस्' : 'Explore Directory'}
                   onAction={() => onNavigatePage('directory')}
                 />
               ) : (
@@ -959,33 +1056,33 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                     >
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between gap-2">
-                          <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shrink-0 group-hover:scale-105 transition-transform">
+                          <div className="p-2 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 shrink-0">
                             {renderIcon(tool.icon, 'h-5 w-5')}
                           </div>
                           <button
                             type="button"
                             onClick={(e) => handleTogglePin(tool.id, e)}
-                            className="p-1 rounded text-amber-500 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                            className="p-1.5 rounded text-amber-500 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                             title="Unpin"
                             aria-label="Unpin tool"
                           >
                             <Pin className="h-3.5 w-3.5 fill-amber-500" />
                           </button>
                         </div>
-                        <CardTitle className="mt-2 text-sm">
+                        <CardTitle className="mt-2 text-base">
                           {isNe ? tool.nameNe : tool.nameEn}
                         </CardTitle>
-                        <CardDescription className="text-xs line-clamp-2">
+                        <CardDescription className="text-xs sm:text-sm line-clamp-2">
                           {isNe ? tool.descNe : tool.descEn}
                         </CardDescription>
                       </CardHeader>
-                      <CardFooter className="pt-2 pb-2">
-                        <span className="text-[10px] text-slate-400 font-mono">
+                      <CardFooter className="pt-2.5 pb-2.5">
+                        <span className="text-xs text-slate-700 dark:text-slate-200 font-mono">
                           {tool.badgeEn || 'Active'}
                         </span>
-                        <span className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                          <span>Launch</span>
-                          <ArrowRight className="h-3 w-3" />
+                        <span className="text-xs text-cyan-700 dark:text-cyan-300 font-bold flex items-center gap-1">
+                          <span>Open</span>
+                          <ArrowRight className="h-3.5 w-3.5" />
                         </span>
                       </CardFooter>
                     </Card>
@@ -1003,8 +1100,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                   icon={<Clock className="h-6 w-6 text-slate-400" />}
                   title={isNe ? 'हालै कुनै गतिविधि छैन' : 'No Recent Activity Yet'}
                   description={isNe 
-                    ? 'तपाईंले कमान्ड सेन्टरबाट प्रयोग गरेका सेवाहरू यहाँ देखा पर्नेछन्। तलको बटनबाट सेवा सुरु गर्नुहोस्।' 
-                    : 'Tools you launch from the search bar or shortcuts will automatically appear here for quick continuation.'}
+                    ? 'तपाईंले प्रयोग गरेका सेवाहरू यहाँ देखा पर्नेछन्।' 
+                    : 'Tools you open from search or shortcuts will appear here.'}
                   actionLabel={isNe ? 'दैनिक सेवा खोल्नुहोस्' : 'Open Daily Utilities'}
                   onAction={() => onNavigatePage('daily')}
                 />
@@ -1019,26 +1116,26 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                     >
                       <CardHeader className="pb-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-lg bg-slate-100 dark:bg-white/10 text-cyan-500 shrink-0">
+                          <div className="p-2 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 shrink-0">
                             {renderIcon(tool.icon, 'h-4 w-4')}
                           </div>
                           <div>
-                            <CardTitle className="text-sm">
+                            <CardTitle className="text-sm sm:text-base">
                               {isNe ? tool.nameNe : tool.nameEn}
                             </CardTitle>
-                            <span className="text-[10px] text-slate-400 block font-mono">
-                              Category: {tool.category}
+                            <span className="text-xs text-slate-600 dark:text-slate-300 block font-mono">
+                              {tool.category}
                             </span>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardFooter className="pt-2 pb-2">
-                        <span className="text-[10px] text-slate-400">
+                      <CardFooter className="pt-2.5 pb-2.5">
+                        <span className="text-xs text-slate-700 dark:text-slate-200">
                           {tool.sourceMetadata.verifiedYear}
                         </span>
-                        <span className="text-xs text-cyan-500 font-semibold flex items-center gap-1">
-                          <span>Re-open</span>
-                          <ArrowRight className="h-3 w-3" />
+                        <span className="text-xs text-cyan-700 dark:text-cyan-300 font-bold flex items-center gap-1">
+                          <span>Open</span>
+                          <ArrowRight className="h-3.5 w-3.5" />
                         </span>
                       </CardFooter>
                     </Card>

@@ -110,7 +110,7 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
           viewBox="5 4 34 36"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full p-1 transition-transform duration-300 group-hover:scale-[1.04]"
+          className="w-full h-full p-1 transition-opacity duration-300"
           aria-label="NepalAI Architectural N Emblem"
         >
           <defs>
@@ -290,62 +290,51 @@ export const NepalAILogo: React.FC<NepalAILogoProps> = ({
                 : { scale: 0, opacity: 0 }
             }
             transition={{ duration: 0.4, delay: 1.15 }}
-            className="transition-transform duration-300 group-hover:scale-125"
+            className="transition-opacity duration-300"
           />
         </svg>
-
-        {/* Ambient Subtle Cyan Pulse */}
-        <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500 shadow-[0_0_6px_#06B6D4]"></span>
-        </span>
       </div>
 
       {/* 
         Single 'N' Brand Lockup:
         The emblem [N] defines the letter 'N' for Nepal and the icon both.
-        Directly followed by 'epal' + 'AI' + '.tech' to seamlessly read 'NepalAI.tech' without any duplicate 'N'.
+        Directly followed by 'epal' + 'AI' + '.tech' cleanly without pill clutter.
       */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-2 whitespace-nowrap shrink-0">
         <div className="flex items-baseline tracking-tight font-display -ml-0.5 sm:-ml-1">
           {/* 'epal' completing 'Nepal' from the 'N' emblem */}
           <span
-            className={`font-black ${textSizes[size]} transition-colors tracking-tight ${
-              isDark ? 'text-white' : 'text-slate-900'
+            className={`font-extrabold ${textSizes[size]} transition-colors tracking-tight ${
+              isDark ? 'text-white' : 'text-slate-950'
             }`}
           >
             epal
           </span>
 
           {/* 'AI' in signature Sovereign Cyan */}
-          <span className={`font-black ${textSizes[size]} text-cyan-500 dark:text-cyan-400 tracking-tight ml-0.5`}>
+          <span className={`font-extrabold ${textSizes[size]} text-cyan-700 dark:text-cyan-400 tracking-tight ml-0.5`}>
             AI
           </span>
 
-          {/* Refined .TECH Capsule Badge */}
-          <span className="ml-1.5 sm:ml-2 inline-flex items-center">
-            <span
-              className={`font-mono font-bold uppercase tracking-widest ${badgeSizes[size]} rounded-md border transition-all ${
-                isDark
-                  ? 'border-cyan-500/30 bg-cyan-950/40 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/60 group-hover:bg-cyan-900/40'
-                  : 'border-cyan-300 bg-cyan-50 text-cyan-800 shadow-2xs group-hover:border-cyan-500 group-hover:bg-cyan-100'
-              }`}
-            >
-              .tech
-            </span>
+          {/* Clean editorial .tech suffix */}
+          <span
+            className={`font-mono font-semibold text-xs sm:text-[13px] tracking-tight ml-0.5 transition-colors ${
+              isDark ? 'text-slate-400 group-hover:text-cyan-300' : 'text-slate-500 group-hover:text-cyan-700'
+            }`}
+          >
+            .tech
           </span>
         </div>
 
-        {/* Heritage Devanagari Pill */}
+        {/* Unboxed Heritage Devanagari Separator */}
         {showDevanagariTag && (
           <span
-            className={`hidden sm:inline-flex items-center text-[10px] font-semibold font-['Noto_Sans_Devanagari'] rounded-md px-2 py-0.5 border transition-colors ${
-              isDark
-                ? 'text-slate-400 bg-white/[0.03] border-white/[0.08]'
-                : 'text-slate-600 bg-slate-100 border-slate-200'
+            className={`hidden xl:inline-flex items-center gap-2 text-[11px] font-medium font-['Noto_Sans_Devanagari'] transition-colors ${
+              isDark ? 'text-slate-400' : 'text-slate-500'
             }`}
           >
-            नेपाल एआई
+            <span aria-hidden="true" className="text-rose-700/70 dark:text-rose-400/70">·</span>
+            <span>नेपाल एआई</span>
           </span>
         )}
       </div>

@@ -208,6 +208,24 @@ const PRESET_SAMPLE_DATA: Record<string, { title: string; type: string; sample: 
 १. Hugging Face n8n अटोमेसन प्रणाली सबै सहकारी ग्राहकमा निशुल्क जडान गर्ने निर्णय सर्वसम्मत पारित भयो। (जिम्मेवारी: अनुज, म्याद: असोज २५)
 २. FonePay Dynamic QR इन्टिग्रेशनको सेक्युरिटी अडिट सम्पन्न गर्ने। (जिम्मेवारी: सिता, म्याद: असोज २०)
 ३. आगामी महिना नयाँ Devanagari Voice TTS मोडल सार्वजनिक गर्ने।`
+  },
+  study_notes: {
+    title: 'अध्ययन र परीक्षा नोट सारांश (Student Study & Exam Notes)',
+    type: 'general',
+    sample: `अर्थशास्त्र तथा वित्त शास्त्र (कक्षा १२ / स्नातक)
+विषय: नेपालको कर प्रणाली र मूल्य अभिवृद्धि कर (VAT)
+मुख्य बुँदाहरू:
+१. नेपालमा मूल्य अभिवृद्धि कर (VAT) को मानक दर १३% रहेको छ।
+२. आयकर ऐन २०५८ दफा ९५क अनुसार विदेशमा सफ्टवेयर निर्यात गर्ने व्यक्तिलाई ५% अन्तिम टीडीएस लागू हुन्छ।
+३. परीक्षा मिति: वैशाख १५, रिभिजन समय: बिहान ६-८ बजे।`
+  },
+  budget_marketing: {
+    title: 'परिवार बजेट र मार्केटिङ योजना (Household & Campaign Notes)',
+    type: 'general',
+    sample: `मासिक घरखर्च तथा दशैँ अफर योजना (असोज)
+घरायसी तरकारी र किराना बजेट: रु. १८,५०० (कालिमाटी मौसमी खरिदबाट रु. ३,२०० बचत)
+स्कुल शुल्क र खाजा: रु. १२,०००
+बिक्री प्रचार अफर: नियमित ग्राहकलाई २०% छुट र फ्री होम डेलिभरी (लक्ष्य: २५० अर्डर)`
   }
 };
 
@@ -487,7 +505,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
           </h2>
 
           <p className={`text-sm sm:text-base leading-relaxed ${
-            isDark ? 'text-slate-400' : 'text-slate-600'
+            isDark ? 'text-slate-200' : 'text-slate-700'
           }`}>
             {isNepali
               ? 'डलर कार्ड वा क्रेडिट कार्ड नचाहिने उत्कृष्ट निःशुल्क एआई एपीआईहरू। तल दिइएको लाइभ इन्जिनमार्फत देवनागरी कागजात, नागरिकता र भ्याट बिलबाट तुरुन्तै जेसन डेटा निकाल्नुहोस्।'
@@ -502,20 +520,20 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
           <div
             className={`rounded-2xl border p-6 sm:p-8 transition-all ${
               isDark
-                ? 'border-emerald-500/20 bg-[#0c0f1e] text-slate-100 shadow-2xl shadow-emerald-950/20'
-                : 'border-emerald-200 bg-white text-slate-900 shadow-md'
+                ? 'border-cyan-500/20 bg-[#0c1324] text-slate-100 shadow-2xl shadow-cyan-950/20'
+                : 'border-cyan-200 bg-white text-slate-900 shadow-md'
             }`}
           >
             {/* Box Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-500/15">
               <div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-emerald-400" aria-hidden="true" />
-                  <h3 className={`text-lg sm:text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Sparkles className="h-5 w-5 text-cyan-400" aria-hidden="true" />
+                  <h3 className={`text-lg sm:text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
                     {isNepali ? 'लाइभ एआई डेटा निष्कर्षण इन्जिन (Live Data Extractor)' : 'Live Multimodal AI Data Extractor'}
                   </h3>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className={`text-xs mt-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Powered by Gemini 3.8 Flash & Sovereign Devanagari NLP Engine.
                 </p>
               </div>
@@ -527,18 +545,20 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                     key={key}
                     type="button"
                     onClick={() => handleSelectPreset(key)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer ${
                       selectedPreset === key
-                        ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                        ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 text-white font-bold shadow-sm shadow-cyan-500/25'
                         : isDark
-                        ? 'bg-white/[0.04] text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                        : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
+                        ? 'bg-white/[0.04] text-slate-200 hover:text-white hover:bg-white/[0.08]'
+                        : 'bg-slate-100 text-slate-800 hover:text-slate-950 hover:bg-slate-200'
                     }`}
                   >
                     {key === 'nagarikta' && '🪪 नागरिकता (ID)'}
                     {key === 'vat_bill' && '🧾 भ्याट बिल (Invoice)'}
                     {key === 'lalpurja' && '📜 लालपुर्जा (Land)'}
                     {key === 'minutes' && '📝 माइन्युट (Minutes)'}
+                    {key === 'study_notes' && '🎓 Study Notes'}
+                    {key === 'budget_marketing' && '🏠 Budget & Offer'}
                   </button>
                 ))}
               </div>
@@ -550,11 +570,11 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
               {/* Left Column: Raw Input Area */}
               <div className="lg:col-span-6 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="extractor-raw-input" className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <FileText className="h-4 w-4 text-emerald-400" />
+                  <label htmlFor="extractor-raw-input" className={`text-xs font-bold flex items-center gap-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                    <FileText className={`h-4 w-4 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                     <span>Raw Devanagari / English Text or Scanned Document Content</span>
                   </label>
-                  <span className="text-[11px] text-slate-500 font-mono">
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                     {inputText.length} chars
                   </span>
                 </div>
@@ -565,23 +585,23 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder="Paste any Devanagari text, citizen card OCR output, VAT receipt, or meeting notes here..."
-                  className={`w-full rounded-xl border p-3.5 text-xs font-mono transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 leading-relaxed ${
+                  className={`w-full rounded-xl border p-3.5 text-xs font-mono transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 leading-relaxed ${
                     isDark
-                      ? 'border-white/10 bg-[#070912] text-slate-200 placeholder-slate-600 focus:border-emerald-500/50'
-                      : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                      ? 'border-white/15 bg-[#070b14] text-slate-100 placeholder-slate-400 focus:border-cyan-500/50'
+                      : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-500 focus:bg-white'
                   }`}
                 />
 
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">Extraction Target:</span>
+                    <span className={`text-xs font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Extraction Target:</span>
                     <select
                       id="extractor-type-select"
                       aria-label="Extraction Target Type"
                       value={extractionType}
                       onChange={(e) => setExtractionType(e.target.value)}
-                      className={`rounded-lg border px-2.5 py-1.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                        isDark ? 'border-white/10 bg-[#070912] text-white' : 'border-slate-300 bg-white text-slate-900'
+                      className={`rounded-lg border px-2.5 py-1.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
+                        isDark ? 'border-white/10 bg-[#070b14] text-white' : 'border-slate-300 bg-white text-slate-900'
                       }`}
                     >
                       <option value="nagarikta">Nepali Citizenship Card</option>
@@ -596,7 +616,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                     type="button"
                     onClick={handleExtractData}
                     disabled={isExtracting || !inputText.trim()}
-                    className="flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 px-5 text-xs transition-all shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-2.5 px-5 text-xs transition-all shadow-md shadow-cyan-500/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 disabled:opacity-50 cursor-pointer"
                   >
                     {isExtracting ? (
                       <>
@@ -617,8 +637,8 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
               <div className="lg:col-span-6 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-slate-300">Verified Structured JSON Output</span>
+                    <Database className={`h-4 w-4 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+                    <span className={`text-xs font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Verified Structured JSON Output</span>
                   </div>
 
                   {extractedResult && (
@@ -626,8 +646,8 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                       <button
                         type="button"
                         onClick={() => setViewMode(viewMode === 'visual' ? 'json' : 'visual')}
-                        className={`px-2 py-1 rounded-md text-[11px] font-mono border transition-colors ${
-                          isDark ? 'border-white/10 text-slate-300 hover:text-white' : 'border-slate-200 text-slate-700'
+                        className={`px-2 py-1 rounded-md text-[11px] font-mono border transition-colors cursor-pointer ${
+                          isDark ? 'border-white/15 text-slate-200 hover:text-white hover:bg-white/5' : 'border-slate-300 text-slate-800 hover:bg-slate-100'
                         }`}
                       >
                         {viewMode === 'visual' ? 'View Raw JSON' : 'View Visual Cards'}
@@ -635,20 +655,24 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                       <button
                         type="button"
                         onClick={copyExtractedJson}
-                        className="p-1.5 rounded-md border border-white/10 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                        className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                          isDark ? 'border-white/15 text-slate-200 hover:text-white hover:bg-white/5' : 'border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                        }`}
                         title="Copy JSON to clipboard"
                         aria-label="Copy extracted JSON"
                       >
-                        {copiedResult ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copiedResult ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                       </button>
                       <button
                         type="button"
                         onClick={downloadJsonFile}
-                        className="p-1.5 rounded-md border border-white/10 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                        className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                          isDark ? 'border-white/15 text-slate-200 hover:text-white hover:bg-white/5' : 'border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                        }`}
                         title="Download .json file"
                         aria-label="Download JSON file"
                       >
-                        <Download className="h-3.5 w-3.5 text-emerald-400" />
+                        <Download className={`h-3.5 w-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                       </button>
                     </div>
                   )}
@@ -657,21 +681,21 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                 <div
                   className={`rounded-xl border p-4 min-h-[260px] max-h-[340px] overflow-y-auto font-mono text-xs transition-all ${
                     isDark
-                      ? 'border-white/10 bg-[#070912] text-emerald-300'
-                      : 'border-slate-200 bg-slate-900 text-emerald-400'
+                      ? 'border-white/10 bg-[#070b14] text-cyan-300'
+                      : 'border-slate-200 bg-slate-900 text-cyan-400'
                   }`}
                 >
                   {isExtracting ? (
                     <div className="h-full flex flex-col items-center justify-center py-16 text-slate-400 space-y-3">
-                      <RefreshCw className="h-7 w-7 animate-spin text-emerald-400" />
+                      <RefreshCw className="h-7 w-7 animate-spin text-cyan-400" />
                       <p className="text-xs">Parsing Devanagari entities, numerals and verifying fields...</p>
                     </div>
                   ) : extractedResult ? (
                     viewMode === 'visual' ? (
                       <div className="space-y-2 text-xs">
-                        <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20 text-slate-400">
-                          <span className="text-emerald-400 font-bold">Document: {extractedResult.document_type || 'STRUCTURED_ENTITY'}</span>
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
+                        <div className="flex items-center justify-between pb-2 border-b border-cyan-500/20 text-slate-400">
+                          <span className="text-cyan-400 font-bold">Document: {extractedResult.document_type || 'STRUCTURED_ENTITY'}</span>
+                          <span className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30 font-bold">
                             {extractedEngine || 'Gemini 3.8 Flash'}
                           </span>
                         </div>
@@ -710,12 +734,12 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                 </div>
 
                 {extractedResult && (
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                    <span className="flex items-center gap-1.5 text-emerald-400">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
+                  <div className={`flex items-center justify-between text-[11px] pt-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    <span className={`flex items-center gap-1.5 font-semibold ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>
+                      <CheckCircle2 className={`h-3.5 w-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                       <span>Zero hallucination • Ready for Database / API Sync</span>
                     </span>
-                    <span className="font-mono">{extractionMode}</span>
+                    <span className={`font-mono ${isDark ? 'text-cyan-300' : 'text-cyan-800'}`}>{extractionMode}</span>
                   </div>
                 )}
               </div>
@@ -731,16 +755,18 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className={`text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <h3 className={`text-xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
                 Top Free AI Services & Integration Guides for Nepal
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Every service below offers a permanent $0/month tier without demanding international credit cards.
               </p>
             </div>
             
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20 shrink-0">
-              <ShieldCheck className="h-4 w-4" />
+            <div className={`flex items-center gap-2 text-xs font-mono px-3 py-1 rounded-xl border shrink-0 font-semibold ${
+              isDark ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' : 'text-cyan-800 bg-cyan-50 border-cyan-300'
+            }`}>
+              <ShieldCheck className={`h-4 w-4 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
               <span>Tested & Verified in Nepal</span>
             </div>
           </div>
@@ -749,30 +775,36 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
             {FREE_AI_PROVIDERS.map((provider) => (
               <div
                 key={provider.id}
-                className={`rounded-2xl border p-6 flex flex-col justify-between transition-all ${
+                className={`rounded-2xl border p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 ${
                   isDark
-                    ? 'border-white/[0.08] bg-[#0c0f1c] text-slate-200 hover:border-emerald-500/30'
-                    : 'border-slate-200 bg-white text-slate-800 shadow-sm hover:border-emerald-500/40'
+                    ? 'border-white/[0.1] bg-[#0c1324] text-slate-100 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-950/20'
+                    : 'border-slate-200 bg-white text-slate-900 shadow-sm hover:border-cyan-500 hover:shadow-md'
                 }`}
               >
                 <div className="space-y-4">
                   {/* Provider Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="inline-block rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-mono font-bold mb-1.5">
+                      <span className={`inline-block rounded-md border px-2 py-0.5 text-[10px] font-mono font-bold mb-1.5 ${
+                        isDark ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/25' : 'bg-cyan-50 text-cyan-800 border-cyan-300'
+                      }`}>
                         {provider.badge}
                       </span>
-                      <h4 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      <h4 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
                         {provider.name}
                       </h4>
-                      <p className="text-[11px] text-slate-400 font-mono mt-0.5">{provider.category}</p>
+                      <p className={`text-[11px] font-mono mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{provider.category}</p>
                     </div>
 
                     <a
                       href={provider.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-xl border border-slate-500/20 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
+                      className={`p-2 rounded-xl border transition-colors shrink-0 ${
+                        isDark
+                          ? 'border-white/15 text-slate-300 hover:text-white hover:bg-slate-800'
+                          : 'border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                      }`}
                       aria-label={`Visit official site for ${provider.name}`}
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -781,26 +813,26 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
 
                   {/* Free Limits & Cost */}
                   <div className={`p-3 rounded-xl border text-xs space-y-1 ${
-                    isDark ? 'border-white/[0.06] bg-white/[0.02]' : 'border-slate-100 bg-slate-50'
+                    isDark ? 'border-white/[0.08] bg-white/[0.03]' : 'border-slate-200 bg-slate-50'
                   }`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Pricing:</span>
-                      <span className="font-bold text-emerald-400">{provider.cost}</span>
+                      <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Pricing:</span>
+                      <span className={`font-bold ${isDark ? 'text-cyan-300' : 'text-cyan-800'}`}>{provider.cost}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Free Limits:</span>
-                      <span className="font-mono text-[11px] text-slate-300">{provider.limits}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Free Limits:</span>
+                      <span className={`font-mono text-[11px] text-right ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{provider.limits}</span>
                     </div>
                   </div>
 
                   {/* Step-by-step How to Use */}
                   <div className="space-y-1.5">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Terminal className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className={`text-xs font-bold flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-950'}`}>
+                      <Terminal className={`h-3.5 w-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                       <span>How to Use:</span>
                     </span>
                     <p className={`text-xs leading-relaxed whitespace-pre-line ${
-                      isDark ? 'text-slate-300' : 'text-slate-600'
+                      isDark ? 'text-slate-200' : 'text-slate-700'
                     } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}>
                       {isNepali ? provider.howToUse.ne : provider.howToUse.en}
                     </p>
@@ -809,11 +841,13 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                   {/* Code Snippet Box */}
                   <div className="space-y-1.5 pt-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-400 font-mono">Quick Implementation:</span>
+                      <span className={`font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Quick Implementation:</span>
                       <button
                         type="button"
                         onClick={() => copySnippet(provider.id, provider.codeSnippet)}
-                        className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+                        className={`flex items-center gap-1 transition-colors cursor-pointer font-semibold ${
+                          isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-700 hover:text-cyan-900'
+                        }`}
                         aria-label={`Copy code snippet for ${provider.name}`}
                       >
                         {copiedCode === provider.id ? (
@@ -831,7 +865,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                     </div>
 
                     <pre className={`p-3 rounded-xl border text-[11px] font-mono overflow-x-auto leading-relaxed ${
-                      isDark ? 'border-white/10 bg-[#070912] text-emerald-300' : 'border-slate-300 bg-slate-900 text-emerald-400'
+                      isDark ? 'border-white/10 bg-[#070b14] text-cyan-300' : 'border-slate-300 bg-slate-900 text-cyan-400'
                     }`}>
                       {provider.codeSnippet}
                     </pre>
@@ -845,7 +879,9 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                     href={provider.docsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
+                    className={`hover:underline flex items-center gap-1 font-semibold ${
+                      isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-700 hover:text-cyan-900'
+                    }`}
                   >
                     <span>Read API Documentation</span>
                     <ArrowRight className="h-3 w-3" />
@@ -855,7 +891,9 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenConsultation(`Integration setup for ${provider.name}`)}
-                      className="text-slate-400 hover:text-white transition-colors"
+                      className={`transition-colors cursor-pointer font-medium ${
+                        isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                      }`}
                     >
                       Need custom setup?
                     </button>
@@ -875,24 +913,21 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="flex h-2.5 w-2.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </span>
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                <span className="inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
                   {language === 'ne' ? 'प्रत्यक्ष नेपाल एआई समाचार तथा विकास' : 'Live Nepal AI Industry Intelligence'}
                 </span>
                 {lastNewsUpdated && (
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     • Synced at {lastNewsUpdated}
                   </span>
                 )}
               </div>
-              <h3 className={`text-xl sm:text-2xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {language === 'ne' ? 'नेपालको एआई तथा प्रविधि विकास सम्बन्धी ताजा समाचार र विश्लेषण' : 'Nepal AI Developments, Directives & Ecosystem Headlines'}
+              <h3 className={`text-xl sm:text-2xl font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
+                {language === 'ne' ? 'नेपालको एआई तथा प्रविधि विकास सम्बन्धी ताजा समाचार र विश्लेषण' : 'Nepal AI Developments & Headlines'}
               </h3>
-              <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Grounded live search intelligence tracking NRB regulatory updates, open-source Devanagari models, public GovTech rollouts, and local tech milestones.
+              <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+                Tracking NRB regulatory updates, Devanagari models, GovTech rollouts, and local tech milestones.
               </p>
             </div>
 
@@ -902,13 +937,13 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                 type="button"
                 onClick={() => fetchNewsData(selectedNewsCategory, newsSearchQuery)}
                 disabled={isLoadingNews}
-                className={`min-h-[40px] px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all ${
+                className={`min-h-[40px] px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all cursor-pointer ${
                   isDark
-                    ? 'bg-white/[0.04] hover:bg-white/[0.08] text-emerald-400 border-emerald-500/30'
-                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                    ? 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                    : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border-cyan-300'
                 }`}
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${isLoadingNews ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-3.5 w-3.5 text-cyan-400 ${isLoadingNews ? 'animate-spin' : ''}`} />
                 <span>{isLoadingNews ? 'Fetching News...' : 'Refresh Feed'}</span>
               </button>
             </div>
@@ -930,7 +965,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                       fetchNewsData(selectedNewsCategory, newsSearchQuery);
                     }
                   }}
-                  className={`w-full min-h-[42px] pl-10 pr-20 text-xs rounded-xl border focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  className={`w-full min-h-[42px] pl-10 pr-20 text-xs rounded-xl border focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                     isDark
                       ? 'bg-black/50 border-white/10 text-white placeholder-slate-500'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 shadow-xs'
@@ -943,7 +978,9 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                       setNewsSearchQuery('');
                       fetchNewsData(selectedNewsCategory, '');
                     }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] text-slate-400 hover:text-white rounded bg-slate-800"
+                    className={`absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] rounded cursor-pointer font-semibold ${
+                      isDark ? 'text-slate-200 hover:text-white bg-slate-800' : 'text-slate-700 hover:text-slate-950 bg-slate-200'
+                    }`}
                   >
                     Clear
                   </button>
@@ -953,7 +990,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
               <button
                 type="button"
                 onClick={() => fetchNewsData(selectedNewsCategory, newsSearchQuery)}
-                className="min-h-[42px] px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shrink-0 flex items-center justify-center gap-1.5"
+                className="min-h-[42px] px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 cursor-pointer"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span>Search</span>
@@ -980,9 +1017,9 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                       setSelectedNewsCategory(cat.id);
                       fetchNewsData(cat.id, newsSearchQuery);
                     }}
-                    className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                       isActive
-                        ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                        ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 text-white font-bold shadow-sm shadow-cyan-500/25 border-transparent'
                         : isDark
                         ? 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white border border-white/[0.06]'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
@@ -1024,64 +1061,66 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                 .map((item) => (
                   <div
                     key={item.id}
-                    className={`rounded-2xl border p-5 flex flex-col justify-between transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1 ${
+                    className={`rounded-2xl border p-5 flex flex-col justify-between transition-colors duration-200 ${
                       isDark
-                        ? 'border-white/[0.08] bg-[#0c101d] text-slate-200 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-950/20'
-                        : 'border-slate-200 bg-white text-slate-800 shadow-sm hover:border-emerald-500/40 hover:shadow-md'
+                        ? 'border-slate-700/80 bg-[#0c1324] text-slate-100 hover:border-cyan-400'
+                        : 'border-slate-200 bg-white text-slate-800 shadow-xs hover:border-cyan-600 hover:shadow-md'
                     }`}
                   >
                     <div className="space-y-3">
                       {/* Top Badges */}
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold">
+                          <span className={`px-2 py-0.5 rounded-md border text-[11px] font-mono font-bold ${
+                            isDark ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-cyan-50 text-cyan-900 border-cyan-300'
+                          }`}>
                             {item.badge}
                           </span>
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-medium ${
-                            isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-600'
+                          <span className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold ${
+                            isDark ? 'bg-white/10 text-slate-200' : 'bg-slate-100 text-slate-800'
                           }`}>
                             {item.category}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1 text-[10px] font-mono text-slate-400">
+                        <div className={`flex items-center gap-1 text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           <Calendar className="h-3 w-3" />
                           <span>{item.date}</span>
                         </div>
                       </div>
 
                       {/* Headline */}
-                      <h4 className={`text-sm sm:text-base font-bold leading-snug font-display ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                      <h4 className={`text-base font-bold leading-snug font-display ${
+                        isDark ? 'text-white' : 'text-slate-950'
                       }`}>
                         {item.headline}
                       </h4>
 
                       {/* Summary */}
-                      <p className={`text-xs leading-relaxed ${
-                        isDark ? 'text-slate-300' : 'text-slate-600'
+                      <p className={`text-sm leading-relaxed ${
+                        isDark ? 'text-slate-200' : 'text-slate-700'
                       }`}>
                         {item.summary}
                       </p>
 
                       {/* Practical Impact for Nepal */}
                       <div className={`p-3 rounded-xl border text-xs space-y-1 ${
-                        isDark ? 'bg-black/40 border-emerald-500/20 text-slate-300' : 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+                        isDark ? 'bg-black/40 border-cyan-500/30 text-slate-100' : 'bg-cyan-50/80 border-cyan-200 text-slate-900'
                       }`}>
-                        <div className="flex items-center gap-1.5 font-bold text-emerald-400 text-[11px]">
+                        <div className="flex items-center gap-1.5 font-bold text-cyan-700 dark:text-cyan-300 text-xs">
                           <TrendingUp className="h-3.5 w-3.5" />
-                          <span>Ecosystem Impact & Local Business Utility:</span>
+                          <span>Nepal Impact:</span>
                         </div>
-                        <p className="text-[11px] leading-relaxed">
+                        <p className="text-xs leading-relaxed">
                           {item.impact}
                         </p>
                       </div>
                     </div>
 
                     {/* Source & Verified Link */}
-                    <div className="pt-3.5 mt-3.5 border-t border-slate-500/15 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <div className="pt-3.5 mt-3.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <div className={`flex items-center gap-1.5 text-xs ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
                         <span className="truncate max-w-[180px] sm:max-w-[240px]">
                           {item.source}
                         </span>
@@ -1091,7 +1130,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                         href={item.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1 shrink-0 hover:underline"
+                        className="text-cyan-700 dark:text-cyan-300 text-xs font-bold flex items-center gap-1 shrink-0 hover:underline"
                       >
                         <span>Official Bulletin</span>
                         <ExternalLink className="h-3 w-3" />
@@ -1108,7 +1147,7 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
               isDark ? 'border-white/10 bg-black/20' : 'border-slate-200 bg-slate-50'
             }`}>
               <Newspaper className="h-8 w-8 text-slate-500 mx-auto mb-2" />
-              <p className="text-xs font-semibold text-slate-400">
+              <p className={`text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 No intelligence updates found matching "{newsSearchQuery}".
               </p>
               <button
@@ -1118,7 +1157,9 @@ export const FreeAIToolsSection: React.FC<FreeAIToolsSectionProps> = ({
                   setSelectedNewsCategory('all');
                   fetchNewsData('all', '');
                 }}
-                className="mt-3 px-3 py-1.5 text-xs text-emerald-400 font-semibold hover:underline"
+                className={`mt-3 px-3 py-1.5 text-xs font-semibold hover:underline cursor-pointer ${
+                  isDark ? 'text-cyan-400' : 'text-cyan-700'
+                }`}
               >
                 Reset Search & View All News
               </button>

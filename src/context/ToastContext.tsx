@@ -62,20 +62,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               role="status"
               className={`pointer-events-auto rounded-2xl border p-4 shadow-2xl backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in ${
                 isSuccess
-                  ? 'bg-slate-900/95 border-emerald-500/50 shadow-emerald-950/40 text-slate-100'
+                  ? 'bg-slate-900/95 border-cyan-500/50 shadow-cyan-950/40 text-slate-100'
                   : isError
                   ? 'bg-slate-900/95 border-red-500/50 shadow-red-950/40 text-slate-100'
-                  : 'bg-slate-900/95 border-cyan-500/50 shadow-cyan-950/40 text-slate-100'
+                  : 'bg-slate-900/95 border-sky-500/50 shadow-sky-950/40 text-slate-100'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={`mt-0.5 rounded-xl p-2 shrink-0 ${
                     isSuccess
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                       : isError
                       ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                      : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                      : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
                   }`}
                 >
                   {isSuccess && <CheckCircle2 className="h-5 w-5" aria-hidden="true" />}
@@ -97,7 +97,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 <button
                   type="button"
                   onClick={() => removeToast(toast.id)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                  className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 min-h-[32px] min-w-[32px] flex items-center justify-center"
                   aria-label="Dismiss notification"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
@@ -108,7 +108,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               <div className="mt-3 h-1 w-full bg-white/10 rounded-full overflow-hidden">
                 <div
                   className={`h-full animate-[progress_5s_linear] ${
-                    isSuccess ? 'bg-emerald-400' : isError ? 'bg-red-400' : 'bg-cyan-400'
+                    isSuccess ? 'bg-cyan-400' : isError ? 'bg-red-400' : 'bg-sky-400'
                   }`}
                   style={{ animationDuration: `${toast.duration || 5000}ms` }}
                 />

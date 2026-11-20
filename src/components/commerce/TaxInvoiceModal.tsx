@@ -19,6 +19,7 @@ import {
 } from '../../utils/nepalInvoiceEngine';
 import { getCurrentBikramSambatDate } from '../../utils/nepaliTextConverter';
 import { CommerceOrder } from './CommercePortal';
+import { exportIrdInvoicePdf } from '../../utils/pdfExport';
 
 export interface TaxInvoiceModalProps {
   isOpen: boolean;
@@ -68,7 +69,23 @@ export const TaxInvoiceModal: React.FC<TaxInvoiceModalProps> = ({
   const wordsEn = numberToEnglishWords(totalNpr);
 
   const handlePrint = () => {
-    window.print();
+    exportIrdInvoicePdf({
+      businessName,
+      businessPan,
+      businessAddress,
+      businessPhone,
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      buyerName: order.shippingAddress?.fullName || 'Customer',
+      buyerAddress: `${order.shippingAddress?.address || ''}, ${order.shippingAddress?.city || ''}`,
+      buyerPhone: order.shippingAddress?.phone || '',
+      items: order.items,
+      deliveryChargeNpr: Number(order.deliveryChargeNpr) || 0,
+      discountNpr: Number(order.discountNpr) || 0,
+      totalNprOverride: totalNpr,
+    });
   };
 
   return (

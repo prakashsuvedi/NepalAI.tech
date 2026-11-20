@@ -61,7 +61,7 @@ export const StudioBanner: React.FC<StudioBannerProps> = ({ theme = 'dark', lang
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200 dark:border-white/10 mb-8">
           <div>
-            <div className="text-xs font-mono font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 uppercase">
+            <div className="text-xs font-mono font-semibold tracking-wider text-cyan-600 dark:text-cyan-400 mb-2 uppercase">
               {isNepali ? 'मल्टिमोडल स्टुडियो' : 'Multimodal Studio'}
             </div>
             <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-display ${
@@ -70,7 +70,7 @@ export const StudioBanner: React.FC<StudioBannerProps> = ({ theme = 'dark', lang
               {t.studioBanner.title}
             </h2>
             <p className={`mt-2 text-sm max-w-xl ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
+              isDark ? 'text-slate-200' : 'text-slate-700'
             }`}>
               {t.studioBanner.subtitle}
             </p>
@@ -81,8 +81,10 @@ export const StudioBanner: React.FC<StudioBannerProps> = ({ theme = 'dark', lang
               href="https://studio.nepalai.tech"
               target="_blank"
               rel="noopener noreferrer"
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 cursor-pointer ${
-                isDark ? 'bg-white text-slate-950 hover:bg-slate-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-colors inline-flex items-center gap-2 cursor-pointer shadow-md ${
+                isDark 
+                  ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25' 
+                  : 'bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-600/20'
               }`}
             >
               <span>{t.studioBanner.openStudio}</span>
@@ -101,29 +103,31 @@ export const StudioBanner: React.FC<StudioBannerProps> = ({ theme = 'dark', lang
                 href="https://studio.nepalai.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`rounded-2xl border p-5 transition-all block cursor-pointer ${
+                className={`rounded-2xl border p-5 transition-colors duration-200 block cursor-pointer group ${
                   isDark
-                    ? 'border-white/10 bg-white/[0.02] hover:border-emerald-500/40 hover:bg-white/[0.04]'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                    ? 'border-white/15 bg-[#0c1324] hover:border-cyan-400/70'
+                    : 'border-slate-200 bg-white hover:border-cyan-600/70 shadow-sm'
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`p-2.5 rounded-xl ${
-                    isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-700'
+                  <div className={`p-2.5 rounded-xl transition-colors ${
+                    isDark 
+                      ? 'bg-cyan-500/15 text-cyan-300 group-hover:bg-cyan-500/25' 
+                      : 'bg-cyan-50 text-cyan-700 group-hover:bg-cyan-100'
                   }`}>
                     <IconComp className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="text-xs font-mono text-cyan-700 dark:text-cyan-300 font-bold px-2.5 py-0.5 rounded-md bg-cyan-500/10">
                     {tool.pricing}
                   </span>
                 </div>
 
-                <h3 className={`text-sm font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-base font-bold font-display transition-colors group-hover:text-cyan-600 dark:group-hover:text-cyan-300 ${isDark ? 'text-white' : 'text-slate-950'}`}>
                   {isNepali ? tool.titleNe : tool.titleEn}
                 </h3>
 
-                <p className={`mt-1.5 text-xs leading-relaxed ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
+                <p className={`mt-1.5 text-sm leading-relaxed ${
+                  isDark ? 'text-slate-200' : 'text-slate-700'
                 }`}>
                   {isNepali ? tool.descNe : tool.descEn}
                 </p>
@@ -133,16 +137,18 @@ export const StudioBanner: React.FC<StudioBannerProps> = ({ theme = 'dark', lang
         </div>
 
         {/* Bottom Payment Support Notice */}
-        <div className="mt-8 pt-4 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        <div className={`mt-8 pt-4 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs ${
+          isDark ? 'border-white/15 text-slate-300' : 'border-slate-200 text-slate-700'
+        }`}>
           <div className="flex items-center gap-2">
-            <QrCode className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
+            <QrCode className="h-4 w-4 text-cyan-500 shrink-0" aria-hidden="true" />
             <span>
               {isNepali
                 ? 'FonePay QR, eSewa, Khalti र डलर कार्डबाट सीधै भुक्तानी उपलब्ध (रू / $ दुवै)।'
                 : 'Direct billing available via FonePay QR, eSewa, Khalti, and Dollar Cards (NPR & USD).'}
             </span>
           </div>
-          <span className="font-mono text-[11px]">studio.nepalai.tech</span>
+          <span className="font-mono text-xs font-semibold">studio.nepalai.tech</span>
         </div>
 
       </div>

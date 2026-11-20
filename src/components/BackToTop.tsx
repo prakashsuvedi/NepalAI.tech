@@ -51,13 +51,13 @@ export const BackToTop: React.FC<BackToTopProps> = ({ theme = 'dark', language =
         id="back-to-top-button"
         aria-label={label}
         title={label}
-        className={`group relative flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-md shadow-lg transition-all duration-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 active:scale-95 ${
+        className={`group relative flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-md shadow-lg transition-colors duration-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer ${
           isDark
-            ? 'bg-[#0f1320]/80 border-white/10 text-slate-300 hover:text-white hover:border-emerald-500/50 hover:bg-[#151a2c] shadow-black/40'
-            : 'bg-white/90 border-slate-200 text-slate-700 hover:text-slate-950 hover:border-emerald-400 hover:bg-slate-50 shadow-slate-300/50'
+            ? 'bg-[#0f1320]/95 border-white/15 text-slate-200 hover:text-white hover:border-cyan-400/70 hover:bg-[#151a2c] shadow-black/40'
+            : 'bg-white/95 border-slate-300 text-slate-800 hover:text-slate-950 hover:border-cyan-500 hover:bg-slate-50 shadow-slate-300/50'
         }`}
       >
-        <ArrowUp className="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-emerald-500" aria-hidden="true" />
+        <ArrowUp className="h-5 w-5 transition-colors duration-200 group-hover:text-cyan-500 dark:group-hover:text-cyan-300" aria-hidden="true" />
         
         {/* Subtle tooltip on hover */}
         <span

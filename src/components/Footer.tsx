@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       className={`border-t text-xs transition-colors duration-300 ${
-        isDark ? 'border-slate-800 bg-[#06080e] text-slate-400' : 'border-slate-200 bg-white text-slate-600'
+        isDark ? 'border-slate-800/90 bg-[#060911] text-slate-200' : 'border-slate-200/90 bg-white text-slate-700'
       }`}
       role="contentinfo"
       aria-label="Site footer"
@@ -49,21 +49,21 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="md:col-span-5 space-y-3">
             <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
 
-            <p className={`text-xs leading-relaxed max-w-md ${
-              isDark ? 'text-slate-300' : 'text-slate-600'
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-md ${
+              isDark ? 'text-slate-200' : 'text-slate-700'
             }`}>
               {t.footer.tagline}
             </p>
 
             {/* Authoritative Single Provenance Card */}
             <div className={`p-3.5 rounded-xl border text-xs max-w-md ${
-              isDark ? 'bg-white/[0.02] border-white/10 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+              isDark ? 'bg-white/[0.03] border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
             }`}>
-              <div className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mb-1">
+              <div className="font-semibold text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5 mb-1">
                 <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
                 <span>{isNepali ? 'स्क्यामस्पाइक सोलुसन्सद्वारा निर्मित' : 'Engineered by Scamspike Solutions'}</span>
               </div>
-              <p className="text-[11px] leading-relaxed opacity-90">
+              <p className="text-xs leading-relaxed">
                 {isNepali ? (
                   <>
                     प्लेटफर्म डिजाइन र निर्माण:{' '}
@@ -71,7 +71,7 @@ export const Footer: React.FC<FooterProps> = ({
                       href="https://scamspike.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold underline hover:text-emerald-500 transition-colors"
+                      className="font-bold underline hover:text-cyan-500 transition-colors"
                     >
                       स्क्यामस्पाइक सोलुसन्स प्रा. लि. (Scamspike Solutions Pvt. Ltd.)
                     </a>
@@ -80,7 +80,7 @@ export const Footer: React.FC<FooterProps> = ({
                       href="https://prakashsuvedi.com.np"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold underline hover:text-emerald-500 transition-colors"
+                      className="font-bold underline hover:text-cyan-500 transition-colors"
                     >
                       प्रकाश सुवेदी (Prakash Suvedi)
                     </a>
@@ -92,7 +92,7 @@ export const Footer: React.FC<FooterProps> = ({
                       href="https://scamspike.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold underline hover:text-emerald-500 transition-colors"
+                      className="font-bold underline hover:text-cyan-500 transition-colors"
                     >
                       Scamspike Solutions Pvt. Ltd.
                     </a>
@@ -101,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({
                       href="https://prakashsuvedi.com.np"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold underline hover:text-emerald-500 transition-colors"
+                      className="font-bold underline hover:text-cyan-500 transition-colors"
                     >
                       Prakash Suvedi
                     </a>
@@ -111,8 +111,8 @@ export const Footer: React.FC<FooterProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] opacity-80 pt-1">
-              <MapPin className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 text-xs pt-1 text-slate-700 dark:text-slate-200">
+              <MapPin className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
               <span>{t.footer.nepalLocations}</span>
             </div>
           </div>
@@ -127,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'home')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'गृहपृष्ठ (Home)' : 'Home Overview'}
                 </button>
@@ -136,7 +136,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'command-center')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'कमान्ड सेन्टर (Command Center)' : 'Command Center'}
                 </button>
@@ -144,8 +144,17 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   type="button"
+                  onClick={(e) => handlePageClick(e, 'trends')}
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
+                >
+                  {isNepali ? 'नेपाल एआई + ट्रेन्ड्स (Trends)' : 'Nepal AI + Trends'}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
                   onClick={(e) => handlePageClick(e, 'directory')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'टुल्स डाइरेक्टरी (Tools Directory)' : 'AI Tools Directory'}
                 </button>
@@ -154,7 +163,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'daily')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'दैनिक एआई (Daily Tools)' : 'Daily Essential Tools'}
                 </button>
@@ -163,7 +172,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'free')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'निःशुल्क एआई र समाचार (Free AI)' : 'Free APIs & Intelligence'}
                 </button>
@@ -172,7 +181,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'consulting')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'परामर्श सेवा (Consulting)' : 'Enterprise Consulting'}
                 </button>
@@ -181,7 +190,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={(e) => handlePageClick(e, 'compliance')}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-500 transition-colors cursor-pointer text-left"
                 >
                   {isNepali ? 'नियम तथा मद्दत (Compliance & FAQ)' : 'Compliance & FAQ'}
                 </button>
@@ -200,7 +209,7 @@ export const Footer: React.FC<FooterProps> = ({
                   href="https://studio.nepalai.tech"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-indigo-500 hover:text-indigo-400 font-semibold"
+                  className="flex items-center gap-1.5 text-cyan-700 dark:text-cyan-300 hover:underline font-semibold"
                 >
                   <span>NepalAI Studio</span>
                   <ArrowUpRight className="h-3 w-3" />
@@ -210,7 +219,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={onOpenConsultation}
-                  className="text-emerald-500 hover:underline flex items-center gap-1 cursor-pointer text-left font-medium"
+                  className="text-cyan-700 dark:text-cyan-300 hover:underline flex items-center gap-1 cursor-pointer text-left font-semibold"
                 >
                   <span>{isNepali ? 'परामर्श बुक गर्नुहोस्' : 'Book Scoping Advisory'}</span>
                   <ArrowUpRight className="h-3 w-3" />
@@ -220,7 +229,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenPrivacyPolicy?.()}
-                  className="hover:text-emerald-500 transition-colors cursor-pointer text-left"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors cursor-pointer text-left"
                 >
                   {t.footer.privacyPolicy}
                 </button>
@@ -230,9 +239,9 @@ export const Footer: React.FC<FooterProps> = ({
                   href="/llms.txt"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emerald-500 transition-colors inline-flex items-center gap-1 font-mono text-[11px]"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors inline-flex items-center gap-1 font-mono text-xs"
                 >
-                  <FileText className="h-3 w-3 text-emerald-500" />
+                  <FileText className="h-3 w-3 text-cyan-600 dark:text-cyan-400" />
                   <span>AI Agent (llms.txt)</span>
                 </a>
               </li>
@@ -241,27 +250,27 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Contact Details */}
           <div className="md:col-span-2 space-y-2.5">
-            <h3 className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
+            <h3 className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-950'}`}>
               {t.footer.contactUs}
             </h3>
             <div className="space-y-2 text-xs">
               <a
                 href="mailto:contact@nepalai.tech"
-                className="flex items-center gap-1.5 hover:text-emerald-500 transition-colors"
+                className="flex items-center gap-1.5 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors"
               >
-                <Mail className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                <Mail className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
                 <span>contact@nepalai.tech</span>
               </a>
               <a
                 href="https://prakashsuvedi.com.np"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-emerald-500 hover:underline font-mono text-[11px]"
+                className="inline-flex items-center gap-1 text-cyan-700 dark:text-cyan-300 hover:underline font-mono text-xs"
               >
                 <span>prakashsuvedi.com.np</span>
                 <ArrowUpRight className="h-3 w-3" />
               </a>
-              <p className="text-[11px] opacity-75">
+              <p className="text-xs text-slate-700 dark:text-slate-200">
                 Kathmandu & Pokhara, Nepal
               </p>
             </div>
@@ -270,7 +279,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Bottom Clean Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] opacity-75">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-200">
           <div>
             © {new Date().getFullYear()} nepalai.tech. {isNepali ? 'सर्वाधिकार सुरक्षित।' : 'All rights reserved.'}{' '}
             Scamspike Solutions Pvt. Ltd. (Prakash Suvedi).
@@ -290,7 +299,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <button
                   type="button"
                   onClick={onOpenAdminPanel}
-                  className="text-emerald-500 hover:underline cursor-pointer"
+                  className="text-cyan-500 hover:underline cursor-pointer"
                 >
                   Admin
                 </button>

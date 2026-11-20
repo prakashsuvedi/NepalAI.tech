@@ -96,14 +96,14 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({ theme = 'dark' }) =>
         transition={{ duration: 0.18, ease: 'easeOut' }}
         className={`absolute rounded-full pointer-events-none transition-colors duration-200 flex items-center justify-center ${
           isHovered
-            ? 'w-10 h-10 border border-emerald-400/80 bg-emerald-500/15 backdrop-blur-[1px] shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+            ? 'w-10 h-10 border border-cyan-400/90 bg-cyan-500/20 backdrop-blur-[1px] shadow-[0_0_18px_rgba(6,182,212,0.45)]'
             : theme === 'dark'
-            ? 'w-7 h-7 border border-white/30 bg-white/[0.04]'
+            ? 'w-7 h-7 border border-cyan-500/30 bg-cyan-500/[0.05]'
             : 'w-7 h-7 border border-slate-700/30 bg-slate-900/[0.04]'
         }`}
       >
         {hoverLabel && (
-          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-emerald-300 select-none">
+          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-cyan-300 select-none">
             {hoverLabel}
           </span>
         )}
@@ -122,7 +122,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({ theme = 'dark' }) =>
           opacity: isVisible ? 1 : 0,
         }}
         transition={{ duration: 0.1 }}
-        className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 pointer-events-none shadow-[0_0_6px_#34d399]"
+        className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400 pointer-events-none shadow-[0_0_8px_#22d3ee]"
       />
     </div>
   );

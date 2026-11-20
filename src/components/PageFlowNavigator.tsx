@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Grid, Wrench, Sparkles, Briefcase, ShieldCheck, Home, LayoutDashboard, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Grid, Wrench, Sparkles, Briefcase, ShieldCheck, Home, LayoutDashboard, ShoppingBag, TrendingUp } from 'lucide-react';
 import { AppPage, ThemeMode, Language } from '../types';
 
 interface PageFlowNavigatorProps {
@@ -40,8 +39,17 @@ export const PAGES_META: PageMeta[] = [
     icon: LayoutDashboard,
   },
   {
-    id: 'directory',
+    id: 'trends',
     order: 3,
+    labelEn: 'Nepal AI + Trends',
+    labelNe: 'नेपाल एआई + ट्रेन्ड्स',
+    descEn: 'Live Nepal searches, AI explainers, diaspora & tri-script keywords',
+    descNe: 'नेपालका ताजा ट्रेन्ड, एआई व्याख्या, प्रवास र किबोर्ड खोज',
+    icon: TrendingUp,
+  },
+  {
+    id: 'directory',
+    order: 4,
     labelEn: 'Tools Directory',
     labelNe: 'टुल्स डाइरेक्टरी',
     descEn: '40+ verified AI tools with NPR pricing & Dollar Card guide',
@@ -50,7 +58,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'daily',
-    order: 4,
+    order: 5,
     labelEn: 'Daily AI Tools',
     labelNe: 'दैनिक एआई',
     descEn: 'Devanagari OCR, Nepali Voice, Letter Writer & Salary Tax',
@@ -59,7 +67,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'free',
-    order: 5,
+    order: 6,
     labelEn: 'Free AI & News',
     labelNe: 'निःशुल्क एआई र समाचार',
     descEn: 'Free APIs without cards, document scanner & live intelligence',
@@ -68,7 +76,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'consulting',
-    order: 6,
+    order: 7,
     labelEn: 'Consulting',
     labelNe: 'परामर्श सेवा',
     descEn: 'Enterprise AI pipelines, architecture & dual NPR/USD billing',
@@ -77,7 +85,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'commerce',
-    order: 7,
+    order: 8,
     labelEn: 'NepalAI Commerce',
     labelNe: 'नेपालएआई कमर्स',
     descEn: 'Multi-tenant e-commerce with eSewa, Khalti, Nepal QR & WhatsApp alerts',
@@ -86,7 +94,7 @@ export const PAGES_META: PageMeta[] = [
   },
   {
     id: 'compliance',
-    order: 8,
+    order: 9,
     labelEn: 'Compliance & FAQ',
     labelNe: 'नियम तथा मद्दत',
     descEn: 'NRB $500 Dollar Card rules, CIB cyber safety & booking',
@@ -134,15 +142,15 @@ export const PageFlowNavigator: React.FC<PageFlowNavigatorProps> = ({
             <div
               className={`p-2.5 rounded-xl border ${
                 isDark
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                  : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                  ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+                  : 'border-cyan-300 bg-cyan-50 text-cyan-800'
               }`}
             >
               <currentMeta.icon className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-500 font-bold">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-bold">
                   {isNe
                     ? `खण्ड ${currentMeta.order} / ${PAGES_META.length}`
                     : `Page ${currentMeta.order} of ${PAGES_META.length}`}
@@ -150,15 +158,15 @@ export const PageFlowNavigator: React.FC<PageFlowNavigatorProps> = ({
                 <span className="text-slate-400 text-xs">•</span>
                 <span
                   className={`text-xs font-semibold ${
-                    isDark ? 'text-slate-300' : 'text-slate-700'
+                    isDark ? 'text-slate-200' : 'text-slate-800'
                   }`}
                 >
                   {isNe ? currentMeta.labelNe : currentMeta.labelEn}
                 </span>
               </div>
               <p
-                className={`text-xs mt-0.5 ${
-                  isDark ? 'text-slate-400' : 'text-slate-500'
+                className={`text-sm mt-0.5 ${
+                  isDark ? 'text-slate-200' : 'text-slate-700'
                 }`}
               >
                 {isNe ? currentMeta.descNe : currentMeta.descEn}
@@ -177,14 +185,14 @@ export const PageFlowNavigator: React.FC<PageFlowNavigatorProps> = ({
                   type="button"
                   onClick={() => handlePageChange(p.id)}
                   title={isNe ? p.labelNe : p.labelEn}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                     isActive
                       ? isDark
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
-                        : 'bg-emerald-600 text-white shadow-xs'
+                        ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-500/50 shadow-xs'
+                        : 'bg-cyan-600 text-white shadow-xs'
                       : isDark
-                        ? 'text-slate-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-transparent'
-                        : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-transparent'
+                        ? 'text-slate-200 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10'
+                        : 'text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200/80'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -202,66 +210,60 @@ export const PageFlowNavigator: React.FC<PageFlowNavigatorProps> = ({
         {/* Previous & Next Page Navigation Buttons */}
         <div className="flex items-center justify-between gap-4 pt-5">
           {prevPage ? (
-            <motion.button
+            <button
               type="button"
-              whileHover={{ x: -3 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => handlePageChange(prevPage.id)}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
                 isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-200 hover:text-white hover:bg-white/[0.08]'
-                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                  ? 'border-white/15 bg-white/[0.04] text-slate-100 hover:text-white hover:bg-white/[0.08]'
+                  : 'border-slate-300 bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100'
               }`}
               aria-label={`Go to previous page: ${isNe ? prevPage.labelNe : prevPage.labelEn}`}
             >
-              <ArrowLeft className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+              <ArrowLeft className="h-4 w-4 text-cyan-500 dark:text-cyan-300" aria-hidden="true" />
               <div className="text-left">
-                <span className="text-[10px] block font-mono text-slate-400 uppercase">
+                <span className={`text-xs block font-mono uppercase ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   {isNe ? 'अघिल्लो खण्ड' : 'Previous Page'}
                 </span>
                 <span>{isNe ? prevPage.labelNe : prevPage.labelEn}</span>
               </div>
-            </motion.button>
+            </button>
           ) : (
             <div />
           )}
 
           {nextPage ? (
-            <motion.button
+            <button
               type="button"
-              whileHover={{ x: 3 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => handlePageChange(nextPage.id)}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md ${
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-md ${
                 isDark
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25'
+                  : 'bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-600/20'
               }`}
               aria-label={`Go to next page: ${isNe ? nextPage.labelNe : nextPage.labelEn}`}
             >
               <div className="text-right">
-                <span className="text-[10px] block font-mono opacity-80 uppercase">
+                <span className="text-xs block font-mono text-cyan-100 uppercase">
                   {isNe ? 'अर्को खण्ड' : 'Next Page'}
                 </span>
                 <span>{isNe ? nextPage.labelNe : nextPage.labelEn}</span>
               </div>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </motion.button>
+            </button>
           ) : (
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => handlePageChange('home')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
                 isDark
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                  : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                  ? 'border-cyan-500/40 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25'
+                  : 'border-cyan-300 bg-cyan-50 text-cyan-800 hover:bg-cyan-100'
               }`}
             >
               <Home className="h-4 w-4" />
               <span>{isNe ? 'गृहपृष्ठमा फर्कनुहोस्' : 'Return to Home'}</span>
-            </motion.button>
+            </button>
           )}
         </div>
       </div>

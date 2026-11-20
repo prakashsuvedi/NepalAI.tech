@@ -18,7 +18,8 @@ import {
   LogOut,
   Building2,
   Check,
-  ShoppingBag
+  ShoppingBag,
+  TrendingUp
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ThemeMode, Language, AppPage } from '../types';
@@ -72,9 +73,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
   const isNe = language === 'ne';
 
-  // Core 4 primary destinations (calibrated for laptop width without overstretching)
+  // Core 5 primary destinations (calibrated for laptop width without overstretching)
   const primaryPages: { id: AppPage; labelEn: string; labelNe: string; icon: React.ElementType }[] = [
     { id: 'command-center', labelEn: 'Command Center', labelNe: 'कमान्ड सेन्टर', icon: LayoutDashboard },
+    { id: 'trends', labelEn: 'Trends', labelNe: 'ट्रेन्ड्स', icon: TrendingUp },
     { id: 'directory', labelEn: 'Directory', labelNe: 'डाइरेक्टरी', icon: Grid },
     { id: 'daily', labelEn: 'Daily Utilities', labelNe: 'दैनिक टुल्स', icon: Wrench },
     { id: 'consulting', labelEn: 'Consulting', labelNe: 'परामर्श सेवा', icon: Briefcase },
@@ -117,28 +119,28 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header
       className={`sticky top-0 z-50 w-full border-b transition-colors duration-300 backdrop-blur-xl ${
         isDark
-          ? 'border-slate-800/80 bg-[#080d1a]/95 text-slate-100'
-          : 'border-slate-200/90 bg-white/95 text-slate-800 shadow-2xs'
+          ? 'border-slate-800/90 bg-[#070B14]/90 text-slate-100'
+          : 'border-slate-200/90 bg-[#FAF9F6]/92 text-slate-900'
       }`}
       role="banner"
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         
         {/* Brand Logo Zone */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => handlePageSelect('home')}
-            className="flex items-center rounded-lg cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500"
+            className="flex items-center rounded-lg cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 whitespace-nowrap shrink-0"
             aria-label="nepalai.tech Home"
           >
             <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
           </button>
         </div>
 
-        {/* Desktop Navigation Links Zone (Streamlined 4 core items + More dropdown: Fits perfectly on 1024px+ laptops) */}
+        {/* Desktop Navigation Links Zone — Clean Editorial Typography with Active Bottom Rule */}
         <nav
-          className="hidden lg:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 p-1 rounded-full border border-slate-200/80 dark:border-slate-800"
+          className="hidden lg:flex items-center gap-1 xl:gap-2"
           role="navigation"
           aria-label="Main page navigation"
         >
@@ -149,18 +151,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={page.id}
                 type="button"
                 onClick={() => handlePageSelect(page.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap min-h-[34px] ${
+                className={`relative px-2.5 xl:px-3 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[40px] flex items-center ${
                   isActive
                     ? isDark
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
-                      : 'bg-cyan-600 text-white shadow-xs'
+                      ? 'text-cyan-300'
+                      : 'text-cyan-800'
                     : isDark
-                      ? 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white shadow-2xs'
+                      ? 'text-slate-300 hover:text-white'
+                      : 'text-slate-700 hover:text-slate-950'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                {isNe ? page.labelNe : page.labelEn}
+                <span>{isNe ? page.labelNe : page.labelEn}</span>
+                {isActive && (
+                  <span
+                    className="absolute inset-x-2.5 -bottom-[13px] h-[2px] bg-gradient-to-r from-rose-600 via-cyan-600 to-cyan-500 dark:from-rose-400 dark:via-cyan-400 dark:to-cyan-300"
+                    aria-hidden="true"
+                  />
+                )}
               </button>
             );
           })}
@@ -170,20 +178,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setMoreOpen(!moreOpen)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap min-h-[34px] flex items-center gap-1 ${
+              className={`relative px-2.5 xl:px-3 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[40px] flex items-center gap-1 ${
                 isSecondaryActive
                   ? isDark
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                    : 'bg-cyan-600 text-white'
+                    ? 'text-cyan-300'
+                    : 'text-cyan-800'
                   : isDark
-                    ? 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+                    ? 'text-slate-300 hover:text-white'
+                    : 'text-slate-700 hover:text-slate-950'
               }`}
               aria-expanded={moreOpen}
               aria-label="More navigation options"
             >
               <span>{isNe ? 'थप' : 'More'}</span>
-              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
+              {isSecondaryActive && (
+                <span
+                  className="absolute inset-x-2.5 -bottom-[13px] h-[2px] bg-gradient-to-r from-rose-600 to-cyan-600 dark:from-rose-400 dark:to-cyan-400"
+                  aria-hidden="true"
+                />
+              )}
             </button>
 
             {/* Dropdown Menu */}
@@ -194,10 +208,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className={`absolute left-0 mt-2 w-52 rounded-xl border p-1.5 shadow-lg backdrop-blur-xl z-50 ${
+                  className={`absolute left-0 mt-2 w-56 rounded-xl border p-1.5 shadow-lg backdrop-blur-xl z-50 ${
                     isDark
                       ? 'bg-[#0b1220]/95 border-slate-800 text-slate-200 shadow-cyan-950/20'
-                      : 'bg-white/95 border-slate-200 text-slate-800 shadow-slate-300/40'
+                      : 'bg-white/98 border-slate-200 text-slate-800 shadow-slate-300/40'
                   }`}
                 >
                   {secondaryPages.map((page) => {
@@ -218,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                               : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950'
                         }`}
                       >
-                        <Icon className="h-3.5 w-3.5 text-cyan-500" />
+                        <Icon className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
                         <span>{isNe ? page.labelNe : page.labelEn}</span>
                       </button>
                     );
@@ -238,10 +252,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                      <Sparkles className="h-3.5 w-3.5 text-cyan-500" />
                       <span>{isNe ? 'नेपालएआई स्टुडियो' : 'NepalAI Studio'}</span>
                     </span>
-                    <ArrowUpRight className="h-3 w-3 text-cyan-500" />
+                    <ArrowUpRight className="h-3 w-3 text-cyan-600 dark:text-cyan-400" />
                   </a>
 
                   {/* Stack ROI Calculator */}
@@ -258,11 +272,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      <Layers className="h-3.5 w-3.5 text-cyan-400" />
+                      <Layers className="h-3.5 w-3.5 text-cyan-500" />
                       <span>{t.nav.stackCalculator}</span>
                     </span>
                     {selectedStackCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
+                      <span className="font-mono text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
                         {selectedStackCount}
                       </span>
                     )}
@@ -281,22 +295,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onOpenSearch}
-              className={`flex items-center justify-center rounded-xl border px-2.5 py-1.5 text-xs cursor-pointer min-h-[38px] min-w-[38px] transition-colors ${
+              className={`flex items-center justify-center rounded-lg border px-2.5 py-1.5 text-xs cursor-pointer min-h-[38px] min-w-[38px] transition-colors ${
                 isDark
                   ? 'border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-cyan-500/40'
-                  : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950 hover:border-cyan-400/50'
+                  : 'border-slate-200/90 bg-white text-slate-700 hover:text-slate-950 hover:border-cyan-500/50'
               }`}
               title="Search tools, rates, and docs (Ctrl+K)"
               aria-label="Open Search"
             >
-              <Search className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
+              <Search className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
             </button>
           )}
 
           {/* Language Toggle (Compact EN / नेपाली switch) */}
           <div
-            className={`flex items-center rounded-xl border p-0.5 text-xs min-h-[38px] ${
-              isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
+            className={`flex items-center rounded-lg border p-0.5 text-xs min-h-[38px] shrink-0 ${
+              isDark ? 'border-slate-800 bg-slate-900/70' : 'border-slate-200/90 bg-white'
             }`}
             role="group"
             aria-label="Language selection"
@@ -304,12 +318,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('en')}
-              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[30px] cursor-pointer ${
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[30px] cursor-pointer whitespace-nowrap ${
                 language === 'en'
                   ? isDark
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                    : 'bg-white text-cyan-800 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-cyan-500 text-slate-950 font-bold'
+                    : 'bg-slate-900 text-white font-bold'
+                  : isDark
+                    ? 'text-slate-300 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-950'
               }`}
               aria-pressed={language === 'en'}
             >
@@ -318,12 +334,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('ne')}
-              className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all min-h-[30px] cursor-pointer ${
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[30px] cursor-pointer whitespace-nowrap ${
                 language === 'ne'
                   ? isDark
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                    : 'bg-white text-cyan-800 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-cyan-500 text-slate-950 font-bold'
+                    : 'bg-slate-900 text-white font-bold'
+                  : isDark
+                    ? 'text-slate-300 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-950'
               }`}
               aria-pressed={language === 'ne'}
             >
@@ -338,10 +356,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onToggleTheme}
-            className={`p-2 rounded-xl border transition-all text-xs cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
+            className={`p-2 rounded-lg border transition-colors text-xs cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shrink-0 ${
               isDark
-                ? 'border-slate-800 bg-slate-900/60 text-amber-300 hover:text-white'
-                : 'border-slate-200 bg-slate-100 text-slate-700 hover:text-slate-950'
+                ? 'border-slate-800 bg-slate-900/60 text-amber-300 hover:text-white hover:border-slate-700'
+                : 'border-slate-200/90 bg-white text-slate-700 hover:text-slate-950 hover:border-slate-300'
             }`}
             title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
             aria-label={t.nav.toggleTheme}
@@ -349,7 +367,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isDark ? (
               <Sun className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
             ) : (
-              <Moon className="h-3.5 w-3.5 text-cyan-600" aria-hidden="true" />
+              <Moon className="h-3.5 w-3.5 text-cyan-700" aria-hidden="true" />
             )}
           </button>
 
@@ -359,15 +377,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium min-h-[38px] cursor-pointer transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium min-h-[38px] cursor-pointer transition-colors whitespace-nowrap shrink-0 ${
                   isDark
                     ? 'border-slate-800 bg-slate-900/70 hover:border-cyan-500/40 text-slate-200'
-                    : 'border-slate-200 bg-white hover:border-cyan-500/50 text-slate-800 shadow-2xs'
+                    : 'border-slate-200/90 bg-white hover:border-cyan-600/50 text-slate-800'
                 }`}
                 aria-expanded={userMenuOpen}
                 aria-label="User account and business menu"
               >
-                <div className="w-5 h-5 rounded-full bg-cyan-600 text-white font-bold text-[10px] flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-cyan-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
                   {(profile?.fullName || user.email || 'N')[0].toUpperCase()}
                 </div>
                 <span className="font-semibold max-w-[100px] truncate">
@@ -384,7 +402,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className={`absolute right-0 mt-2 w-64 rounded-2xl border p-2 shadow-xl backdrop-blur-xl z-50 ${
+                    className={`absolute right-0 mt-2 w-64 rounded-xl border p-2 shadow-xl backdrop-blur-xl z-50 ${
                       isDark
                         ? 'bg-[#0b1220]/95 border-slate-800 text-slate-200 shadow-cyan-950/30'
                         : 'bg-white/98 border-slate-200 text-slate-800 shadow-slate-300/50'
@@ -398,7 +416,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                         {user.email}
                       </div>
-                      <span className="inline-block mt-1 text-[9px] font-mono px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold uppercase">
+                      <span className="inline-block mt-1 text-[10px] font-mono text-cyan-700 dark:text-cyan-400 font-bold uppercase tracking-wider">
                         {profile?.systemRole === 'super_admin' ? 'Super Admin' : 'Business Owner'}
                       </span>
                     </div>
@@ -460,22 +478,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onOpenAuth?.('signin')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all min-h-[38px] cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors min-h-[38px] cursor-pointer whitespace-nowrap shrink-0 ${
                 isDark
                   ? 'border-slate-800 bg-slate-900/60 hover:border-cyan-500/40 text-slate-200 hover:text-white'
-                  : 'border-slate-200 bg-white hover:border-cyan-500/50 text-slate-700 hover:text-slate-950 shadow-2xs'
+                  : 'border-slate-200/90 bg-white hover:border-cyan-600/50 text-slate-800 hover:text-slate-950'
               }`}
             >
-              <UserIcon className="h-3.5 w-3.5 text-cyan-500" />
+              <UserIcon className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>{isNe ? 'लग-इन' : 'Sign In'}</span>
             </button>
           )}
 
-          {/* Book Consultation Primary CTA Button (Cyan Sovereign Palette) */}
+          {/* Book Consultation Primary CTA Button */}
           <button
             type="button"
             onClick={() => onOpenConsultation()}
-            className="flex items-center gap-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 px-3.5 py-2 text-xs font-bold text-white transition-all shadow-xs hover:shadow-cyan-500/20 cursor-pointer min-h-[38px]"
+            className="flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 px-3.5 py-2 text-xs font-bold text-white transition-colors shadow-xs cursor-pointer min-h-[38px] whitespace-nowrap shrink-0"
           >
             <span>{t.nav.bookConsultation}</span>
             <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -488,7 +506,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Language Switcher in Mobile Top Bar */}
           <div
             className={`flex items-center rounded-xl border p-0.5 text-xs min-h-[36px] ${
-              isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
+              isDark ? 'border-slate-700 bg-slate-900/80' : 'border-slate-300 bg-slate-100'
             }`}
             role="group"
             aria-label="Language selection"
@@ -496,10 +514,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('en')}
-              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all min-h-[28px] cursor-pointer ${
+              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-colors min-h-[28px] cursor-pointer ${
                 language === 'en'
-                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-800 shadow-xs'
-                  : 'text-slate-400'
+                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-900 shadow-xs'
+                  : isDark ? 'text-slate-200' : 'text-slate-700'
               }`}
             >
               EN
@@ -507,10 +525,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('ne')}
-              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all min-h-[28px] cursor-pointer ${
+              className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-colors min-h-[28px] cursor-pointer ${
                 language === 'ne'
-                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-800 shadow-xs'
-                  : 'text-slate-400'
+                  ? isDark ? 'bg-cyan-500 text-slate-950' : 'bg-white text-cyan-900 shadow-xs'
+                  : isDark ? 'text-slate-200' : 'text-slate-700'
               }`}
             >
               नेपाली
@@ -640,7 +658,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Core Destinations */}
             <div className="space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 block mb-1.5">
+              <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 px-2 block mb-1.5">
                 {isNe ? 'प्रमुख खण्डहरू' : 'Core Destinations'}
               </span>
               {[...primaryPages, ...secondaryPages].map((page) => {
@@ -651,14 +669,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     key={page.id}
                     type="button"
                     onClick={() => handlePageSelect(page.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[42px] cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[42px] cursor-pointer ${
                       isActive
                         ? isDark
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+                          ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-500/40 shadow-xs'
                           : 'bg-cyan-600 text-white shadow-xs'
                         : isDark
-                          ? 'text-slate-300 hover:bg-white/[0.04]'
-                          : 'text-slate-700 hover:bg-slate-100'
+                          ? 'text-slate-200 hover:bg-white/[0.06]'
+                          : 'text-slate-800 hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -679,7 +697,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Workbenches & External Studio */}
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 block">
+              <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 px-2 block">
                 {isNe ? 'स्टुडियो र उपकरणहरू' : 'Studio & Workbenches'}
               </span>
 

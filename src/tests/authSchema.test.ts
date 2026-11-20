@@ -1,16 +1,27 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs';
 import path from 'path';
-import { profiles, businesses, businessMembers, businessInvitations } from '../db/schema';
-import { isSupabaseConfigured } from '../lib/supabase';
+import {
+  users,
+  profiles,
+  businesses,
+  businessMembers,
+  businessInvitations,
+  userPreferences,
+  savedCalculations,
+  consultationLeads,
+} from '../db/schema.ts';
 
-console.log('--- Running Phase 1 Identity & Authentication Architecture Tests ---');
+console.log('--- Running Phase 1 Identity & Cloud SQL Architecture Tests ---');
 
 // Test 1: Verify Drizzle ORM Schema Tables & Fields
 console.log('[Test 1] Validating Drizzle PostgreSQL Multi-Tenant Schema...');
+assert.ok(users, 'Users table must be defined');
+assert.ok(users.uid, 'Users uid (Firebase Auth link) must be defined');
+assert.ok(users.email, 'Users email must be defined');
+
 assert.ok(profiles, 'Profiles table must be defined');
-assert.ok(profiles.id, 'Profiles id (auth.users link) must be defined');
+assert.ok(profiles.id, 'Profiles id (Firebase UID link) must be defined');
 assert.ok(profiles.email, 'Profiles email must be defined');
 assert.ok(profiles.systemRole, 'Profiles systemRole must be defined');
 
@@ -26,7 +37,11 @@ assert.ok(businessMembers.role, 'Business member role must be defined');
 
 assert.ok(businessInvitations, 'Business invitations table must be defined');
 assert.ok(businessInvitations.token, 'Business invitation token must be defined');
-console.log('  ✓ All 4 core multi-tenant identity tables verified.');
+
+assert.ok(userPreferences, 'User preferences table must be defined');
+assert.ok(savedCalculations, 'Saved calculations table must be defined');
+assert.ok(consultationLeads, 'Consultation leads table must be defined');
+console.log('  ✓ All Cloud SQL identity, tenant, workspace, and lead tables verified.');
 
 // Test 2: Security Remediation Audit - Ensure NO exposed admin key in frontend service
 console.log('[Test 2] Auditing Frontend Client Code for Compromised Admin Keys...');
@@ -37,21 +52,16 @@ const hasAuthHeadersHelper = studioServiceContent.includes('getAuthHeaders()');
 assert.strictEqual(hasAuthHeadersHelper, true, 'getAuthHeaders() dynamic resolver must be present in studioAdminService.ts');
 console.log('  ✓ Verified: Zero hardcoded admin credentials in client-facing code.');
 
-// Test 3: RLS Policies Migration SQL Verification
-console.log('[Test 3] Auditing PostgreSQL Row Level Security (RLS) SQL Migration...');
-const rlsSql = fs.readFileSync(path.join(process.cwd(), 'src/db/migrations/0001_rls_policies.sql'), 'utf-8');
-assert.ok(rlsSql.includes('ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;'), 'RLS must be enabled on profiles');
-assert.ok(rlsSql.includes('ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;'), 'RLS must be enabled on businesses');
-assert.ok(rlsSql.includes('ALTER TABLE business_members ENABLE ROW LEVEL SECURITY;'), 'RLS must be enabled on business_members');
-assert.ok(rlsSql.includes('USING'), 'RLS policies must include USING clauses');
-assert.ok(rlsSql.includes('WITH CHECK'), 'RLS policies must include WITH CHECK clauses');
-console.log('  ✓ RLS migration syntax, multi-tenant isolation, and WITH CHECK guarantees verified.');
+// Test 3: Verify Firebase configuration & Drizzle Cloud SQL pool configuration
+console.log('[Test 3] Auditing Firebase Config & Cloud SQL Pool Configuration...');
+const fbConfigRaw = fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf-8');
+const fbConfig = JSON.parse(fbConfigRaw);
+assert.ok(fbConfig.projectId && fbConfig.projectId !== 'remixed-project-id', 'firebase-applet-config.json must have a valid projectId');
 
-// Test 4: Supabase Resilient Configuration Fallback
-console.log('[Test 4] Testing Supabase Client Initialization & Fallback...');
-const configured = isSupabaseConfigured();
-assert.strictEqual(typeof configured, 'boolean', 'isSupabaseConfigured must return boolean');
-console.log(`  ✓ Supabase client handles environment gracefully (Configured: ${configured}).`);
+const dbIndexContent = fs.readFileSync(path.join(process.cwd(), 'src/db/index.ts'), 'utf-8');
+assert.ok(dbIndexContent.includes('process.env.SQL_HOST'), 'pg Pool must use Object Method with SQL_HOST');
+assert.ok(!dbIndexContent.includes('DATABASE_URL'), 'pg Pool must not use DATABASE_URL');
+console.log('  ✓ Firebase Auth & Cloud SQL Object Method configuration verified.');
 
 console.log('-------------------------------------------------------');
 console.log('✅ ALL PHASE 1 IDENTITY & AUTH TESTS PASSED SUCCESSFULLY');

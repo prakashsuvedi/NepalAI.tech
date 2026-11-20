@@ -138,10 +138,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center space-y-3 mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-xs">
-            <MessageSquare className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-semibold shadow-xs">
+            <MessageSquare className="h-3.5 w-3.5 text-cyan-500" aria-hidden="true" />
             <span
-              className={isDark ? 'text-emerald-400' : 'text-emerald-700'}
+              className={isDark ? 'text-cyan-400' : 'text-cyan-800'}
             >
               {t.contact.badge}
             </span>
@@ -158,7 +158,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
           <p
             className={`text-sm sm:text-base leading-relaxed ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
+              isDark ? 'text-slate-300' : 'text-slate-600'
             }`}
           >
             {t.contact.subtitle}
@@ -174,19 +174,19 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             <div
               className={`rounded-2xl border p-6 sm:p-7 space-y-6 transition-all ${
                 isDark
-                  ? 'border-white/[0.08] bg-[#0c0f1c] text-slate-200'
+                  ? 'border-white/[0.08] bg-[#0c1324] text-slate-200 shadow-xl'
                   : 'border-slate-200 bg-white text-slate-800 shadow-xs'
               }`}
             >
               <div className="space-y-1.5 pb-4 border-b border-slate-500/15">
                 <h3
                   className={`text-base font-bold font-display ${
-                    isDark ? 'text-white' : 'text-slate-900'
+                    isDark ? 'text-white' : 'text-slate-950'
                   }`}
                 >
                   {t.contact.directTitle}
                 </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                   {t.contact.directSubtitle}
                 </p>
               </div>
@@ -195,14 +195,16 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 
                 {/* Email */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg border shrink-0 ${
+                    isDark ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                  }`}>
                     <Mail className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="space-y-0.5">
-                    <div className="text-slate-400 font-medium">{t.contact.emailLabel}</div>
+                    <div className={`font-medium ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{t.contact.emailLabel}</div>
                     <a
                       href="mailto:contact@nepalai.tech"
-                      className="font-bold text-emerald-400 hover:underline text-sm inline-flex items-center min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                      className="font-bold text-cyan-700 dark:text-cyan-300 hover:underline text-sm inline-flex items-center min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 rounded"
                     >
                       {t.contact.emailVal}
                     </a>
@@ -211,31 +213,35 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 {/* WhatsApp */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg border shrink-0 ${
+                    isDark ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                  }`}>
                     <Phone className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="space-y-0.5">
-                    <div className="text-slate-400 font-medium">{t.contact.whatsappLabel}</div>
+                    <div className={`font-medium ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{t.contact.whatsappLabel}</div>
                     <a
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-emerald-400 hover:underline text-sm inline-flex items-center gap-1 min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
+                      className="font-bold text-cyan-700 dark:text-cyan-300 hover:underline text-sm inline-flex items-center gap-1 min-h-[44px] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 rounded"
                     >
                       <span>{t.contact.whatsappVal}</span>
-                      <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </a>
                   </div>
                 </div>
 
                 {/* Office Location */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg border shrink-0 ${
+                    isDark ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-sky-50 text-sky-700 border-sky-200'
+                  }`}>
                     <MapPin className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="space-y-0.5">
-                    <div className="text-slate-400 font-medium">{t.contact.officeLabel}</div>
-                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                    <div className={`font-medium ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{t.contact.officeLabel}</div>
+                    <div className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {t.contact.officeVal}
                     </div>
                   </div>
@@ -243,12 +249,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 {/* Working Hours */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg border shrink-0 ${
+                    isDark ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
                     <Clock className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="space-y-0.5">
-                    <div className="text-slate-400 font-medium">{t.contact.hoursLabel}</div>
-                    <div className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                    <div className={`font-medium ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{t.contact.hoursLabel}</div>
+                    <div className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {t.contact.hoursVal}
                     </div>
                   </div>
@@ -262,7 +270,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 text-xs transition-all shadow-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-4 text-xs transition-colors shadow-md shadow-cyan-500/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500"
                   aria-label="Direct chat on WhatsApp"
                 >
                   <MessageSquare className="h-4 w-4" aria-hidden="true" />
@@ -277,16 +285,16 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             <div
               className={`rounded-2xl border p-5 flex items-center gap-3.5 ${
                 isDark
-                  ? 'border-emerald-500/20 bg-emerald-950/20 text-slate-300'
-                  : 'border-emerald-200 bg-emerald-50/80 text-slate-700'
+                  ? 'border-cyan-500/30 bg-cyan-950/25 text-slate-100'
+                  : 'border-cyan-300 bg-cyan-50 text-slate-900'
               }`}
             >
-              <ShieldCheck className="h-6 w-6 text-emerald-400 shrink-0" aria-hidden="true" />
+              <ShieldCheck className="h-6 w-6 text-cyan-600 dark:text-cyan-400 shrink-0" aria-hidden="true" />
               <div className="text-xs">
-                <div className="font-bold text-emerald-400">
+                <div className="font-bold text-cyan-800 dark:text-cyan-300">
                   {isNepali ? 'गोपनीयता र सम्झौताको ग्यारेन्टी' : 'Guaranteed NDA & Confidentiality'}
                 </div>
-                <div className="text-[11px] opacity-80">
+                <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                   {isNepali
                     ? 'हाम्रा सबै परामर्श र छलफलहरू कानुनी रूपमा सुरक्षित र गोप्य रहनेछन्।'
                     : 'All discussions are protected under standard mutual NDAs before technical discovery.'}
@@ -299,28 +307,28 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           {/* Right Column: Interactive Consultation & Booking Form */}
           <div className="lg:col-span-7">
             <div
-              className={`rounded-2xl border p-6 sm:p-8 transition-all ${
+              className={`rounded-2xl border p-6 sm:p-8 transition-colors ${
                 isDark
-                  ? 'border-white/[0.08] bg-[#0c0f1e] text-slate-100'
-                  : 'border-slate-200 bg-white text-slate-900 shadow-sm'
+                  ? 'border-white/15 bg-[#0c1324] text-slate-100 shadow-xl'
+                  : 'border-slate-200 bg-white text-slate-950 shadow-sm'
               }`}
             >
               {isSubmitted ? (
                 <div className="text-center py-10 space-y-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto animate-bounce">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/35 text-cyan-500 dark:text-cyan-300 mx-auto">
                     <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
                   </div>
                   
                   <div className="space-y-1.5">
                     <h3
                       className={`text-xl font-bold font-display ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                        isDark ? 'text-white' : 'text-slate-950'
                       }`}
                     >
                       {t.contact.successTitle}
                     </h3>
                     <p
-                      className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed"
+                      className={`text-sm max-w-md mx-auto leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}
                     >
                       {t.contact.successMessage}
                     </p>
@@ -330,7 +338,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <button
                       type="button"
                       onClick={handleResetForm}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition-colors"
+                      className="px-4 py-2.5 rounded-xl bg-cyan-600 text-white text-xs font-bold hover:bg-cyan-500 transition-colors cursor-pointer"
                     >
                       {t.contact.sendAnother}
                     </button>
@@ -339,9 +347,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-xl border border-white/10 text-xs text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+                      className={`px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                        isDark ? 'border-white/15 text-slate-200 hover:text-white' : 'border-slate-300 text-slate-800 hover:text-slate-950'
+                      }`}
                     >
-                      <MessageSquare className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+                      <MessageSquare className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
                       <span>{t.contact.whatsappChatBtn}</span>
                     </a>
                   </div>
@@ -352,18 +362,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <div className="space-y-1 pb-2 border-b border-slate-500/15">
                     <h3
                       className={`text-base font-bold font-display ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                        isDark ? 'text-white' : 'text-slate-950'
                       }`}
                     >
                       {t.contact.formTitle}
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className={`text-xs ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       {t.contact.formSubtitle}
                     </p>
                   </div>
 
                   {errorMessage && (
-                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-300 text-xs flex items-center gap-2">
                       <span className="font-bold">Notice:</span>
                       <span>{errorMessage}</span>
                     </div>
@@ -375,7 +385,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-name" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.nameLabel}
                       </label>
@@ -386,10 +396,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         placeholder={t.contact.namePlaceholder}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400 focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-600 focus:bg-white'
                         }`}
                       />
                     </div>
@@ -398,7 +408,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-email" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.emailInputLabel}
                       </label>
@@ -409,10 +419,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder={t.contact.emailPlaceholder}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400 focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-600 focus:bg-white'
                         }`}
                       />
                     </div>
@@ -421,7 +431,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-phone" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.phoneLabel}
                       </label>
@@ -431,10 +441,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder={t.contact.phonePlaceholder}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400 focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-600 focus:bg-white'
                         }`}
                       />
                     </div>
@@ -443,7 +453,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-org" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.orgLabel}
                       </label>
@@ -453,10 +463,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         value={formData.organization}
                         onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                         placeholder={t.contact.orgPlaceholder}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400 focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-600 focus:bg-white'
                         }`}
                       />
                     </div>
@@ -469,7 +479,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-service" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.serviceLabel}
                       </label>
@@ -477,10 +487,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         id="contact-service"
                         value={formData.serviceCategory}
                         onChange={(e) => setFormData({ ...formData, serviceCategory: e.target.value })}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 focus:border-cyan-600 focus:bg-white'
                         }`}
                       >
                         <option value="">{t.contact.serviceOptionDefault}</option>
@@ -495,7 +505,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <div className="space-y-1.5">
                       <label 
                         htmlFor="contact-budget" 
-                        className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                        className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                       >
                         {t.contact.budgetLabel}
                       </label>
@@ -503,10 +513,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         id="contact-budget"
                         value={formData.budgetRange}
                         onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isDark
-                            ? 'border-white/10 bg-[#070912] text-white focus:border-emerald-500/50'
-                            : 'border-slate-300 bg-slate-50 text-slate-900 focus:border-emerald-500 focus:bg-white'
+                            ? 'border-white/15 bg-[#070912] text-white focus:border-cyan-400'
+                            : 'border-slate-300 bg-slate-50 text-slate-950 focus:border-cyan-600 focus:bg-white'
                         }`}
                       >
                         <option value="">{t.contact.budgetOptionDefault}</option>
@@ -524,7 +534,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <div className="space-y-1.5">
                     <label 
                       htmlFor="contact-message" 
-                      className={`block text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
+                      className={`block text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}
                     >
                       {t.contact.messageLabel}
                     </label>
@@ -535,10 +545,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder={t.contact.messagePlaceholder}
-                      className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                      className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                         isDark
-                          ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500 focus:border-emerald-500/50'
-                          : 'border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white'
+                          ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400 focus:border-cyan-400'
+                          : 'border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-500 focus:border-cyan-600 focus:bg-white'
                       }`}
                     />
                   </div>
@@ -547,7 +557,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 px-4 text-xs transition-all shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 min-h-[44px] cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-4 text-xs transition-colors shadow-md shadow-cyan-500/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 disabled:opacity-50 min-h-[44px] cursor-pointer"
                     >
                       {isSubmitting ? (
                         <span>{t.contact.submittingBtn}</span>

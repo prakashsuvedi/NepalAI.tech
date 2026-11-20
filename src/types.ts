@@ -1,6 +1,6 @@
 export type ThemeMode = 'dark' | 'light';
 export type Language = 'en' | 'ne';
-export type AppPage = 'home' | 'command-center' | 'dashboard' | 'directory' | 'daily' | 'free' | 'consulting' | 'compliance' | 'commerce';
+export type AppPage = 'home' | 'command-center' | 'dashboard' | 'directory' | 'daily' | 'trends' | 'free' | 'consulting' | 'compliance' | 'commerce';
 
 export interface HeroConfig {
   eyebrowNepali: string;

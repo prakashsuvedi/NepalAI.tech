@@ -4,11 +4,13 @@ import { AdminLeadsTab } from './AdminLeadsTab';
 import { AdminStudioTab } from './AdminStudioTab';
 import { AdminHealthTab } from './AdminHealthTab';
 import { useAdminData } from '../hooks/useAdminData';
+import { useAuth } from '../context/AuthContext';
 import { 
   fetchStudioAdminConnection, 
   syncLeadsWithStudioAdmin, 
   updateLeadStatusRealtime, 
   fetchCurrentLeads,
+  getAuthHeaders,
   StudioConnectionStatus 
 } from '../services/studioAdminService';
 import {
@@ -67,16 +69,20 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
   const [lastStudioSync, setLastStudioSync] = useState<string | null>(null);
   const [realtimeSyncEnabled, setRealtimeSyncEnabled] = useState(true);
 
+  const { user, profile, signInWithGoogle } = useAuth();
+  const isSuperAdmin = profile?.systemRole === 'super_admin';
+
   // Hook fetching real-time metrics (user count, token usage, revenue) from studio.nepalai.tech/api/admin/users
   const { 
     metrics: studioMetrics, 
     users: studioUsers, 
     isLoading: isAdminDataLoading,
     refresh: refreshAdminData 
-  } = useAdminData(isOpen ? 12000 : 0);
+  } = useAdminData(isOpen && isSuperAdmin ? 12000 : 0);
 
   // Fetch leads and update state
   const fetchLeads = async () => {
+    if (!isSuperAdmin) return;
     setIsLoadingLeads(true);
     try {
       const freshLeads = await fetchCurrentLeads();
@@ -92,6 +98,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
 
   // Fetch utility: Connects and synchronizes pending consulting leads with studio.nepalai.tech/admin
   const handleSyncWithStudio = async () => {
+    if (!isSuperAdmin) return;
     setIsStudioSyncing(true);
     try {
       const syncResult = await syncLeadsWithStudioAdmin(leads);
@@ -112,7 +119,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
 
   // Real-time synchronization effect: polls studio.nepalai.tech/admin every 10 seconds when open
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !isSuperAdmin) return;
 
     fetchLeads();
     fetchStudioAdminConnection().then((conn) => {
@@ -139,7 +146,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [isOpen, realtimeSyncEnabled]);
+  }, [isOpen, realtimeSyncEnabled, isSuperAdmin]);
 
   useEffect(() => {
     setLocalHero(heroConfig);
@@ -183,11 +190,14 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
 
   const handleDeleteLead = async (id: string) => {
     try {
-      await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' });
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/admin/leads/${id}`, { method: 'DELETE', headers });
+      if (res.ok) {
+        setLeads((prev) => prev.filter((l) => l.id !== id));
+      }
     } catch (err) {
       console.log('Delete lead API note:', err);
     }
-    setLeads((prev) => prev.filter((l) => l.id !== id));
   };
 
   const handleHeroChange = (field: keyof HeroConfig, value: any) => {
@@ -279,6 +289,27 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+
+        {!isSuperAdmin && (
+          <div className="mt-3 p-3.5 rounded-xl border border-amber-500/40 bg-amber-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="text-xs text-amber-100">
+              {!user ? (
+                <span>Sign in with your administrator Google account to access live leads, diagnostics, and telemetry.</span>
+              ) : (
+                <span>Signed in as <strong>{user.email}</strong>. Super Admin privileges are required to modify platform leads and system controls.</span>
+              )}
+            </div>
+            {!user && (
+              <button
+                type="button"
+                onClick={() => signInWithGoogle()}
+                className="px-3.5 py-1.5 rounded-lg bg-white text-slate-950 text-xs font-bold hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              >
+                Continue with Google
+              </button>
+            )}
+          </div>
+        )}
 
         {/* REAL-TIME STATUS TRACKER: studio.nepalai.tech/admin Live Bridge */}
         <div className="mt-3 p-3 sm:p-3.5 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-black/40 to-emerald-950/30 shadow-inner">

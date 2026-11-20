@@ -85,7 +85,7 @@ export const Dialog: React.FC<DialogProps> = ({
                   {title}
                 </h2>
                 {description && (
-                  <p id="dialog-description" className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p id="dialog-description" className="text-xs text-slate-700 dark:text-slate-300 mt-1">
                     {description}
                   </p>
                 )}
@@ -93,7 +93,7 @@ export const Dialog: React.FC<DialogProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+                className="rounded-lg p-1.5 text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />

@@ -20,21 +20,21 @@ export const NepaliHeritageArt: React.FC<NepaliHeritageArtProps> = ({
       <div
         className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[420px] rounded-full blur-[110px] transition-colors duration-500 ${
           isDark
-            ? 'bg-gradient-to-b from-indigo-900/20 via-emerald-950/15 to-transparent'
-            : 'bg-gradient-to-b from-amber-200/25 via-emerald-100/30 to-transparent'
+            ? 'bg-gradient-to-b from-cyan-900/20 via-sky-950/15 to-transparent'
+            : 'bg-gradient-to-b from-cyan-100/40 via-sky-100/30 to-transparent'
         }`}
       />
 
       {/* Subtle Prayer Flags (लुङ्दार) Accent along the top */}
       <div className="absolute top-0 left-0 right-0 h-4 flex items-center justify-around opacity-35">
         <div className="w-full flex items-center justify-around border-t border-dashed border-slate-500/25 pt-0.5">
-          {['bg-blue-500', 'bg-white', 'bg-red-500', 'bg-emerald-500', 'bg-amber-400'].map((color, idx) => (
+          {['bg-blue-600', 'bg-white', 'bg-red-500', 'bg-cyan-500', 'bg-amber-400'].map((color, idx) => (
             <div
               key={idx}
               className={`w-3.5 h-2.5 ${color} opacity-40 transform -skew-x-12 shadow-sm rounded-b-[1px]`}
             />
           ))}
-          {['bg-blue-500', 'bg-white', 'bg-red-500', 'bg-emerald-500', 'bg-amber-400'].map((color, idx) => (
+          {['bg-blue-600', 'bg-white', 'bg-red-500', 'bg-cyan-500', 'bg-amber-400'].map((color, idx) => (
             <div
               key={`repeat-${idx}`}
               className={`w-3.5 h-2.5 ${color} opacity-40 transform -skew-x-12 shadow-sm rounded-b-[1px] hidden sm:block`}

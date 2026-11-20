@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nepalai.tech – Sovereign AI Hub, Studio & Enterprise AI Consulting in Nepal</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('nepalai_theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch (e) {}
+      })();
+    </script>
     
     <!-- Core Favicons, PWA & Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -516,9 +527,15 @@
           "@id": "https://nepalai.tech/#ev-calculator",
           "name": "Nepal EV Road Tax, Bluebook & NEA Charging Calculator",
           "applicationCategory": "UtilitiesApplication",
-          "operatingSystem": "All Modern Browsers",
-          "url": "https://nepalai.tech/#daily-tools",
+          "operatingSystem": "All",
+          "url": "https://nepalai.tech/tools/ev-tax",
           "description": "Calculates provincial annual EV road tax for cars, 2-wheelers, microbuses (HiAce), and public buses with compound bluebook delay fines and NEA Time-of-Day (TOD) off-peak charging cost vs. petrol savings.",
+          "featureList": [
+            "Provincial EV annual road tax by kW slab",
+            "Compound bluebook renewal delay fines",
+            "NEA TOD off-peak charging vs petrol cost comparator",
+            "A4 PDF audit slip export"
+          ],
           "offers": {
             "@type": "Offer",
             "price": "0",
@@ -530,9 +547,15 @@
           "@id": "https://nepalai.tech/#nepse-terminal",
           "name": "NEPSE Trading & Capital Gains Tax (CGT) Terminal",
           "applicationCategory": "FinanceApplication",
-          "operatingSystem": "All Modern Browsers",
-          "url": "https://nepalai.tech/#daily-tools",
+          "operatingSystem": "All",
+          "url": "https://nepalai.tech/tools/nepse",
           "description": "Computes SEBON 5-tier broker commission, short-term (7.5%) & long-term (5%) CGT, DP & SEBON fees, break-even target prices, and bonus/right share adjusted opening prices.",
+          "featureList": [
+            "SEBON 5-tier equity broker commission breakdown",
+            "Short-term (7.5%) and Long-term (5%) CGT calculation",
+            "Bonus and Right share price adjustment calculator",
+            "Break-even price and A4 PDF report"
+          ],
           "offers": {
             "@type": "Offer",
             "price": "0",
@@ -544,9 +567,14 @@
           "@id": "https://nepalai.tech/#it-export-engine",
           "name": "Nepal IT Export Remittance & Section 95Ka Declaration Engine",
           "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All Modern Browsers",
-          "url": "https://nepalai.tech/#daily-tools",
+          "operatingSystem": "All",
+          "url": "https://nepalai.tech/tools/it-export",
           "description": "Computes Section 95Ka 5% individual final TDS / 1% company TDS on foreign wire remittances and auto-generates official bilingual bank self-declaration letters.",
+          "featureList": [
+            "NRB buying rate inward USD to NPR conversion",
+            "Section 95Ka 5% freelancer & 1% company final TDS",
+            "Bilingual bank self-declaration letter generator & A4 PDF export"
+          ],
           "offers": {
             "@type": "Offer",
             "price": "0",
@@ -558,9 +586,14 @@
           "@id": "https://nepalai.tech/#bullion-terminal",
           "name": "Nepal Gold & Silver Bullion, Jewelry Tax & Tola Converter",
           "applicationCategory": "FinanceApplication",
-          "operatingSystem": "All Modern Browsers",
-          "url": "https://nepalai.tech/#daily-tools",
+          "operatingSystem": "All",
+          "url": "https://nepalai.tech/tools/bullion",
           "description": "FENEGOSIDA daily rates for 24K Chhapawal, 22K Tejabi, and Fine Silver, Tola-to-Grams converter, making charge & melting wastage auditing, 2% luxury tax, 13% IRD VAT, and 10-year gold investment compounding simulator.",
+          "featureList": [
+            "Live FENEGOSIDA Chhapawal, Tejabi Gold & Silver rates",
+            "Tola, Aana, Lal, and Gram weight converter",
+            "Making charge (ज्याला), wastage (जर्ती), 2% luxury tax & 13% VAT audit"
+          ],
           "offers": {
             "@type": "Offer",
             "price": "0",

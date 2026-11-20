@@ -25,6 +25,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useToast } from '../context/ToastContext';
 import { ThemeMode, Language } from '../types';
+import { transliterateRomanToDevanagari } from '../utils/nepaliTextConverter';
 
 interface Message {
   id: string;
@@ -49,118 +50,241 @@ interface HamroAIChatModalProps {
   onOpenStackCalculator?: () => void;
 }
 
-// Lightweight Romanized to Devanagari basic phonetic transliterator helper for real-time assist
-function romanToDevanagari(text: string): string {
-  const map: Record<string, string> = {
-    'namaste': 'नमस्ते',
-    'nepal': 'नेपाल',
-    'nepali': 'नेपाली',
-    'kasto': 'कस्तो',
-    'chha': 'छ',
-    'cha': 'छ',
-    'dhanyabad': 'धन्यवाद',
-    'tapai': 'तपाईं',
-    'tapaiko': 'तपाईंको',
-    'mero': 'मेरो',
-    'hamro': 'हाम्रो',
-    'ai': 'एआई',
-    'bidesh': 'विदेश',
-    'paisa': 'पैसा',
-    'khalti': 'खल्ती',
-    'esewa': 'ईसेवा',
-    'fonepay': 'फोनपे',
-    'bank': 'बैंक',
-    'rastra': 'राष्ट्र',
-    'kathmandu': 'काठमाडौं',
-    'nagarikta': 'नागरिकता',
-    'lagi': 'लागि',
-    'garnu': 'गर्नु',
-    'garne': 'गर्ने',
-    'sathi': 'साथी',
-    'subha': 'शुभ',
-    'din': 'दिन',
-    'bikas': 'विकास',
-    'technology': 'प्रविधि',
-  };
+type AssistantPersona =
+  | 'general'
+  | 'student'
+  | 'officer'
+  | 'business'
+  | 'corporate'
+  | 'marketer'
+  | 'homemaker';
 
-  let processed = text.toLowerCase();
-  Object.keys(map).forEach((k) => {
-    const regex = new RegExp(`\\b${k}\\b`, 'gi');
-    processed = processed.replace(regex, map[k]);
-  });
-  return processed;
+interface PersonaConfig {
+  id: AssistantPersona;
+  labelEn: string;
+  labelNe: string;
+  prompts: Array<{
+    chipEn: string;
+    chipNe: string;
+    promptRoman: string;
+    promptUnicode: string;
+    promptEn: string;
+  }>;
+  fallbackNe: string;
+  fallbackEn: string;
 }
 
-const KNOWLEDGE_RESPONSES = [
+const PERSONA_CONFIGS: PersonaConfig[] = [
   {
-    triggers: ['nrb', 'compliance', 'bank', 'guideline', 'regulatory', 'राष्ट्र बैंक', 'नियम', 'वित्तीय'],
-    responseNe: `नेपाल राष्ट्र बैंक (NRB) को IT & AI सुरक्षा निर्देशिका अनुसार वित्तीय डाटाहरू नेपालभित्रै Sovereign अन-प्रेम वा एयर-ग्याप क्लस्टरमा राख्नु अनिवार्य छ।
-
-नेपालएआई (NepalAI) ले उपलब्ध गराउने बैंकिङ RAG आर्किटेक्चर:
-१. **डाटा सार्वभौमिकता (Data Residency)**: ग्राहकको PII (व्यक्तिगत विवरण) विदेश नपठाई काठमाडौं क्लस्टरमै इन्फरेन्स हुन्छ।
-२. **डुअल अथेन्टिकेसन**: FonePay, eSewa र बैंक API सँग इन्टिग्रेटेड सुरक्षित टोकन प्रणाली।
-३. **नेपाली भाषा मोडलिङ**: ९९.४% शुद्धताका साथ देवनागरी चेक, भौचर र नागरिकता OCR प्रमाणीकरण।`,
-    responseEn: `Under Nepal Rastra Bank (NRB) guidelines, financial institutions must maintain sovereign data residency and auditability for automated AI systems.
-
-NepalAI Sovereign Banking Architecture offers:
-1. **Local Kathmandu Inference**: 42ms low latency with zero foreign data egress for sensitive KYC and core banking data.
-2. **Deterministic RAG**: Grounded on NRB directives and internal bank standard operating procedures.
-3. **Dual Currency Feasibility**: Consulting deployments start from NPR 4,50,000 ($3,400) with complete IP transfer.`,
-    code: `# NRB Sovereign Air-Gapped Inference Sample
-from nepalai import SovereignRAGPipeline, NRBGuardrail
-
-pipeline = SovereignRAGPipeline(
-    cluster="kathmandu-cluster-01",
-    data_residency="NP_BAGMATI",
-    guardrails=NRBGuardrail(enforce_pii_masking=True)
-)
-result = pipeline.query("KYC verification for Nagarikta 27-01-78-00123")`
+    id: 'general',
+    labelEn: 'All',
+    labelNe: 'सबै',
+    prompts: [
+      {
+        chipEn: 'Draft Nepali Letter',
+        chipNe: 'नेपाली निवेदन लेख',
+        promptRoman: 'malai ward karyalaya ko lagi bida wa sifaris ko nibedan lekhidinu',
+        promptUnicode: 'मलाई नेपाली निवेदनको सरल ढाँचा लेखिदिनुहोस्।',
+        promptEn: 'Help me write a polite formal Nepali application letter.',
+      },
+      {
+        chipEn: 'EV Tax vs Petrol',
+        chipNe: 'ईभी कर र बचत',
+        promptRoman: 'Nepal ma 100kW EV car ko road tax ra charging kharcha kati huncha?',
+        promptUnicode: 'नेपालमा १०० किलोवाट ईभी गाडीको सडक कर र चार्जिङ खर्च कति हुन्छ?',
+        promptEn: 'Explain Nepal EV road tax and monthly home charging savings vs petrol.',
+      },
+      {
+        chipEn: 'IT Export 5% Tax',
+        chipNe: 'आईटी निर्यात ५% कर',
+        promptRoman: 'bidesh bata dollar aayema Section 95Ka 5% TDS ra bank letter kasari garne?',
+        promptUnicode: 'विदेशबाट डलर आम्दानी हुँदा ५% टीडीएस र बैंक स्वघोषणा कसरी गर्ने?',
+        promptEn: 'How does Nepal Section 95Ka 5% final TDS work for foreign freelance income?',
+      },
+    ],
+    fallbackNe: `नमस्ते! म **हाम्रो एआई** हुँ — विद्यार्थी, सरकारी/वडा कर्मचारी, व्यापारी, कर्पोरेट, मार्केटर र गृहिणी सबैका लागि सरल सहायक।\n\nतपाईं रोमन नेपाली (जस्तै "kasto chha"), देवनागरी वा अंग्रेजीमा सिधै प्रश्न सोध्न सक्नुहुन्छ।`,
+    fallbackEn: `Namaste! I am **Hamro AI** — a clean, everyday assistant for students, officers, business owners, corporate teams, marketers, and homemakers. Pick a role above or ask any question.`,
   },
   {
-    triggers: ['esewa', 'khalti', 'payment', 'dollar card', '५००', 'डलर', 'भुक्तानी', 'खल्ती', 'ईसेवा'],
-    responseNe: `नेपाल राष्ट्र बैंकको वार्षिक $५०० डलर कार्ड सीमालाई बाईपास गर्न नेपालएआईले **Enterprise AI Token Gateway** प्रदान गर्दछ।
-
-मुख्य सुविधाहरू:
-• **स्थानीय भुक्तानी**: ईसेवा (eSewa), खल्ती (Khalti), र FonePay QR मार्फत सिधै नेपाली रुपैयाँ (NPR) मा बिलिङ।
-• **टोकन प्रोक्सी**: OpenAI, Claude, र DeepSeek मोडलहरूको खर्चमा ६०-८०% सम्म बचत।
-• **भ्याट बिलिङ**: नेपालका कम्पनीहरूका लागि आधिकारिक लेखा प्रणालीमा समावेश गर्न मिल्ने भ्याट बिल।`,
-    responseEn: `To overcome the NRB $500 annual prepaid dollar card limitation, NepalAI provides a managed **AI Payment & Token Proxy Gateway**.
-
-Key Advantages:
-• **Native NPR Billing**: Settle enterprise API tokens via eSewa, Khalti, and corporate bank transfer.
-• **Prompt Caching**: Save 60-80% on token fees across OpenAI, Anthropic Claude, and DeepSeek.
-• **Tax-Compliant Invoicing**: Official VAT invoices compliant with Inland Revenue Department (IRD) Nepal.`,
-    code: `// Connect to NepalAI Token Proxy Gateway with NPR billing
-const openai = new OpenAI({
-  apiKey: process.env.NEPALAI_GATEWAY_KEY,
-  baseURL: "https://gateway.nepalai.tech/v1", // Billed via eSewa/Khalti in NPR
-});`
+    id: 'student',
+    labelEn: 'Student',
+    labelNe: 'विद्यार्थी',
+    prompts: [
+      {
+        chipEn: 'Daily Study Plan',
+        chipNe: 'पढाइ तालिका',
+        promptRoman: 'exam ko lagi din ko 4 ghanta ramro study routine banaidinu',
+        promptUnicode: 'परीक्षा तयारीको लागि दैनिक ४ घण्टाको सरल अध्ययन तालिका बनाइदिनुहोस्।',
+        promptEn: 'Create a practical 4-hour daily exam study routine with breaks and revision.',
+      },
+      {
+        chipEn: 'Scholarship Essay',
+        chipNe: 'छात्रवृत्ति निवेदन',
+        promptRoman: 'college scholarship ko lagi ramro nibedan ra essay tip dinu',
+        promptUnicode: 'कलेज छात्रवृत्ति निवेदन र निबन्ध लेख्ने सजिलो तरिका बताउनुहोस्।',
+        promptEn: 'Give me a clear outline for a strong scholarship application letter.',
+      },
+      {
+        chipEn: 'Learn Coding / AI',
+        chipNe: 'कोडिङ सिक्न',
+        promptRoman: 'beginner student le free AI ra coding kasari sikne Nepal ma?',
+        promptUnicode: 'नेपालमा विद्यार्थीले नि:शुल्क कोडिङ र एआई कसरी सुरु गर्ने?',
+        promptEn: 'How can a beginner student in Nepal start learning AI and coding for free?',
+      },
+    ],
+    fallbackNe: `विद्यार्थी सहायक मोड:\n• **४५-१० नियम**: ४५ मिनेट ध्यान दिएर पढ्ने र १० मिनेट मुख्य बुँदा कण्ठ गर्ने।\n• **निवेदन र पत्र**: कलेज बिदा, चारित्रिक वा छात्रवृत्ति निवेदनका लागि "Daily Tools → Roman Letter Studio" बाट तुरुन्तै PDF बनाउनुहोस्।`,
+    fallbackEn: `Student Assistant:\n• Study in 45-min focus blocks followed by a 10-min self-quiz.\n• Need a leave or scholarship application? Use our Letter Studio with Roman typing and click Save PDF directly.`,
   },
   {
-    triggers: ['ocr', 'nagarikta', 'pan', 'document', 'नागरिकता', 'प्यान', 'कागजात'],
-    responseNe: `हाम्रो **देवनागरी भिजन ओसीआर (Devanagari Vision OCR)** ले नेपाली हस्तलिखित तथा कम्प्युटर प्रिन्ट गरिएका कागजातहरू ९९.४% शुद्धताका साथ स्ट्रक्चर्ड JSON मा रूपान्तरण गर्दछ।
-
-समर्थित कागजातहरू:
-१. नेपाली नागरिकता प्रमाणपत्र (पुरानो हस्तलिखित र नयाँ डिजिटल)
-२. राष्ट्रिय परिचयपत्र (National ID) र प्यान कार्ड (PAN)
-३. जग्गाधनी प्रमाण पुर्जा (लालपुर्जा) र बैंक भौचरहरू।`,
-    responseEn: `NepalAI's **Devanagari Vision OCR & Document Intelligence** pipeline extracts structured data from handwritten and printed Nepali documents with 99.4% benchmark accuracy.
-
-Supported Document Types:
-1. Nepali Citizenship (Nagarikta) – Both legacy handwritten & new computerized formats.
-2. National Identity Card (NID) and Inland Revenue PAN Cards.
-3. Land ownership certificates (Lalpurja) and bank deposit receipts.`,
-    code: `// Devanagari OCR Extraction Endpoint
-POST /api/v1/ocr/nepali-document
-Payload: { "image_base64": "...", "doc_type": "nagarikta" }
-Response: {
-  "name_devanagari": "प्रकाश सुवेदी",
-  "dob_bikram_sambat": "२०५४/०८/१२",
-  "citizenship_no": "२७-०१-७५-०८४९२",
-  "district": "काठमाडौं",
-  "confidence": 0.994
-}`
-  }
+    id: 'officer',
+    labelEn: 'Officer',
+    labelNe: 'कर्मचारी / वडा',
+    prompts: [
+      {
+        chipEn: 'Office Tippani Draft',
+        chipNe: 'टिप्पणी आदेश ढाँचा',
+        promptRoman: 'karyalaya ma tippani aadesh lekhda ke ke kura rakhnu parcha?',
+        promptUnicode: 'सरकारी कार्यालयमा टिप्पणी तथा आदेश लेख्दा मुख्य के बुँदा राख्नु पर्छ?',
+        promptEn: 'Give me a clean 3-part structure for an official Nepali office Tippani memo.',
+      },
+      {
+        chipEn: 'Citizen Notice',
+        chipNe: 'सार्वजनिक सूचना',
+        promptRoman: 'ward karyalaya bata sarbajanik suchana ko namuna banaidinu',
+        promptUnicode: 'वडा कार्यालयबाट जारी गर्ने स्पष्ट सार्वजनिक सूचनाको नमुना लेखिदिनुहोस्।',
+        promptEn: 'Draft a clear, polite public ward notice for document verification.',
+      },
+      {
+        chipEn: 'Devanagari OCR Guide',
+        chipNe: 'कागजात स्क्यान',
+        promptRoman: 'purano nagarikta ra lalpurja bata text kasari nikalne?',
+        promptUnicode: 'पुरानो नागरिकता र लालपुर्जाको फोटोबाट तुरुन्तै देवनागरी विवरण कसरी निकाल्ने?',
+        promptEn: 'How can officers extract clean text from scanned Nagarikta & Lalpurja documents?',
+      },
+    ],
+    fallbackNe: `सरकारी/कार्यालय सहायक:\n• **टिप्पणी लेखन**: १. पृष्ठभूमि, २. प्रचलित ऐन/नियमको आधार, ३. स्पष्ट प्रस्तावित निर्णय।\n• आधिकारिक वडा सिफारिस र रोमन-टु-प्रीति प्रिन्टको लागि Letter Studio प्रयोग गर्नुहोस्।`,
+    fallbackEn: `Officer Desk Guide:\n• Structure every official memo (Tippani) into Background, Rule Citation, and Clear Action Proposal.\n• Use Letter Studio for print-ready A4 letters and Word (.doc) downloads.`,
+  },
+  {
+    id: 'business',
+    labelEn: 'Business',
+    labelNe: 'व्यापार / उद्यम',
+    prompts: [
+      {
+        chipEn: 'Pricing & Margin',
+        chipNe: 'नाफा र मूल्य हिसाब',
+        promptRoman: 'saman bechda 13% VAT ra delivery jodera sahi margin kasari rakhne?',
+        promptUnicode: 'सामान बेच्दा १३% भ्याट र डेलिभरी खर्च जोडेर सही नाफा कसरी हिसाब गर्ने?',
+        promptEn: 'How should a Nepal retail business price products after 13% VAT and delivery fees?',
+      },
+      {
+        chipEn: 'Supplier WhatsApp',
+        chipNe: 'सप्लायर सन्देश',
+        promptRoman: 'supplier lai saman order garna polite Nepali ra English message banaidinu',
+        promptUnicode: 'होलसेल सप्लायरलाई सामान अर्डर गर्न सभ्य सन्देश तयार गरिदिनुहोस्।',
+        promptEn: 'Write a polite wholesale order inquiry message for my supplier.',
+      },
+      {
+        chipEn: 'Accept QR / eSewa',
+        chipNe: 'इसेवा / खल्ती भुक्तानी',
+        promptRoman: 'mero pasal ko lagi online store ra eSewa/Khalti checkout kasari chalaune?',
+        promptUnicode: 'मेरो पसलको लागि अनलाइन स्टोर र इसेवा/खल्ती भुक्तानी कसरी सुरु गर्ने?',
+        promptEn: 'How can I list products and accept eSewa, Khalti, and FonePay in NepalAI Commerce?',
+      },
+    ],
+    fallbackNe: `व्यवसाय सहायक:\n• खुद्रा मूल्य तय गर्दा खरिद लागत + ढुवानी + १३% भ्याट + प्याकेजिङ जोडेर मात्र नाफा निकाल्नुहोस्।\n• ग्राहक र सप्लायर बिलको लागि Commerce Portal वा Letter Studio प्रयोग गर्नुहोस्।`,
+    fallbackEn: `Business Helper:\n• Always calculate true landed cost (item + shipping + 13% VAT + packaging) before setting retail prices.\n• Open Commerce Portal to manage products, QR invoices, and WhatsApp order alerts.`,
+  },
+  {
+    id: 'corporate',
+    labelEn: 'Corporate',
+    labelNe: 'कर्पोरेट / क्लाइन्ट',
+    prompts: [
+      {
+        chipEn: 'Client Proposal Email',
+        chipNe: 'क्लाइन्ट प्रस्तावना',
+        promptRoman: 'client lai project proposal ra quote pathaune professional email lekhidinu',
+        promptUnicode: 'क्लाइन्टलाई सेवा प्रस्तावना र मूल्य कोटेसन पठाउने पेशागत इमेल लेखिदिनुहोस्।',
+        promptEn: 'Write a crisp executive email to send a service proposal & quotation to a client.',
+      },
+      {
+        chipEn: 'Salary & Tax TDS',
+        chipNe: 'तलब र कर हिसाब',
+        promptRoman: 'monthly salary ma SSF ra CIT rakhda income tax kati kam huncha?',
+        promptUnicode: 'मासिक तलबमा SSF र नागरिक लगानी कोष (CIT) राख्दा आयकर कति जोगिन्छ?',
+        promptEn: 'How do SSF and CIT deductions reduce monthly IRD income tax TDS?',
+      },
+      {
+        chipEn: 'NRB $500 Card Audit',
+        chipNe: 'डलर कार्ड अडिट',
+        promptRoman: 'dollar card ma SaaS tool tirda 3% bank spread ra 2% DST kati parcha?',
+        promptUnicode: 'डलर कार्डबाट विदेशी सफ्टवेयर तिर्दा बैंक शुल्क र २% डिजिटल कर कति लाग्छ?',
+        promptEn: 'Explain the true NPR cost of SaaS subscriptions on a Nepal $500 dollar card.',
+      },
+    ],
+    fallbackNe: `कर्पोरेट र क्लाइन्ट सहायक:\n• क्लाइन्ट प्रस्तावनामा मुख्य ३ कुरा स्पष्ट राख्नुहोस्: समाधान, समयसीमा र जम्मा रकम।\n• तलब कर र IT निर्यात दफा ९५क पत्रको लागि Daily Tools प्रयोग गर्नुहोस्।`,
+    fallbackEn: `Corporate & Client Assistant:\n• Keep client proposals focused on Deliverable, Timeline, and Transparent Pricing.\n• Use Income Tax and IT Export 95Ka tools for instant PDF slips and bank letters.`,
+  },
+  {
+    id: 'marketer',
+    labelEn: 'Marketer',
+    labelNe: 'मार्केटिङ',
+    prompts: [
+      {
+        chipEn: 'TikTok / FB Ad Hook',
+        chipNe: 'फेसबुक / टिकटक हुक',
+        promptRoman: 'Nepal ko customer ko lagi TikTok ra Facebook ad ko 3 ota catchy Nepali hook dinu',
+        promptUnicode: 'नेपाली ग्राहकका लागि फेसबुक र टिकटक विज्ञापनको ३ आकर्षक सुरुवाती लाइन दिनुहोस्।',
+        promptEn: 'Give me 3 high-converting Facebook & TikTok ad hooks in Nepali and English.',
+      },
+      {
+        chipEn: 'Festival Offer Copy',
+        chipNe: 'चाडपर्व अफर प्रचार',
+        promptRoman: 'chhadparba special 20% discount offer ko lagi chhoto post lekhidinu',
+        promptUnicode: 'चाडपर्व विशेष २०% छुट अफरको लागि छोटो र आकर्षक पोस्ट लेखिदिनुहोस्।',
+        promptEn: 'Write a short, attractive festive discount campaign post for Nepali shoppers.',
+      },
+      {
+        chipEn: 'Ad Budget in NPR',
+        chipNe: 'विज्ञापन डलर खर्च',
+        promptRoman: 'Facebook boost ma $50 kharcha garda NRB rate ra tax jodera NPR kati parcha?',
+        promptUnicode: 'फेसबुक बुस्टमा ५० डलर खर्च गर्दा बैंक शुल्क र कर सहित नेपाली कति पर्छ?',
+        promptEn: 'How do I estimate my true NPR budget for USD digital ads in Nepal?',
+      },
+    ],
+    fallbackNe: `मार्केटर सहायक:\n• **नेपाली हुक**: "अब महँगो खर्च नगरी घरमै बसी सहजै..." बाट सुरु गरी अन्त्यमा सिधा WhatsApp/Call बटन राख्नुहोस्।\n• डलर बुस्ट खर्च जाँच गर्न NRB Forex टुल प्रयोग गर्नुहोस्।`,
+    fallbackEn: `Marketer Helper:\n• Open with a 1-line problem/benefit hook, show clear NPR pricing, and finish with a single direct action.\n• Use our NRB Forex Auditor to estimate true ad spend after FX spread and 2% DST.`,
+  },
+  {
+    id: 'homemaker',
+    labelEn: 'Homemaker',
+    labelNe: 'गृहिणी / परिवार',
+    prompts: [
+      {
+        chipEn: 'Weekly Meal Plan',
+        chipNe: 'साप्ताहिक खाना योजना',
+        promptRoman: 'pariwar ko lagi sasto ra swasthya weekly Nepali khana ra tiffin plan banaidinu',
+        promptUnicode: 'परिवारको लागि सस्तो र स्वस्थ साप्ताहिक नेपाली खाना र खाजाको तालिका बनाइदिनुहोस्।',
+        promptEn: 'Create a healthy, budget-friendly weekly Nepali family meal and school tiffin plan.',
+      },
+      {
+        chipEn: 'Home Budget Tips',
+        chipNe: 'घरायसी बजेट',
+        promptRoman: 'ghar ko mahina ko tarkari ra kirana kharcha 20% kasari bachaune?',
+        promptUnicode: 'घरको मासिक तरकारी र किराना खर्च २०% सम्म कसरी बचत गर्ने?',
+        promptEn: 'Practical tips to save 20% on monthly Nepali household groceries and kitchen expenses.',
+      },
+      {
+        chipEn: 'Gold Buying Check',
+        chipNe: 'सुन किन्दा ध्यान',
+        promptRoman: 'suna ko gahana kinda jyala jarti ra kar kasari check garne?',
+        promptUnicode: 'सुनको गहना किन्दा ज्याला, जर्ती र कर ठिक छ कि छैन कसरी जाँच गर्ने?',
+        promptEn: 'What should families check regarding jyala, jarti & tax before buying gold jewelry?',
+      },
+    ],
+    fallbackNe: `परिवार तथा गृहिणी सहायक:\n• **मौसमी किनमेल**: कालिमाटीको ताजा दर हेरेर सिजन अनुसार तरकारी किन्दा मासिक २०% सम्म बचत हुन्छ।\n• **सुनचाँदी तथा बिदा पत्र**: गहनाको हिसाब Bullion टुलबाट र बच्चाको स्कुल बिदा पत्र Letter Studio बाट १ मिनेटमै बनाउनुहोस्।`,
+    fallbackEn: `Homemaker & Family Helper:\n• Check seasonal Kalimati rates before weekly grocery shopping to save 15–20%.\n• Audit jewelry making charges (ज्याला/जर्ती) in our Bullion tool, or save school leave letters as PDF in Letter Studio.`,
+  },
 ];
 
 export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
@@ -174,25 +298,24 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
   const isDark = theme === 'dark';
   const { showToast } = useToast();
 
+  const [persona, setPersona] = useState<AssistantPersona>('general');
   const [inputMode, setInputMode] = useState<'romanized' | 'unicode' | 'english'>('romanized');
   const [inputText, setInputText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isAudioSpeaking, setIsAudioSpeaking] = useState<string | null>(null);
 
+  const activePersonaConfig =
+    PERSONA_CONFIGS.find((p) => p.id === persona) || PERSONA_CONFIGS[0];
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome-msg',
       sender: 'assistant',
       text: language === 'ne'
-        ? `नमस्ते! म **हाम्रो एआई (Hamro AI)** हुँ — नेपालको सार्वभौम इन्टेलिजेन्स सहायक। तपाईं मलाई रोमन नेपाली (Romanized Nepali), शुद्ध देवनागरी वा अंग्रेजीमा प्रश्न सोध्न सक्नुहुन्छ।\n\nतपाईंलाई नेपाल राष्ट्र बैंकको एआई नियम, ईसेवा/खल्ती पेमेन्ट, देवनागरी OCR, वा इन्टरप्राइज कन्सल्टिङ बारे के जानकारी चाहिन्छ?`
-        : `Namaste! I am **Hamro AI** — Nepal's sovereign vernacular intelligence assistant. You can converse with me in Romanized Nepali (e.g. "kasto cha"), pure Devanagari Unicode (e.g. "नमस्ते"), or English.\n\nHow can I assist your enterprise with NRB compliance, eSewa/Khalti AI payments, Devanagari OCR, or custom sovereign LLMs?`,
+        ? `नमस्ते! म **हाम्रो एआई** हुँ — सबै उमेर र पेशाका लागि सरल सहायक।\nमाथि आफ्नो भूमिका छान्नुहोस् (विद्यार्थी, कर्मचारी, व्यापार, कर्पोरेट, मार्केटिङ वा गृहिणी/परिवार) र रोमन नेपाली, देवनागरी वा अंग्रेजीमा सिधै सोध्नुहोस्।`
+        : `Namaste! I am **Hamro AI** — simple, practical help for every role.\nPick your role above (Student, Officer, Business, Corporate, Marketer, or Homemaker) and ask in Roman Nepali, Devanagari, or English.`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      suggestedActions: [
-        { label: '🇳🇵 NRB IT Compliance', actionType: 'consultation', payload: 'Enterprise FinTech & NRB Compliance RAG' },
-        { label: '💳 eSewa/Khalti AI Billing', actionType: 'consultation', payload: 'Nepal Payment Bridge & AI Infrastructure Proxy' },
-        { label: '📊 Calculate AI ROI Stack', actionType: 'stack' }
-      ]
     }
   ]);
 
@@ -229,12 +352,7 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
     setInputText('');
     setIsGenerating(true);
 
-    // Call real /api/chat with resilient fallback
-    const lower = text.toLowerCase();
-    const match = KNOWLEDGE_RESPONSES.find((k) =>
-      k.triggers.some((t) => lower.includes(t))
-    );
-
+    // Call real /api/chat with persona context and helpful fallback
     const historyPayload = messages.slice(-5).map(m => ({
       role: m.sender === 'user' ? 'user' : 'model',
       text: m.text
@@ -242,7 +360,6 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
 
     (async () => {
       let replyText = '';
-      let code = match?.code;
 
       try {
         const res = await fetch('/api/chat', {
@@ -251,6 +368,7 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
           body: JSON.stringify({
             message: text,
             language: language,
+            persona: persona,
             history: historyPayload
           })
         });
@@ -262,24 +380,12 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
           }
         }
       } catch {
-        // network or server fallback
+        // network fallback
       }
 
-      // If API didn't return text, use domain knowledge responses
       if (!replyText) {
-        if (match) {
-          replyText = language === 'ne' || inputMode === 'unicode' || lower.includes('nepali') || lower.includes('namaste')
-            ? match.responseNe
-            : match.responseEn;
-        } else {
-          if (inputMode === 'romanized' || lower.includes('cha') || lower.includes('kasto') || lower.includes('garnu')) {
-            replyText = `तपाईंको प्रश्न प्राप्त भयो। नेपालएआईको **काठमाडौं क्लस्टर ०१** ले रोमन नेपाली र देवनागरी दुवैलाई बुझेर इन्टरप्राइज-ग्रेड नतिजा दिन्छ।\n\n• **स्थानीय पूर्वाधार**: ४२ms लेटन्सी, शून्य विदेशी डाटा जोखिम।\n• **भुक्तानी सुविधा**: ईसेवा, खल्ती, र फोनपे मार्फत NPR मा सिधै बिलिङ।\n• **कन्सल्टिङ**: $७५० (रू ९५,०००) देखि सुरु हुने व्यावहारिक एआई रोडम्याप।`;
-          } else if (language === 'ne' || inputMode === 'unicode') {
-            replyText = `नमस्ते! नेपालएआई (NepalAI) को सार्वभौम क्लस्टरले नेपाली बजारका लागि इन्टरप्राइज एआई मोडलिङ, देवनागरी ओसीआर (OCR), र राष्ट्र बैंक अनुपालन सुनिश्चित गर्दछ। थप विस्तृत रणनीतिको लागि हामीसँग प्रत्यक्ष परामर्श बुक गर्न सक्नुहुन्छ।`;
-          } else {
-            replyText = `Thank you for your inquiry. NepalAI operates sovereign 42ms low-latency clusters tailored for Nepal's regulatory landscape, offering dual NPR/USD pricing, localized Devanagari RAG, and seamless eSewa/Khalti integration.`;
-          }
-        }
+        const preferNe = language === 'ne' || inputMode === 'unicode';
+        replyText = preferNe ? activePersonaConfig.fallbackNe : activePersonaConfig.fallbackEn;
       }
 
       const botMsg: Message = {
@@ -287,11 +393,6 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
         sender: 'assistant',
         text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        codeSnippet: code,
-        suggestedActions: [
-          { label: 'Book Advisory Consultation', actionType: 'consultation', payload: 'Custom Nepali LLMs, RAG & Autonomous Agents' },
-          { label: 'Launch Stack Calculator', actionType: 'stack' }
-        ]
       };
 
       setMessages((prev) => [...prev, botMsg]);
@@ -376,20 +477,22 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
           isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
         }`}>
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 shadow-md">
+            <div className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-sky-500 text-white shadow-md">
               <Bot className="h-5 w-5" />
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-[#080b12]" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-cyan-300 border-2 border-[#080b12]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold tracking-tight">
                   Hamro AI (हाम्रो एआई)
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className={`px-2 py-0.5 text-xs font-mono font-semibold rounded-full border ${
+                  isDark ? 'bg-cyan-500/15 border-cyan-500/35 text-cyan-300' : 'bg-cyan-50 border-cyan-300 text-cyan-800'
+                }`}>
                   Kathmandu 42ms
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className={`text-xs hidden sm:block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Sovereign Vernacular LLM • Romanized & Devanagari Nepali • NRB Grounded
               </p>
             </div>
@@ -402,8 +505,8 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
               onClick={handleResetChat}
               className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                 isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]'
-                  : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900'
+                  ? 'border-white/15 bg-white/[0.05] text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                  : 'border-slate-300 bg-white text-slate-700 hover:text-slate-950'
               }`}
               title="Reset Conversation"
               aria-label="Reset Conversation"
@@ -417,8 +520,8 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
               onClick={onClose}
               className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                 isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]'
-                  : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900'
+                  ? 'border-white/15 bg-white/[0.05] text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                  : 'border-slate-300 bg-white text-slate-700 hover:text-slate-950'
               }`}
               aria-label="Close Hamro AI Chat"
             >
@@ -427,57 +530,72 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
           </div>
         </div>
 
-        {/* Status / Script Bar */}
-        <div className={`px-4 sm:px-6 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-xs font-mono ${
-          isDark ? 'border-white/[0.06] bg-black/30 text-slate-400' : 'border-slate-200 bg-slate-100/70 text-slate-600'
+        {/* Clean Role Selector & Script Bar */}
+        <div className={`px-4 sm:px-6 py-2.5 border-b space-y-2 text-xs ${
+          isDark ? 'border-white/10 bg-black/30 text-slate-200' : 'border-slate-200 bg-slate-100 text-slate-800'
         }`}>
-          <div className="flex items-center gap-2">
-            <Languages className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="font-semibold text-slate-300">Input Mode:</span>
-            <div className="inline-flex rounded-lg p-0.5 bg-black/40 border border-white/10">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <span className={`font-semibold shrink-0 mr-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              {language === 'ne' ? 'तपाईंको भूमिका:' : 'Who are you?'}
+            </span>
+            {PERSONA_CONFIGS.map((p) => (
               <button
+                key={p.id}
                 type="button"
-                onClick={() => setInputMode('romanized')}
-                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-                  inputMode === 'romanized'
-                    ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setPersona(p.id)}
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap border transition-colors cursor-pointer ${
+                  persona === p.id
+                    ? 'bg-cyan-600 text-white border-cyan-500 shadow-xs'
+                    : isDark
+                      ? 'bg-white/5 text-slate-300 border-white/10 hover:text-white'
+                      : 'bg-white text-slate-700 border-slate-300 hover:text-slate-950'
                 }`}
               >
-                Roman Nepali
+                {language === 'ne' ? p.labelNe : p.labelEn}
               </button>
-              <button
-                type="button"
-                onClick={() => setInputMode('unicode')}
-                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-                  inputMode === 'unicode'
-                    ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                देवनागरी (Unicode)
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputMode('english')}
-                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-                  inputMode === 'english'
-                    ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                English
-              </button>
-            </div>
+            ))}
           </div>
 
-          <div className="hidden sm:flex items-center gap-3 text-[11px]">
-            <span className="flex items-center gap-1 text-emerald-400">
-              <ShieldCheck className="h-3 w-3" /> NRB Ready
-            </span>
-            <span className="flex items-center gap-1 text-amber-400">
-              <Zap className="h-3 w-3" /> eSewa/Khalti Invoicing
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-2 font-mono">
+            <div className="flex items-center gap-2">
+              <Languages className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-300" />
+              <span className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Typing:</span>
+              <div className={`inline-flex rounded-lg p-0.5 border ${isDark ? 'bg-black/40 border-white/15' : 'bg-white border-slate-300'}`}>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('romanized')}
+                  className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                    inputMode === 'romanized'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                  }`}
+                >
+                  Roman Nepali
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('unicode')}
+                  className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                    inputMode === 'unicode'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                  }`}
+                >
+                  देवनागरी
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('english')}
+                  className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                    inputMode === 'english'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                  }`}
+                >
+                  English
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -498,8 +616,8 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                 <div
                   className={`h-8 w-8 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs ${
                     isBot
-                      ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 shadow-md'
-                      : 'bg-indigo-600 text-white'
+                      ? 'bg-gradient-to-tr from-cyan-500 to-sky-500 text-white shadow-md'
+                      : 'bg-sky-700 text-white'
                   }`}
                 >
                   {isBot ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
@@ -511,21 +629,21 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                     className={`rounded-2xl p-4 sm:p-4.5 text-sm leading-relaxed ${
                       isBot
                         ? isDark
-                          ? 'bg-white/[0.04] border border-white/10 text-slate-100 shadow-sm'
-                          : 'bg-slate-100 border border-slate-200 text-slate-900'
-                        : 'bg-emerald-600 text-white shadow-md'
+                          ? 'bg-white/[0.05] border border-white/15 text-slate-100 shadow-sm'
+                          : 'bg-slate-100 border border-slate-200 text-slate-950'
+                        : 'bg-cyan-600 text-white shadow-md'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap font-sans text-[13.5px] sm:text-sm">
+                    <div className="whitespace-pre-wrap font-sans text-sm">
                       {msg.text}
                     </div>
 
                     {/* Code Snippet if present */}
                     {msg.codeSnippet && (
                       <div className="mt-3 rounded-xl overflow-hidden border border-white/15 bg-[#04060a] text-xs font-mono">
-                        <div className="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b border-white/10 text-slate-400">
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b border-white/10 text-slate-300">
                           <span className="flex items-center gap-1.5">
-                            <Code2 className="h-3 w-3 text-emerald-400" />
+                            <Code2 className="h-3.5 w-3.5 text-cyan-400" />
                             <span>Architecture Snippet</span>
                           </span>
                           <button
@@ -533,10 +651,10 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                             onClick={() => handleCopyMessage(`${msg.id}-code`, msg.codeSnippet || '')}
                             className="hover:text-white transition-colors cursor-pointer"
                           >
-                            {copiedId === `${msg.id}-code` ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                            {copiedId === `${msg.id}-code` ? <Check className="h-3.5 w-3.5 text-cyan-400" /> : <Copy className="h-3.5 w-3.5" />}
                           </button>
                         </div>
-                        <pre className="p-3 text-slate-200 overflow-x-auto text-[11px] leading-relaxed">
+                        <pre className="p-3 text-slate-100 overflow-x-auto text-xs leading-relaxed">
                           {msg.codeSnippet}
                         </pre>
                       </div>
@@ -549,20 +667,20 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleCopyMessage(msg.id, msg.text)}
-                        className={`flex items-center gap-1 px-2 py-0.8 rounded-md text-[11px] border transition-colors cursor-pointer ${
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border transition-colors cursor-pointer ${
                           isDark
-                            ? 'border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
-                            : 'border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                            ? 'border-white/15 text-slate-200 hover:text-white hover:bg-white/10'
+                            : 'border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
                         }`}
                       >
                         {copiedId === msg.id ? (
                           <>
-                            <Check className="h-3 w-3 text-emerald-400" />
+                            <Check className="h-3.5 w-3.5 text-cyan-500" />
                             <span>Copied</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-3.5 w-3.5" />
                             <span>Copy</span>
                           </>
                         )}
@@ -571,22 +689,22 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSpeakMessage(msg.id, msg.text)}
-                        className={`flex items-center gap-1 px-2 py-0.8 rounded-md text-[11px] border transition-colors cursor-pointer ${
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border transition-colors cursor-pointer ${
                           isAudioSpeaking === msg.id
-                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                            ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
                             : isDark
-                            ? 'border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
-                            : 'border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                            ? 'border-white/15 text-slate-200 hover:text-white hover:bg-white/10'
+                            : 'border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
                         }`}
                       >
                         {isAudioSpeaking === msg.id ? (
                           <>
-                            <VolumeX className="h-3 w-3 text-emerald-400" />
+                            <VolumeX className="h-3.5 w-3.5 text-cyan-400" />
                             <span>Stop Voice</span>
                           </>
                         ) : (
                           <>
-                            <Volume2 className="h-3 w-3" />
+                            <Volume2 className="h-3.5 w-3.5" />
                             <span>Listen (Neural Voice)</span>
                           </>
                         )}
@@ -605,7 +723,11 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                               onClose();
                             }
                           }}
-                          className="flex items-center gap-1 px-2.5 py-0.8 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 transition-all text-[11px] font-semibold cursor-pointer"
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-md border transition-colors text-xs font-semibold cursor-pointer ${
+                            isDark
+                              ? 'bg-cyan-500/15 border-cyan-500/35 text-cyan-300 hover:bg-cyan-500/25'
+                              : 'bg-cyan-50 border-cyan-300 text-cyan-800 hover:bg-cyan-100'
+                          }`}
                         >
                           <Sparkles className="h-3 w-3" />
                           <span>{act.label}</span>
@@ -620,79 +742,75 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
           })}
 
           {isGenerating && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 mr-auto"
-            >
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center">
+            <div className="flex items-center gap-3 mr-auto">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-sky-500 text-white flex items-center justify-center">
                 <Bot className="h-4 w-4 animate-spin" />
               </div>
               <div className={`p-3.5 rounded-2xl border text-xs font-mono flex items-center gap-2 ${
-                isDark ? 'border-white/10 bg-white/[0.03] text-emerald-400' : 'border-slate-200 bg-slate-100 text-emerald-700'
+                isDark ? 'border-white/15 bg-white/[0.04] text-cyan-300' : 'border-slate-200 bg-slate-100 text-cyan-800'
               }`}>
-                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="flex h-2 w-2 rounded-full bg-cyan-400" />
                 <span>Kathmandu Sovereign Cluster processing in {inputMode.toUpperCase()}...</span>
               </div>
-            </motion.div>
+            </div>
           )}
 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Suggestion Chips */}
+        {/* Dynamic Persona Quick Suggestion Chips */}
         <div className={`px-4 sm:px-6 py-2.5 border-t overflow-x-auto no-scrollbar flex items-center gap-2 ${
           isDark ? 'border-white/10 bg-black/40' : 'border-slate-200 bg-slate-50'
         }`}>
-          <span className="text-[11px] font-mono text-slate-400 shrink-0 flex items-center gap-1">
-            <Sparkles className="h-3 w-3 text-amber-400" /> Prompts:
+          <span className={`text-xs font-mono shrink-0 flex items-center gap-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            <span>{language === 'ne' ? 'सुझाव:' : 'Try:'}</span>
           </span>
-          <button
-            type="button"
-            onClick={() => handleQuickPrompt(inputMode === 'romanized' ? 'nepal ma kyc automation ra nagarikta ocr kasari garne?' : 'नेपालमा नागरिकता ओसीआर र केवाईसी प्रमाणीकरण कसरी गर्ने?')}
-            className={`text-xs px-2.5 py-1 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              isDark ? 'border-white/10 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-950'
-            }`}
-          >
-            🇳🇵 {inputMode === 'romanized' ? 'Nagarikta KYC & OCR' : 'नागरिकता ओसीआर केवाईसी'}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickPrompt(inputMode === 'romanized' ? 'nrb compliance ma sovereign LLM deploy garna kati khracha lagcha?' : 'नेपाल राष्ट्र बैंकको नियम अनुसार वित्तीय एआई कति लागतमा बन्छ?')}
-            className={`text-xs px-2.5 py-1 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              isDark ? 'border-white/10 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-950'
-            }`}
-          >
-            🏛️ {inputMode === 'romanized' ? 'NRB Banking AI Cost' : 'राष्ट्र बैंक एआई लागत'}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickPrompt(inputMode === 'romanized' ? 'dollar card bina esewa ra khalti bata enterprise AI token kasari line?' : 'ईसेवा र खल्तीबाट एआई टोकन भुक्तानी कसरी गर्ने?')}
-            className={`text-xs px-2.5 py-1 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
-              isDark ? 'border-white/10 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-950'
-            }`}
-          >
-            💳 {inputMode === 'romanized' ? 'eSewa/Khalti AI Gateway' : 'ईसेवा/खल्ती भुक्तानी'}
-          </button>
+          {activePersonaConfig.prompts.map((item, idx) => {
+            const promptVal =
+              inputMode === 'romanized'
+                ? item.promptRoman
+                : inputMode === 'unicode'
+                ? item.promptUnicode
+                : item.promptEn;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleQuickPrompt(promptVal)}
+                className={`text-xs px-3 py-1 rounded-full border font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  isDark
+                    ? 'border-white/15 bg-white/5 text-slate-200 hover:text-white hover:bg-white/10'
+                    : 'border-slate-300 bg-white text-slate-800 hover:text-slate-950'
+                }`}
+              >
+                {language === 'ne' ? item.chipNe : item.chipEn}
+              </button>
+            );
+          })}
         </div>
 
         {/* Input Bar */}
         <div className={`p-3 sm:p-4 border-t ${
           isDark ? 'border-white/10 bg-[#06080e]' : 'border-slate-200 bg-white'
         }`}>
-          {/* Live Transliteration Preview Bar if typing in Romanized */}
-          {inputMode === 'romanized' && inputText.trim().length > 2 && (
-            <div className="mb-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs font-mono flex items-center justify-between text-emerald-400">
+          {/* Live Transliteration Preview Bar when typing in Romanized */}
+          {inputMode === 'romanized' && inputText.trim().length > 1 && (
+            <div className={`mb-2 px-3 py-1.5 rounded-lg border text-xs flex items-center justify-between gap-2 ${
+              isDark ? 'border-cyan-500/35 bg-cyan-500/10 text-cyan-200' : 'border-cyan-300 bg-cyan-50 text-cyan-950'
+            }`}>
               <div className="flex items-center gap-1.5 truncate">
-                <span className="text-[10px] text-slate-400 uppercase">Devanagari Live Assist:</span>
-                <span className="font-semibold text-white">{romanToDevanagari(inputText)}</span>
+                <span className={`text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>देवनागरी:</span>
+                <span className={`font-semibold font-['Noto_Sans_Devanagari'] ${isDark ? 'text-white' : 'text-slate-950'}`}>
+                  {transliterateRomanToDevanagari(inputText)}
+                </span>
               </div>
               <button
                 type="button"
-                onClick={() => setInputText(romanToDevanagari(inputText))}
-                className="shrink-0 text-[10px] px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 cursor-pointer"
+                onClick={() => setInputText(transliterateRomanToDevanagari(inputText))}
+                className="shrink-0 text-xs px-2.5 py-0.5 rounded bg-cyan-600 text-white font-bold hover:bg-cyan-500 cursor-pointer"
               >
-                Apply Unicode
+                Apply नेपाली
               </button>
             </div>
           )}
@@ -723,10 +841,10 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
                     ? 'शुद्ध देवनागरीमा लेख्नुहोस् (उदा: नमस्ते, नेपालमा एआई कन्सल्टिङ...)'
                     : 'Ask in English about sovereign AI, NRB compliance, pricing in NPR/USD...'
                 }
-                className={`w-full p-3 rounded-xl border text-sm resize-none focus:outline-hidden focus:ring-2 focus:ring-emerald-500 transition-colors ${
+                className={`w-full p-3 rounded-xl border text-sm resize-none focus:outline-hidden focus:ring-2 focus:ring-cyan-500 transition-colors ${
                   isDark
-                    ? 'border-white/15 bg-white/[0.04] text-white placeholder:text-slate-500'
-                    : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400'
+                    ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400'
+                    : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500'
                 }`}
               />
             </div>
@@ -734,10 +852,10 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
             <button
               type="submit"
               disabled={!inputText.trim() || isGenerating}
-              className={`p-3.5 rounded-xl font-semibold transition-all flex items-center justify-center cursor-pointer ${
+              className={`p-3.5 rounded-xl font-semibold transition-colors flex items-center justify-center cursor-pointer ${
                 inputText.trim() && !isGenerating
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/25'
-                  : 'bg-white/10 text-slate-500 cursor-not-allowed'
+                  ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                  : isDark ? 'bg-white/10 text-slate-400 cursor-not-allowed' : 'bg-slate-200 text-slate-500 cursor-not-allowed'
               }`}
               aria-label="Send message to Hamro AI"
             >
@@ -745,7 +863,7 @@ export const HamroAIChatModal: React.FC<HamroAIChatModalProps> = ({
             </button>
           </form>
 
-          <div className="flex items-center justify-between mt-2 text-[10px] text-slate-500 font-mono">
+          <div className={`flex items-center justify-between mt-2 text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
             <span>Press Enter to send • Shift+Enter for new line</span>
             <span>NepalAI Cluster 01 • Sovereign Air-Gapped</span>
           </div>

@@ -1,7 +1,12 @@
 import assert from 'node:assert';
+import crypto from 'node:crypto';
 import {
   verifyEsewaPayment,
   verifyKhaltiPayment,
+  createEsewaV2FormPayload,
+  verifyEsewaV2EncodedResponse,
+  initiateKhaltiPayment,
+  getGatewayReadinessStatus,
   generateNepalQRInvoicePayload,
   generateWhatsAppOrderAlert
 } from '../lib/payments/nepalPayments';
@@ -72,7 +77,7 @@ async function runCommerceTests() {
   // Test 5: IRD Tax Invoice Schedule 5 Calculation Engine
   console.log('Test 5: Validating IRD 13% VAT & Subtotal computation...');
   const { calculateIrdTax, numberToNepaliWords, numberToEnglishWords } = await import('../utils/nepalInvoiceEngine');
-  
+
   const taxBreakdown = calculateIrdTax([
     { title: 'Nuwakot Highland Coffee', quantity: 2, unitPriceNpr: 1250 },
     { title: 'Ilam Organic Tea', quantity: 1, unitPriceNpr: 950 }
@@ -92,7 +97,63 @@ async function runCommerceTests() {
   assert.ok(enWords.includes('Three Thousand') && enWords.includes('Four Hundred'), 'English words should spell out thousand and hundred');
   console.log('✓ Test 6 Passed: Bilingual currency words verified.');
 
-  console.log('--- All 6 Commerce & Tax Invoice Tests Passed Successfully! ---');
+  // Test 7: eSewa ePay v2 HMAC-SHA256 Signature Generation & Tamper-Proof Callback Verification
+  console.log('Test 7: Validating eSewa v2 HMAC-SHA256 signing and callback verification...');
+  const v2Payload = createEsewaV2FormPayload({
+    amt: 1250,
+    deliveryCharge: 100,
+    totalAmt: 1350,
+    transactionUuid: 'ORD-2081-2050',
+    productCode: 'EPAYTEST',
+    successUrl: 'https://nepalai.tech/#store/himalayan-coffee',
+    failureUrl: 'https://nepalai.tech/#store/himalayan-coffee',
+  });
+  assert.strictEqual(v2Payload.mode, 'sandbox');
+  assert.strictEqual(v2Payload.fields.total_amount, '1350');
+  assert.ok(v2Payload.fields.signature.length > 20, 'Must produce Base64 HMAC-SHA256 signature');
+
+  const callbackObj: Record<string, string> = {
+    transaction_code: '0007ABC',
+    status: 'COMPLETE',
+    total_amount: '1350',
+    transaction_uuid: 'ORD-2081-2050',
+    product_code: 'EPAYTEST',
+    signed_field_names: 'transaction_code,status,total_amount,transaction_uuid,product_code,signed_field_names',
+  };
+  const msg = callbackObj.signed_field_names.split(',').map((f) => `${f}=${callbackObj[f]}`).join(',');
+  callbackObj.signature = crypto.createHmac('sha256', '8gBm/:&EnhH.1/q').update(msg).digest('base64');
+  const encodedValid = Buffer.from(JSON.stringify(callbackObj), 'utf8').toString('base64');
+
+  const verifiedV2 = verifyEsewaV2EncodedResponse(encodedValid);
+  assert.strictEqual(verifiedV2.verified, true, 'Valid eSewa v2 HMAC callback must verify');
+  assert.strictEqual(verifiedV2.totalAmount, 1350);
+
+  // Tamper test
+  const tamperedObj = { ...callbackObj, total_amount: '9999' };
+  const encodedTampered = Buffer.from(JSON.stringify(tamperedObj), 'utf8').toString('base64');
+  const tamperedV2 = verifyEsewaV2EncodedResponse(encodedTampered);
+  assert.strictEqual(tamperedV2.verified, false, 'Tampered eSewa v2 callback must be rejected');
+  console.log('✓ Test 7 Passed: eSewa v2 HMAC signing & tamper rejection verified.');
+
+  // Test 8: Khalti v2 Initiation & Gateway Readiness Check
+  console.log('Test 8: Validating Khalti v2 session initiation & gateway readiness...');
+  const khaltiInit = await initiateKhaltiPayment({
+    amountNpr: 1350,
+    purchaseOrderId: 'ORD-2081-2050',
+    purchaseOrderName: 'Order #ORD-2081-2050',
+    returnUrl: 'https://nepalai.tech/#store/himalayan-coffee',
+    websiteUrl: 'https://nepalai.tech',
+  });
+  assert.strictEqual(khaltiInit.success, true);
+  assert.strictEqual(khaltiInit.amountPaisa, 135000);
+  assert.ok(khaltiInit.pidx.startsWith('KHLTI_SANDBOX_'));
+
+  const readiness = getGatewayReadinessStatus();
+  assert.strictEqual(readiness.esewa.v2SignatureEnabled, true);
+  assert.strictEqual(readiness.khalti.v2LookupEnabled, true);
+  console.log('✓ Test 8 Passed: Khalti v2 initiation and gateway readiness verified.');
+
+  console.log('--- All 8 Commerce & Payment Gateway Tests Passed Successfully! ---');
 }
 
 runCommerceTests().catch((err) => {

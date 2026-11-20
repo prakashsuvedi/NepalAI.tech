@@ -3,15 +3,10 @@
  * 
  * Fetch utility for real-time synchronization and status updates with
  * the administrative hub at studio.nepalai.tech/admin.
- * 
- * Provides:
- * - Real-time connection probing to studio.nepalai.tech/admin
- * - Bidirectional synchronization of pending consulting leads
- * - Real-time lead status updates (New -> Reviewing -> Contacted -> Converted)
- * - Polling/subscription helper for continuous real-time dashboard sync
  */
 
 import { InquiryLead, LeadStatus } from '../types';
+import { auth } from '../lib/firebase';
 
 export interface StudioConnectionStatus {
   connected: boolean;
@@ -41,16 +36,32 @@ export interface StudioSyncResult {
 const STUDIO_ADMIN_BASE = 'https://studio.nepalai.tech/admin';
 
 /**
- * Connects to studio.nepalai.tech/admin via backend proxy bridge
- * to assess live connection health, pending inquiry tallies, and latency.
+ * Dynamically resolves Firebase ID token headers in memory without exposing
+ * static admin keys or credentials in client-side bundles.
  */
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/json',
+  };
+  try {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const token = await currentUser.getIdToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  } catch {
+    // Graceful fallback when unauthenticated
+  }
+  return headers;
+}
+
 export async function fetchStudioAdminConnection(): Promise<StudioConnectionStatus> {
   const startTime = Date.now();
   try {
-    const res = await fetch('/api/admin/studio-connection', {
-      headers: { 'Accept': 'application/json' },
-    });
-
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/studio-connection', { headers });
     const latencyMs = Date.now() - startTime;
 
     if (res.ok) {
@@ -76,8 +87,7 @@ export async function fetchStudioAdminConnection(): Promise<StudioConnectionStat
       };
     }
     throw new Error(`HTTP error ${res.status}`);
-  } catch (err: any) {
-    // Return resilient offline/cached status
+  } catch {
     return {
       connected: false,
       status: 'offline',
@@ -91,23 +101,21 @@ export async function fetchStudioAdminConnection(): Promise<StudioConnectionStat
       lastSync: new Date().toISOString(),
       syncSupported: true,
       latencyMs: Date.now() - startTime,
-      message: 'Studio admin hub bridge offline or standby.',
+      message: 'Admin sign-in required for live bridge telemetry.',
     };
   }
 }
 
-/**
- * Sends pending consulting leads to studio.nepalai.tech/admin for real-time synchronization.
- */
 export async function syncLeadsWithStudioAdmin(
   leadsPayload?: InquiryLead[]
 ): Promise<StudioSyncResult> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/studio-sync', {
       method: 'POST',
       headers: {
+        ...headers,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
       },
       body: JSON.stringify({
         leads: leadsPayload,
@@ -128,33 +136,29 @@ export async function syncLeadsWithStudioAdmin(
       };
     }
     throw new Error(`Sync responded with ${res.status}`);
-  } catch (err: any) {
-    console.warn('[StudioAdminService] Real-time sync notice:', err);
+  } catch {
     return {
-      success: true,
+      success: false,
       syncedCount: leadsPayload ? leadsPayload.length : 0,
       targetStudioUrl: STUDIO_ADMIN_BASE,
       timestamp: new Date().toISOString(),
-      message: 'Pending leads queued for studio.nepalai.tech dispatch.',
+      message: 'Sign in with an administrator account to synchronize.',
     };
   }
 }
 
-/**
- * Updates the status and administrative notes of a consulting lead in real time,
- * propagating the change both to the persistence layer and studio.nepalai.tech/admin.
- */
 export async function updateLeadStatusRealtime(
   leadId: string,
   newStatus: LeadStatus,
   adminNotes?: string
 ): Promise<{ success: boolean; lead?: InquiryLead; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/leads/${encodeURIComponent(leadId)}`, {
       method: 'PATCH',
       headers: {
+        ...headers,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
       },
       body: JSON.stringify({
         status: newStatus,
@@ -166,11 +170,10 @@ export async function updateLeadStatusRealtime(
 
     if (res.ok) {
       const data = await res.json();
-      
-      // Notify studio admin endpoint of the real-time status transition
+
       fetch('/api/admin/studio-sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'status_transition',
           leadId,
@@ -194,12 +197,10 @@ export async function updateLeadStatusRealtime(
   }
 }
 
-/**
- * Fetches all current inquiry leads from the admin API.
- */
 export async function fetchCurrentLeads(): Promise<InquiryLead[]> {
   try {
-    const res = await fetch('/api/admin/leads');
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/leads', { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.leads)) {
@@ -207,25 +208,10 @@ export async function fetchCurrentLeads(): Promise<InquiryLead[]> {
       }
     }
   } catch (e) {
-    console.warn('[StudioAdminService] Fallback reading localStorage leads:', e);
+    console.warn('[StudioAdminService] Admin leads fetch notice:', e);
   }
-
-  // Fallback to local storage
-  try {
-    const stored = localStorage.getItem('nepalai_consultation_leads');
-    const contactStored = localStorage.getItem('nepalai_contact_leads');
-    const list: InquiryLead[] = [];
-    if (stored) list.push(...JSON.parse(stored));
-    if (contactStored) list.push(...JSON.parse(contactStored));
-    return list;
-  } catch {
-    return [];
-  }
+  return [];
 }
-
-// =========================================================================
-// STUDIO.NEPALAI.TECH REST INTEGRATION CLIENT METHODS
-// =========================================================================
 
 export interface StudioUser {
   id: string;
@@ -311,30 +297,6 @@ export interface StorageR2Diagnostic {
   corsConfigured: boolean;
 }
 
-/**
- * Helper to dynamically resolve authenticated session headers without exposing
- * any static admin keys or credentials in client-side bundles.
- */
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const headers: Record<string, string> = {
-    'Accept': 'application/json',
-  };
-  try {
-    const { supabase } = await import('../lib/supabase');
-    const { data } = await supabase.auth.getSession();
-    if (data?.session?.access_token) {
-      headers['Authorization'] = `Bearer ${data.session.access_token}`;
-    }
-  } catch (e) {
-    // Fallback gracefully in unauthenticated or offline modes
-  }
-  return headers;
-}
-
-/**
- * Fetches all registered studio users, token consumption, and platform revenue
- * from /api/admin/studio/users using secure server-side authorization.
- */
 export async function fetchStudioUsers(): Promise<StudioUsersResponse> {
   try {
     const headers = await getAuthHeaders();
@@ -346,33 +308,18 @@ export async function fetchStudioUsers(): Promise<StudioUsersResponse> {
     console.warn('[StudioAdminService] fetchStudioUsers notice:', err);
   }
   return {
-    success: true,
-    users: [
-      {
-        id: 'usr_admin_01',
-        email: 'prakashsuvedi.backup@gmail.com',
-        name: 'Prakash Suvedi',
-        role: 'admin',
-        tier: 'pro_studio',
-        credits: 999999,
-        usage: { totalTokensUsed: 45200 },
-        transactionsCount: 0,
-        totalPaidUSD: 0
-      }
-    ],
+    success: false,
+    users: [],
     transactions: [],
     metrics: {
-      totalUsers: 1,
-      totalTokensUsed: 45200,
-      totalRevenueUSD: 249.00,
-      activePaidSubscribers: 1
+      totalUsers: 0,
+      totalTokensUsed: 0,
+      totalRevenueUSD: 0,
+      activePaidSubscribers: 0
     }
   };
 }
 
-/**
- * Updates credits, tier, roles, or resets daily trial quota for a specific user ID.
- */
 export async function updateStudioUser(
   userId: string,
   payload: { credits?: number; tier?: string; role?: 'admin' | 'user'; resetTrial?: boolean }
@@ -394,144 +341,117 @@ export async function updateStudioUser(
     console.warn('[StudioAdminService] updateStudioUser notice:', err);
   }
   return {
-    success: true,
-    message: `User ${userId} update synchronized.`
+    success: false,
+    message: `Authorization required to update user ${userId}.`
   };
 }
 
-/**
- * Audits status of the 24-hr daily free quota reset cycle and next reset timestamps.
- */
 export async function fetchDailyResetAudit(): Promise<any> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/studio/daily-reset-audit', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {}
+  } catch {}
   return {
-    success: true,
+    success: false,
     cycle: '24-Hour UTC Midnight Daily Quota Cycle',
-    status: 'healthy',
+    status: 'unauthorized',
     freeTierDailyAllowance: '5,000 Devanagari tokens / day'
   };
 }
 
-/**
- * Runs automated end-to-end health audits across all AI engines
- * (Azure Sora-2, GPT-Image, Azure TTS, Hugging Face).
- */
 export async function fetchStudioSuiteVerification(): Promise<StudioSuiteVerification> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/studio/verify-studio-suite', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {}
+  } catch {}
   return {
-    success: true,
-    overallStatus: 'healthy',
+    success: false,
+    overallStatus: 'unauthorized',
     auditedAt: new Date().toISOString(),
-    engines: [
-      { name: 'Azure Sora-2 Video Engine', status: 'operational', latencyMs: 142 },
-      { name: 'GPT-Image Studio Generation', status: 'operational', latencyMs: 118 },
-      { name: 'Azure Devanagari TTS (Nepali Voice)', status: 'operational', latencyMs: 65 },
-      { name: 'Hugging Face Inference Hub', status: 'operational', latencyMs: 210 }
-    ]
+    engines: []
   };
 }
 
-/**
- * Verifies PostgreSQL Cloud SQL connection latency and schema table health.
- */
 export async function fetchPostgresVerification(): Promise<PostgresVerification> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/studio/postgres/verify', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {}
+  } catch {}
   return {
-    success: true,
-    database: 'nepalai_studio_cloudsql',
-    connection: 'healthy',
-    latencyMs: 12,
-    tables: ['users', 'tokens', 'transactions', 'inquiries'],
-    ssl: 'TLS_1_3_STRICT'
+    success: false,
+    database: 'app_db',
+    connection: 'unauthorized',
+    latencyMs: 0,
+    tables: [],
+    ssl: 'CloudSQL_Auth_Proxy'
   };
 }
 
-/**
- * Diagnostic test verifying high-level server heartbeat, uptime, active sessions.
- * Directly queries /api/diagnostic (with /api/admin/studio/diagnostic fallback)
- */
 export async function fetchStudioDiagnostics(): Promise<StudioDiagnostics> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/diagnostic', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {
+  } catch {
     try {
       const headers = await getAuthHeaders();
       const fallback = await fetch('/api/admin/studio/diagnostic', { headers });
       if (fallback.ok) return await fallback.json();
-    } catch (err) {}
+    } catch {}
   }
   return {
-    success: true,
-    status: 'alive',
+    success: false,
+    status: 'unauthorized',
     service: 'studio.nepalai.tech-gateway',
-    uptimeSeconds: 3600,
-    activeSessions: 8,
+    uptimeSeconds: 0,
+    activeSessions: 0,
     timestamp: new Date().toISOString()
   };
 }
 
-/**
- * Diagnostic test verifying Azure OpenAI Foundry, Sora-2 readiness, and Hugging Face tokens.
- * Directly queries /api/diagnostic/ai-credentials (with fallback)
- */
 export async function fetchAiCredentialsDiagnostic(): Promise<AiCredentialsDiagnostic> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/diagnostic/ai-credentials', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {
+  } catch {
     try {
       const headers = await getAuthHeaders();
       const fallback = await fetch('/api/admin/studio/diagnostic/ai-credentials', { headers });
       if (fallback.ok) return await fallback.json();
-    } catch (err) {}
+    } catch {}
   }
   return {
-    success: true,
-    azureOpenAI: { configured: true, status: 'connected', model: 'gpt-4o-mini-sovereign', latencyMs: 84 },
-    azureSora2: { configured: true, status: 'ready', quota: 'unlimited_enterprise', latencyMs: 142 },
-    huggingFace: { configured: true, tokenVerified: true, modelsAvailable: 14, latencyMs: 210 },
-    azureTTS: { configured: true, locale: 'ne-NP', engine: 'Neural V2', latencyMs: 65 }
+    success: false,
+    azureOpenAI: { configured: false, status: 'unauthorized', model: 'gpt-4o-mini-sovereign' },
+    azureSora2: { configured: false, status: 'unauthorized', quota: 'restricted' },
+    huggingFace: { configured: false, tokenVerified: false, modelsAvailable: 0 },
+    azureTTS: { configured: false, locale: 'ne-NP', engine: 'Neural V2' }
   };
 }
 
-/**
- * Diagnostic test verifying Cloudflare R2 / S3 storage connectivity.
- * Directly queries /api/diagnostic/storage/r2 (with fallback)
- */
 export async function fetchStorageR2Diagnostic(): Promise<StorageR2Diagnostic> {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/diagnostic/storage/r2', { headers });
     if (res.ok) return await res.json();
-  } catch (e) {
+  } catch {
     try {
       const headers = await getAuthHeaders();
       const fallback = await fetch('/api/admin/studio/diagnostic/storage/r2', { headers });
       if (fallback.ok) return await fallback.json();
-    } catch (err) {}
+    } catch {}
   }
   return {
-    success: true,
+    success: false,
     provider: 'Cloudflare R2 Sovereign Kathmandu Cache',
     bucket: 'nepalai-studio-media',
-    status: 'accessible',
-    readLatencyMs: 24,
-    writeLatencyMs: 41,
-    corsConfigured: true
+    status: 'unauthorized',
+    readLatencyMs: 0,
+    writeLatencyMs: 0,
+    corsConfigured: false
   };
 }

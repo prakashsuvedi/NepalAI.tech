@@ -34,6 +34,16 @@ import { ConsultingOffering, HeroConfig, ThemeMode, Language, AppPage } from './
 import { CONSULTING_OFFERINGS } from './data/consultingOfferings';
 import { DEFAULT_HERO_CONFIG } from './data/defaultHeroConfig';
 import { Bot } from 'lucide-react';
+import {
+  resolveToolFromUrl,
+  getToolSeoByTab,
+  applyClientToolSeo,
+  resetDefaultSiteSeo,
+  ToolTabId,
+} from './utils/toolSeo';
+import { TrendingHomepageStrip } from './components/trends/TrendingHomepageStrip';
+import { NepalTrendsPortal } from './components/trends/NepalTrendsPortal';
+import { resolveTrendsRouteFromPath, TrendsRouteMatch } from './utils/trendsSeo';
 
 export default function App() {
   // Global Theme Mode: Light and Dark
@@ -99,6 +109,13 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  // Sync Tailwind v4 `.dark` class and native color-scheme on <html>
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', theme === 'dark');
+    root.style.colorScheme = theme;
+  }, [theme]);
 
   // Hero Configuration with Admin Panel customization
   const [heroConfig, setHeroConfig] = useState<HeroConfig>(() => {
@@ -190,13 +207,62 @@ export default function App() {
   };
 
   // Modular Page View State - Eliminates long vertical scrolling
-  const validPages: AppPage[] = ['home', 'command-center', 'dashboard', 'directory', 'daily', 'free', 'consulting', 'compliance', 'commerce'];
+  const validPages: AppPage[] = ['home', 'command-center', 'dashboard', 'directory', 'daily', 'trends', 'free', 'consulting', 'compliance', 'commerce'];
+
+  const parseHashRoute = (rawHash: string): { page: AppPage; storeSlug?: string } => {
+    const clean = rawHash.replace(/^#/, '').trim();
+    if (clean.startsWith('store/')) {
+      const slug = decodeURIComponent(clean.slice('store/'.length)).trim();
+      if (slug) {
+        return { page: 'commerce', storeSlug: slug };
+      }
+    }
+    if (validPages.includes(clean as AppPage)) {
+      return { page: clean === 'dashboard' ? 'command-center' : (clean as AppPage) };
+    }
+    return { page: 'home' };
+  };
+
+  const [storeSlug, setStoreSlug] = useState<string | undefined>(() => {
+    try {
+      return parseHashRoute(window.location.hash).storeSlug;
+    } catch {
+      return undefined;
+    }
+  });
+
+  const [trendsRoute, setTrendsRoute] = useState<TrendsRouteMatch>(() => {
+    try {
+      return resolveTrendsRouteFromPath(window.location.pathname) || { view: 'nepal' };
+    } catch {
+      return { view: 'nepal' };
+    }
+  });
+
+  const [dailyInitialTab, setDailyInitialTab] = useState<ToolTabId | undefined>(() => {
+    try {
+      const matched = resolveToolFromUrl(window.location.pathname, window.location.search);
+      return matched?.tab;
+    } catch {
+      return undefined;
+    }
+  });
 
   const [currentPage, setCurrentPage] = useState<AppPage>(() => {
     try {
-      const hash = window.location.hash.replace('#', '') as AppPage;
-      if (validPages.includes(hash)) {
-        return hash === 'dashboard' ? 'command-center' : hash;
+      const trendsFromPath = resolveTrendsRouteFromPath(window.location.pathname);
+      if (trendsFromPath) {
+        return 'trends';
+      }
+      const toolFromPath = resolveToolFromUrl(window.location.pathname, window.location.search);
+      if (toolFromPath) {
+        return 'daily';
+      }
+      if (window.location.hash) {
+        const parsed = parseHashRoute(window.location.hash);
+        if (parsed.storeSlug || validPages.includes(window.location.hash.replace('#', '') as AppPage)) {
+          return parsed.page;
+        }
       }
       const saved = localStorage.getItem('nepalai_current_page') as AppPage;
       if (saved && validPages.includes(saved)) {
@@ -208,14 +274,47 @@ export default function App() {
     return 'home';
   });
 
-  const [dailyInitialTab, setDailyInitialTab] = useState<'fx' | 'letter' | 'voice' | 'ocr' | 'tax' | 'market' | undefined>(undefined);
+  const handleOpenTrendsRoute = (path: string) => {
+    const matched = resolveTrendsRouteFromPath(path) || { view: 'nepal' as const };
+    setStoreSlug(undefined);
+    setTrendsRoute(matched);
+    setCurrentPage('trends');
+    try {
+      localStorage.setItem('nepalai_current_page', 'trends');
+      window.history.pushState({}, '', path);
+    } catch {
+      // ignore history errors
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSelectPage = (page: AppPage) => {
     const resolvedPage = page === 'dashboard' ? 'command-center' : page;
+    setStoreSlug(undefined);
     setCurrentPage(resolvedPage);
     try {
       localStorage.setItem('nepalai_current_page', resolvedPage);
-      window.location.hash = resolvedPage;
+      if (resolvedPage === 'trends') {
+        setTrendsRoute({ view: 'nepal' });
+        window.history.pushState({}, '', '/trending/nepal');
+      } else if (resolvedPage !== 'daily') {
+        if (
+          window.location.pathname.startsWith('/tools/') ||
+          window.location.pathname.startsWith('/trending/') ||
+          window.location.pathname.startsWith('/keywords/')
+        ) {
+          window.history.replaceState({}, '', `/#${resolvedPage}`);
+        } else {
+          window.location.hash = resolvedPage;
+        }
+        resetDefaultSiteSeo();
+      } else {
+        const activeTabSeo = getToolSeoByTab(dailyInitialTab || 'fx');
+        if (activeTabSeo) {
+          window.history.replaceState({}, '', `/tools/${activeTabSeo.slug}`);
+          applyClientToolSeo(activeTabSeo);
+        }
+      }
     } catch (e) {
       console.error(e);
     }
@@ -224,21 +323,64 @@ export default function App() {
 
   const handleNavigateWithTab = (page: AppPage, tab?: string) => {
     if (page === 'daily' && tab) {
-      setDailyInitialTab(tab as any);
+      const typedTab = tab as ToolTabId;
+      setDailyInitialTab(typedTab);
+      const seo = getToolSeoByTab(typedTab);
+      if (seo) {
+        try {
+          window.history.replaceState({}, '', `/tools/${seo.slug}`);
+          applyClientToolSeo(seo);
+        } catch {
+          // ignore history failure
+        }
+      }
     }
     handleSelectPage(page);
   };
 
-  // Listen to hash changes for browser forward/back buttons
+  // Apply initial /tools/:slug or /trending/* SEO tags and listen to browser hashchange & popstate
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') as AppPage;
-      if (validPages.includes(hash)) {
-        setCurrentPage(hash === 'dashboard' ? 'command-center' : hash);
+    const syncFromUrl = () => {
+      const trendsMatched = resolveTrendsRouteFromPath(window.location.pathname);
+      if (trendsMatched) {
+        setTrendsRoute(trendsMatched);
+        setCurrentPage('trends');
+        return;
+      }
+      const toolMatched = resolveToolFromUrl(window.location.pathname, window.location.search);
+      if (toolMatched) {
+        setDailyInitialTab(toolMatched.tab);
+        setCurrentPage('daily');
+        applyClientToolSeo(toolMatched);
+        return;
+      }
+      const clean = window.location.hash.replace(/^#/, '').trim();
+      if (!clean) return;
+      const parsed = parseHashRoute(window.location.hash);
+      if (parsed.storeSlug) {
+        setStoreSlug(parsed.storeSlug);
+        setCurrentPage('commerce');
+        resetDefaultSiteSeo();
+      } else if (validPages.includes(clean as AppPage)) {
+        setStoreSlug(undefined);
+        setCurrentPage(parsed.page);
+        if (parsed.page !== 'daily') {
+          resetDefaultSiteSeo();
+        }
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    const initialTool = resolveToolFromUrl(window.location.pathname, window.location.search);
+    if (initialTool) {
+      applyClientToolSeo(initialTool);
+    }
+
+    window.addEventListener('hashchange', syncFromUrl);
+    window.addEventListener('popstate', syncFromUrl);
+    return () => {
+      window.removeEventListener('hashchange', syncFromUrl);
+      window.removeEventListener('popstate', syncFromUrl);
+    };
   }, []);
 
   // Hero config updates
@@ -285,10 +427,10 @@ export default function App() {
     <AuthProvider>
       <ToastProvider>
         <div
-          className={`min-h-screen flex flex-col transition-colors duration-300 ${
+          className={`min-h-screen flex flex-col transition-colors duration-300 relative ${
             isDark
-              ? 'bg-[#080d1a] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200'
-              : 'bg-[#f8fafc] text-slate-900 selection:bg-cyan-500/20 selection:text-cyan-900'
+              ? 'bg-[#070B14] text-slate-50 selection:bg-cyan-500/30 selection:text-cyan-100'
+              : 'bg-[#FAF9F6] text-slate-950 selection:bg-cyan-500/20 selection:text-cyan-950'
           }`}
         >
           {/* Navigation Bar */}
@@ -324,7 +466,7 @@ export default function App() {
                 transition={{ duration: 0.2 }}
                 className="space-y-0"
               >
-                {/* 1. Hero Introduction */}
+                {/* 1. Editorial Split Hero + Live Nepal Pulse */}
                 <Hero
                   config={heroConfig}
                   theme={theme}
@@ -334,16 +476,28 @@ export default function App() {
                   onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
                   onOpenSearch={() => setIsSearchOpen(true)}
                   onSelectPage={handleSelectPage}
+                  onOpenDailyTab={(tab) => handleNavigateWithTab('daily', tab)}
+                  onOpenTrendDetail={(slug) => handleOpenTrendsRoute(`/trending/nepal/${slug}`)}
                 />
 
-                {/* 2. Page Navigation Portal Hub */}
+                {/* 2. Live Nepal Pulse Broadsheet (Trending + Official Market Desk) */}
+                <TrendingHomepageStrip
+                  theme={theme}
+                  language={language}
+                  onOpenTrendDetail={(slug) => handleOpenTrendsRoute(`/trending/nepal/${slug}`)}
+                  onOpenTrendsRoute={handleOpenTrendsRoute}
+                  onOpenDailyTab={(tab) => handleNavigateWithTab('daily', tab)}
+                />
+
+                {/* 3. Asymmetric Marquee Bento Hub */}
                 <BentoPortalHub
                   onSelectPage={handleSelectPage}
+                  onOpenTrendsRoute={handleOpenTrendsRoute}
                   theme={theme}
                   language={language}
                 />
 
-                {/* 3. About Scamspike Solutions & Sovereign Pillars */}
+                {/* 4. Sovereign Proof & Enterprise Consultation */}
                 <AboutSection
                   theme={theme}
                   language={language}
@@ -403,7 +557,39 @@ export default function App() {
                   language={language}
                   onOpenConsultation={handleOpenConsultation}
                   onNavigateHome={() => handleSelectPage('home')}
+                  onOpenHamroAI={() => setIsHamroAIOpen(true)}
+                  onActiveToolChange={(tab) => {
+                    setDailyInitialTab(tab);
+                    const seo = getToolSeoByTab(tab);
+                    if (seo) {
+                      try {
+                        window.history.replaceState({}, '', `/tools/${seo.slug}`);
+                        applyClientToolSeo(seo);
+                      } catch {
+                        // ignore
+                      }
+                    }
+                  }}
                   initialTab={dailyInitialTab}
+                />
+              </motion.div>
+            )}
+
+            {currentPage === 'trends' && (
+              <motion.div
+                key="page-trends"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <NepalTrendsPortal
+                  theme={theme}
+                  language={language}
+                  route={trendsRoute}
+                  onChangeRoute={handleOpenTrendsRoute}
+                  onNavigateToolTab={(tab) => handleNavigateWithTab('daily', tab)}
+                  onNavigateHome={() => handleSelectPage('home')}
                 />
               </motion.div>
             )}
@@ -484,6 +670,8 @@ export default function App() {
                 <CommercePortal
                   theme={theme}
                   language={language}
+                  initialTab={storeSlug ? 'storefront' : undefined}
+                  storeSlug={storeSlug}
                   onNavigateHome={() => handleSelectPage('home')}
                   onOpenConsultation={handleOpenConsultation}
                 />
@@ -581,6 +769,7 @@ export default function App() {
             theme={theme}
             language={language}
             onSelectPage={handleSelectPage}
+            onOpenTrendsRoute={handleOpenTrendsRoute}
             onOpenConsultation={handleOpenConsultation}
             onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
           />
@@ -593,6 +782,7 @@ export default function App() {
             theme={theme}
             language={language}
             onOpenConsultation={handleOpenConsultation}
+            onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
           />
         )}
 

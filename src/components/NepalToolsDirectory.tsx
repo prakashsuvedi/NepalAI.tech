@@ -138,13 +138,13 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-500/20">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs text-emerald-500 mb-2">
-              <span className="font-['Noto_Sans_Devanagari'] font-medium">
+            <div className="flex items-center gap-2 text-xs text-cyan-500 mb-2 font-semibold">
+              <span className="font-['Noto_Sans_Devanagari']">
                 {language === 'ne' ? 'स्थानीय पहुँच तथा भुक्तानी' : 'Verified Nepal Ecosystem'}
               </span>
               <span className={isDark ? 'text-slate-600' : 'text-slate-300'} aria-hidden="true">•</span>
               <span className={`font-mono uppercase tracking-wider text-[11px] ${
-                isDark ? 'text-slate-400' : 'text-slate-500'
+                isDark ? 'text-cyan-400/90' : 'text-cyan-700'
               }`}>
                 {t.tools.badge}
               </span>
@@ -158,7 +158,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               {language === 'ne' ? 'प्रमाणित एआई टुल्स र भुक्तानी गाइड' : 'Verified AI Tools & Payment Directory'}
             </h2>
             <p className={`mt-2 text-xs sm:text-sm leading-relaxed ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
+              isDark ? 'text-slate-300' : 'text-slate-700'
             }`}>
               {t.tools.subtitle}
             </p>
@@ -169,13 +169,13 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               type="button"
               onClick={onOpenStackCalculator}
               aria-label={`Open AI Stack Calculator with ${selectedStack.length} tools selected`}
-              className={`min-h-[44px] px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors flex items-center justify-center gap-2 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer ${
                 isDark
-                  ? 'bg-white/[0.04] border-white/10 text-emerald-300 hover:text-white hover:border-emerald-500/50'
-                  : 'bg-white border-slate-300 text-emerald-700 hover:text-emerald-900 shadow-xs'
+                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-400 shadow-sm shadow-cyan-500/10'
+                  : 'bg-white border-cyan-200 text-cyan-800 hover:text-cyan-950 hover:border-cyan-400 shadow-xs'
               }`}
             >
-              <Layers className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
+              <Layers className="h-4 w-4 text-cyan-500 shrink-0" aria-hidden="true" />
               <span className={language === 'ne' ? "font-['Noto_Sans_Devanagari']" : ''}>
                 {t.nav.stackCalculator} ({selectedStack.length})
               </span>
@@ -196,10 +196,10 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               placeholder={t.tools.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full min-h-[44px] rounded-xl border pl-10 pr-3.5 py-2.5 text-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors ${
+              className={`w-full min-h-[44px] rounded-xl border pl-10 pr-3.5 py-2.5 text-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors ${
                 isDark
-                  ? 'border-white/10 bg-black/40 text-white placeholder-slate-500 focus:border-white/30'
-                  : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-500 shadow-xs'
+                  ? 'border-white/10 bg-[#0c1324] text-white placeholder-slate-400 focus:border-cyan-500'
+                  : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-cyan-500 shadow-xs'
               }`}
             />
           </div>
@@ -210,7 +210,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
             role="group"
             aria-label="Payment method filter"
           >
-            <span className={`text-xs mr-1 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            <span className={`text-xs mr-1 font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               {t.tools.paymentFilterLabel}:
             </span>
             {[
@@ -219,23 +219,21 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               { id: 'dollar', label: '$500 Dollar Card' },
               { id: 'free', label: 'Free Tier' },
             ].map((f) => (
-              <motion.button
+              <button
                 key={f.id}
                 type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 aria-pressed={filterType === f.id}
                 onClick={() => setFilterType(f.id as any)}
-                className={`min-h-[44px] px-3.5 py-2 rounded-xl transition-colors text-xs font-medium flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-xl transition-colors text-xs font-semibold flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer ${
                   filterType === f.id
-                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                    ? 'bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 text-white font-bold shadow-xs border-transparent'
                     : isDark
-                    ? 'bg-white/[0.03] border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.06]'
-                    : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-50 shadow-2xs'
+                    ? 'bg-white/[0.06] border border-slate-700 text-slate-200 hover:text-white hover:border-cyan-400'
+                    : 'bg-white border border-slate-300 text-slate-800 hover:text-slate-950 hover:border-cyan-600 shadow-2xs'
                 }`}
               >
                 {f.label}
-              </motion.button>
+              </button>
             ))}
           </div>
 
@@ -248,25 +246,23 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
           aria-label="Tool categories filter"
         >
           {CATEGORIES.map((c) => (
-            <motion.button
+            <button
               key={c}
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               aria-pressed={category === c}
               onClick={() => setCategory(c)}
-              className={`min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+              className={`min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors flex items-center justify-center focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer font-semibold ${
                 category === c
                   ? isDark
-                    ? 'bg-white/10 text-emerald-400 border border-emerald-500/40 font-bold'
-                    : 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold'
+                    ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400 font-bold'
+                    : 'bg-cyan-50 text-cyan-950 border border-cyan-500 font-bold shadow-xs'
                   : isDark
-                  ? 'bg-black/20 text-slate-400 hover:text-slate-200'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900'
+                  ? 'bg-black/40 border border-slate-800 text-slate-200 hover:text-white hover:border-slate-600'
+                  : 'bg-white text-slate-800 border border-slate-300 hover:text-slate-950 hover:border-cyan-600'
               }`}
             >
               {c === 'All' ? t.tools.allCategories : c === 'Nepal Sovereign AI' ? (language === 'ne' ? '🇳🇵 स्वदेशी एआई (Nepal Sovereign)' : '🇳🇵 Nepal Sovereign AI') : c}
-            </motion.button>
+            </button>
           ))}
         </div>
 
@@ -318,10 +314,10 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
             <div className="flex flex-wrap md:flex-col items-start md:items-end gap-2 shrink-0 text-xs font-mono">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-[11px] font-semibold ${
                 isDark 
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' 
-                  : 'border-emerald-300 bg-emerald-100 text-emerald-900'
+                  ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300' 
+                  : 'border-cyan-200 bg-cyan-50 text-cyan-900'
               }`}>
-                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
                 <span>100% Official Links Only</span>
               </span>
               <span className={`inline-flex items-center gap-1 text-[11px] ${
@@ -335,13 +331,13 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
         </div>
 
         {/* Tooltip Overlay Indicator & Live Sync Trigger */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs">
           <span className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
-            <span className="font-medium">
+            <Sparkles className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+            <span className={`font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
               {language === 'ne' 
                 ? 'विस्तृत विवरण र भुक्तानी गाइड हेर्न कुनै पनि टुलमा क्लिक गर्नुहोस्' 
-                : 'Click or hover any tool card for specifications and payment guidelines'}
+                : 'Click the info icon on any tool card for bilingual details'}
             </span>
           </span>
 
@@ -351,15 +347,15 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
               onClick={handleRefreshDirectory}
               disabled={isFetchingData || isHydrating}
               aria-label={language === 'ne' ? 'टुल्स डाटा पुनः सिंक गर्नुहोस्' : 'Sync directory data'}
-              className={`inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              className={`inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-xl border text-xs font-mono font-semibold transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                 isDark
-                  ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:text-white hover:border-emerald-500/40'
-                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:border-emerald-500/40'
+                  ? 'border-slate-700 bg-white/[0.06] text-slate-100 hover:border-cyan-400'
+                  : 'border-slate-300 bg-white text-slate-800 hover:border-cyan-600'
               }`}
               title={language === 'ne' ? 'टुल्स डाटा पुनः लोड गर्नुहोस्' : 'Refresh tools directory'}
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 text-emerald-400 shrink-0 ${
+                className={`h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0 ${
                   isFetchingData || isHydrating ? 'animate-spin' : ''
                 }`}
                 aria-hidden="true"
@@ -368,14 +364,14 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                 {isFetchingData || isHydrating
                   ? language === 'ne'
                     ? 'अपडेट हुँदैछ...'
-                    : 'Hydrating Data...'
+                    : 'Updating...'
                   : language === 'ne'
                   ? 'रिफ्रेस'
-                  : 'Sync Directory'}
+                  : 'Refresh'}
               </span>
             </button>
 
-            <span className="hidden sm:inline font-semibold text-slate-400">
+            <span className={`hidden sm:inline font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
               {filteredTools.length} {t.tools.toolsFound}
             </span>
           </div>
@@ -414,75 +410,43 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                 return (
                   <motion.article
                     key={tool.id}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.45, delay: (idx % 6) * 0.06 }}
-                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.35, delay: (idx % 6) * 0.04 }}
                 onMouseEnter={(e) => handleMouseEnterTool(tool, e)}
                 onMouseLeave={handleMouseLeaveTool}
-                className={`group relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-200 focus-within:ring-2 focus-within:ring-emerald-500 cursor-default ${
+                className={`group relative flex flex-col justify-between rounded-2xl border p-5 transition-colors duration-200 focus-within:ring-2 focus-within:ring-cyan-500 cursor-default ${
                   isSelected
                     ? isDark
-                      ? 'border-emerald-500/60 bg-emerald-950/20 shadow-xl shadow-emerald-950/30'
-                      : 'border-emerald-400 bg-emerald-50/60 shadow-lg shadow-emerald-100'
+                      ? 'border-cyan-400 bg-[#0d182d] ring-1 ring-cyan-400/40'
+                      : 'border-cyan-600 bg-cyan-50/70 shadow-sm'
                     : isDark
-                    ? 'border-white/[0.08] bg-white/[0.015] hover:border-emerald-500/50 hover:bg-white/[0.035] hover:shadow-xl hover:shadow-emerald-950/25'
-                    : 'border-slate-200 bg-white hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-500/10'
+                    ? 'border-slate-700/80 bg-[#0c1324] hover:border-cyan-400/80'
+                    : 'border-slate-200 bg-white hover:border-cyan-600 hover:shadow-md'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs mb-2.5">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`font-semibold px-2.5 py-0.5 rounded-md text-[11px] ${
-                        isDark ? 'bg-white/[0.05] text-slate-300' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {tool.category}
-                      </span>
+                  <div className="flex items-center justify-between text-xs mb-2.5 gap-2">
+                    <span className={`font-semibold px-2.5 py-0.5 rounded-md text-xs ${
+                      isDark ? 'bg-white/[0.08] text-slate-200' : 'bg-slate-100 text-slate-800'
+                    }`}>
+                      {tool.category}
+                    </span>
 
-                      {/* Visual Quick Pay Badge */}
-                      {supportsQuickPay && (
-                        <span
-                          id={`quick-pay-badge-${tool.id}`}
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight border transition-colors ${
-                            isDark
-                              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
-                              : 'bg-emerald-50 border-emerald-300/80 text-emerald-800'
-                          }`}
-                          title={language === 'ne' ? 'नेपालमा इसेवा वा खल्तीबाट सिधै भुक्तानी गर्न सकिने' : 'Direct payment via eSewa or Khalti supported'}
-                        >
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                          <span>Quick Pay</span>
-                          <span className={`text-[9px] font-medium hidden sm:inline ${
-                            isDark ? 'text-emerald-400/90' : 'text-emerald-700'
-                          }`}>
-                            • {tool.quickPayProvider || 'eSewa/Khalti'}
-                          </span>
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      {isHighValue && (
-                        <span className="flex items-center gap-1 text-amber-400 font-semibold text-[10px] bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
-                          <Award className="h-3 w-3" aria-hidden="true" />
-                          <span>Top Choice</span>
-                        </span>
-                      )}
-
+                    <div className="flex items-center gap-2">
                       {tool.worksInNepal === 'direct' ? (
-                        <span className="flex items-center gap-1 text-emerald-500 font-medium text-[11px]">
-                          <CheckCircle className="h-3 w-3" aria-hidden="true" />
+                        <span className="flex items-center gap-1 text-cyan-700 dark:text-cyan-300 font-semibold text-xs">
+                          <CheckCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                           <span>{t.tools.worksDirectly}</span>
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-amber-500 font-medium text-[11px]">
-                          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                        <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold text-xs">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                           <span>{t.tools.needsVpn}</span>
                         </span>
                       )}
 
-                      {/* Tooltip trigger button with strict 44x44px mobile touch target */}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -490,13 +454,13 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                           handleTogglePinTooltip(tool);
                         }}
                         aria-label={`View bilingual description and specs for ${tool.name}`}
-                        title="Click to toggle Apple-style specs tooltip"
-                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1.5 rounded-xl transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        title="Click to toggle specs tooltip"
+                        className={`min-w-[38px] min-h-[38px] flex items-center justify-center -mr-1 rounded-xl transition-colors cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                           isTooltipActive
-                            ? 'bg-emerald-500 text-slate-950'
+                            ? 'bg-cyan-600 text-white'
                             : isDark
-                            ? 'text-slate-400 hover:text-white hover:bg-white/[0.08]'
-                            : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
+                            ? 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
+                            : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
                         }`}
                       >
                         <Info className="h-4 w-4" aria-hidden="true" />
@@ -505,130 +469,88 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                   </div>
 
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className={`text-sm font-bold leading-snug group-hover:text-emerald-400 transition-colors ${isDark ? 'text-white' : 'text-slate-950'}`}>
+                    <h3 className={`text-base font-bold leading-snug group-hover:text-cyan-700 dark:group-hover:text-cyan-300 transition-colors ${isDark ? 'text-white' : 'text-slate-950'}`}>
                       {tool.name}
                     </h3>
-                    {tool.popularityInNepal === 'Essential' && (
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        Essential
+                    {supportsQuickPay && (
+                      <span
+                        id={`quick-pay-badge-${tool.id}`}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border shrink-0 ${
+                          isDark
+                            ? 'bg-cyan-950/70 border-cyan-500/40 text-cyan-300'
+                            : 'bg-cyan-50 border-cyan-300 text-cyan-900'
+                        }`}
+                      >
+                        {tool.quickPayProvider || 'eSewa / Khalti'}
                       </span>
                     )}
                   </div>
 
-                  <p className={`text-xs mt-1.5 line-clamp-2 leading-relaxed ${
-                    isDark ? 'text-slate-300' : 'text-slate-600'
+                  <p className={`text-sm mt-1.5 line-clamp-2 leading-relaxed ${
+                    isDark ? 'text-slate-200' : 'text-slate-700'
                   }`}>
-                    {tool.description}
+                    {language === 'ne' && tool.descriptionNe ? tool.descriptionNe : tool.description}
                   </p>
 
-                  {/* Standout Capability Pill */}
-                  <div className={`mt-2.5 flex items-center gap-1.5 text-xs font-medium ${
-                    isDark ? 'text-emerald-400' : 'text-emerald-700 font-semibold'
+                  {/* Standout Capability Line */}
+                  <div className={`mt-2.5 flex items-center gap-1.5 text-xs font-semibold ${
+                    isDark ? 'text-cyan-300' : 'text-cyan-800'
                   }`}>
-                    <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    <Zap className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     <span className="truncate">{tool.keyCapability}</span>
                   </div>
 
-                  {/* Local Business Adoption Usage Meter / Progress Bar */}
-                  <div className={`mt-3 rounded-xl border p-2.5 space-y-1.5 text-xs ${
-                    isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50/80 border-slate-200'
-                  }`}>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className={`flex items-center gap-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                        <TrendingUp className={`h-3 w-3 shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
-                        <span className="font-medium text-xs">
-                          {language === 'ne' ? 'नेपाली व्यवसाय प्रयोग दर:' : 'Local Business Adoption:'}
-                        </span>
-                      </div>
-                      <span className={`font-bold tabular-nums ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                        {adoption}%
-                      </span>
-                    </div>
-
-                    {/* Progress Bar Meter */}
-                    <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
-                      <div
-                        className={`h-full rounded-full transition-all duration-700 ${
-                          adoption >= 90
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-300 shadow-xs'
-                            : adoption >= 80
-                            ? 'bg-gradient-to-r from-teal-500 to-emerald-400'
-                            : 'bg-gradient-to-r from-amber-500 to-emerald-400'
-                        }`}
-                        style={{ width: `${adoption}%` }}
-                      />
-                    </div>
-
-                    <div className={`flex items-center justify-between text-[11px] pt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      <span className="truncate max-w-[170px]" title={tool.businessUsageTier || 'SME & Enterprise Standard'}>
-                        {tool.businessUsageTier || 'SME & Enterprise Standard'}
-                      </span>
-                      {tool.monthlyActiveBusinesses && (
-                        <span className={`font-semibold tabular-nums shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                          {tool.monthlyActiveBusinesses}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Payment Details Box */}
-                  <div className={`mt-2.5 rounded-xl border p-2.5 text-xs ${
-                    isDark ? 'bg-black/40 border-white/[0.06]' : 'bg-slate-50 border-slate-200'
+                  {/* Clean Compact Cost & Adoption Summary */}
+                  <div className={`mt-3.5 rounded-xl border p-3 space-y-2 text-xs ${
+                    isDark ? 'bg-black/40 border-slate-800' : 'bg-slate-50 border-slate-200'
                   }`}>
                     <div className="flex items-center justify-between font-semibold">
-                      <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                        {language === 'ne' ? 'भुक्तानी विधि:' : 'Payment Method:'}
+                      <span className={isDark ? 'text-slate-200' : 'text-slate-800'}>
+                        {language === 'ne' ? 'लागत / भुक्तानी:' : 'Price & Payment:'}
                       </span>
-                      <span className={`font-bold tabular-nums ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                      <span className={`font-bold tabular-nums font-mono ${isDark ? 'text-cyan-300' : 'text-cyan-800'}`}>
                         {tool.monthlyPriceUsd > 0 ? `$${tool.monthlyPriceUsd}/mo (~NPR ${npr.toLocaleString()})` : 'Free Tier'}
                       </span>
                     </div>
-                    <p className={`text-xs mt-0.5 leading-snug ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <p className={`text-xs leading-snug ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       {tool.paymentDetails}
                     </p>
-
-                    {supportsQuickPay && (
-                      <div className={`flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-slate-500/15 text-[11px] font-medium ${
-                        isDark ? 'text-emerald-400' : 'text-emerald-700'
-                      }`}>
-                        <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                        </span>
-                        <span>{language === 'ne' ? 'सिधै इसेवा / खल्ती भुक्तानी समर्थित' : 'Direct eSewa / Khalti instant payment supported'}</span>
-                      </div>
-                    )}
+                    <div className={`flex items-center justify-between pt-1.5 border-t ${isDark ? 'border-slate-800 text-slate-200' : 'border-slate-200 text-slate-700'}`}>
+                      <span className="flex items-center gap-1 font-medium">
+                        <TrendingUp className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+                        <span>{language === 'ne' ? 'नेपाल प्रयोग:' : 'Nepal Adoption:'}</span>
+                      </span>
+                      <span className="font-bold font-mono text-cyan-700 dark:text-cyan-300">{adoption}%</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Bottom Card Actions with strict 44x44px touch targets */}
-                <div className="mt-4 pt-3 border-t border-slate-500/15 flex items-center justify-between gap-2">
+                {/* Bottom Card Actions with clear touch targets */}
+                <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
                   <a
                     href={tool.officialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Visit official website for ${tool.name} (opens in new tab)`}
-                    className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs flex items-center justify-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl transition-colors cursor-pointer ${
-                      isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+                    className={`min-h-[44px] px-3 py-2 text-xs font-semibold flex items-center justify-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-xl transition-colors cursor-pointer ${
+                      isDark ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'
                     }`}
                   >
                     <span>{t.tools.visitOfficial}</span>
                     <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   </a>
 
-                  <motion.button
+                  <button
                     type="button"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.96 }}
                     onClick={() => onToggleStack(tool.id)}
                     aria-label={isSelected ? `Remove ${tool.name} from stack` : `Add ${tool.name} to stack`}
                     aria-pressed={isSelected}
-                    className={`min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer ${
+                    className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer ${
                       isSelected
-                        ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                        ? 'bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 text-white font-bold shadow-xs border-transparent'
                         : isDark
-                        ? 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white border border-white/10'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-950 border border-slate-200'
+                        ? 'bg-white/[0.08] text-slate-100 hover:bg-cyan-500/20 hover:text-cyan-200 border border-slate-700'
+                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-300'
                     }`}
                   >
                     {isSelected ? (
@@ -646,7 +568,7 @@ export const NepalToolsDirectory: React.FC<NepalToolsDirectoryProps> = ({
                         </span>
                       </>
                     )}
-                  </motion.button>
+                  </button>
                 </div>
 
                 {/* Minimalist Apple-Style Hover Tooltip Component */}

@@ -20,19 +20,19 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   className = '',
 }) => {
   return (
-    <nav aria-label="Breadcrumb" className={`flex items-center text-xs text-slate-500 dark:text-slate-400 ${className}`}>
+    <nav aria-label="Breadcrumb" className={`flex items-center text-xs text-slate-600 dark:text-slate-300 ${className}`}>
       <ol className="flex items-center gap-1.5 flex-wrap">
         {onHomeClick && (
           <li className="flex items-center">
             <button
               type="button"
               onClick={onHomeClick}
-              className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
+              className="flex items-center gap-1 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
               aria-label="Home"
             >
               <Home className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
-            <ChevronRight className="h-3.5 w-3.5 mx-1 text-slate-400 dark:text-slate-600 shrink-0" aria-hidden="true" />
+            <ChevronRight className="h-3.5 w-3.5 mx-1 text-slate-400 dark:text-slate-500 shrink-0" aria-hidden="true" />
           </li>
         )}
 
@@ -43,7 +43,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               {item.isCurrent || isLast ? (
                 <span
                   aria-current="page"
-                  className="font-semibold text-slate-800 dark:text-slate-200"
+                  className="font-semibold text-slate-900 dark:text-white"
                 >
                   {item.label}
                 </span>
@@ -51,14 +51,14 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                 <button
                   type="button"
                   onClick={item.onClick}
-                  className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
+                  className="hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   {item.label}
                 </button>
               ) : item.href ? (
                 <a
                   href={item.href}
-                  className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                  className="hover:text-slate-950 dark:hover:text-white transition-colors"
                 >
                   {item.label}
                 </a>
@@ -67,7 +67,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               )}
 
               {!isLast && (
-                <ChevronRight className="h-3.5 w-3.5 mx-1 text-slate-400 dark:text-slate-600 shrink-0" aria-hidden="true" />
+                <ChevronRight className="h-3.5 w-3.5 mx-1 text-slate-400 dark:text-slate-500 shrink-0" aria-hidden="true" />
               )}
             </li>
           );

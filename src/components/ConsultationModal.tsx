@@ -149,10 +149,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       >
         {/* Modal Header */}
         <div className={`px-5 py-4 border-b flex items-center justify-between shrink-0 ${
-          isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-100 bg-slate-50/50'
+          isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-slate-50/70'
         }`}>
           <div>
-            <div className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-0.5">
+            <div className="text-xs font-mono font-semibold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider mb-0.5">
               {isNepali ? 'परामर्श तथा इन्जिनियरिङ' : 'Advisory & Engineering'}
             </div>
             <h2 id="consultation-modal-title" className="text-base sm:text-lg font-bold font-display">
@@ -162,8 +162,8 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
           <button
             onClick={onClose}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center ${
-              isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            className={`p-2 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center ${
+              isDark ? 'text-slate-200 hover:text-white hover:bg-white/10' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
             }`}
             aria-label="Close modal"
           >
@@ -172,22 +172,22 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain text-xs">
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain text-sm">
           {!submitted ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               
               {/* Service Selection */}
               <div>
-                <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                   {isNepali ? 'इच्छुक सेवा वा विषय' : 'Consulting Track'}
                 </label>
                 <select
                   value={service}
                   onChange={(e) => setService(e.target.value)}
-                  className={`w-full rounded-xl border p-2.5 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                  className={`w-full rounded-xl border p-2.5 text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                     isDark
-                      ? 'border-white/10 bg-white/[0.04] text-white focus:border-emerald-500/60'
-                      : 'border-slate-300 bg-slate-50 text-slate-900 focus:bg-white focus:border-emerald-600'
+                      ? 'border-white/15 bg-white/[0.05] text-white focus:border-cyan-400'
+                      : 'border-slate-300 bg-slate-50 text-slate-950 focus:bg-white focus:border-cyan-600'
                   }`}
                 >
                   <option value="Enterprise AI Architecture & MVP Sprint">Enterprise AI Architecture & 2-Week MVP Sprint</option>
@@ -202,7 +202,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
               {/* Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {isNepali ? 'नाम *' : 'Full Name *'}
                   </label>
                   <input
@@ -211,17 +211,17 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isNepali ? 'तपाईंको नाम' : 'Your name'}
-                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                    className={`w-full rounded-xl border px-3 py-2.5 text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                       isDark
-                        ? 'border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500 focus:border-emerald-500/60'
-                        : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600'
+                        ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400 focus:border-cyan-400'
+                        : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-cyan-600'
                     }`}
                   />
-                  {formErrors.name && <p className="text-red-500 text-[11px] mt-1">{formErrors.name}</p>}
+                  {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                 </div>
 
                 <div>
-                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {isNepali ? 'इमेल *' : 'Business Email *'}
                   </label>
                   <input
@@ -230,20 +230,20 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@organization.com"
-                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                    className={`w-full rounded-xl border px-3 py-2.5 text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                       isDark
-                        ? 'border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500 focus:border-emerald-500/60'
-                        : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600'
+                        ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400 focus:border-cyan-400'
+                        : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-cyan-600'
                     }`}
                   />
-                  {formErrors.email && <p className="text-red-500 text-[11px] mt-1">{formErrors.email}</p>}
+                  {formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
                 </div>
               </div>
 
               {/* Phone & Organization */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {isNepali ? 'फोन / ह्वाट्सएप *' : 'Phone / WhatsApp *'}
                   </label>
                   <input
@@ -252,17 +252,17 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+977 98XXXXXXXX"
-                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                       isDark
-                        ? 'border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500 focus:border-emerald-500/60'
-                        : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600'
+                        ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400 focus:border-cyan-400'
+                        : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-cyan-600'
                     }`}
                   />
-                  {formErrors.phone && <p className="text-red-500 text-[11px] mt-1">{formErrors.phone}</p>}
+                  {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
                 </div>
 
                 <div>
-                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {isNepali ? 'संस्था / कम्पनी' : 'Organization'}
                   </label>
                   <input
@@ -270,10 +270,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                     placeholder={isNepali ? 'कम्पनीको नाम' : 'Company or Agency'}
-                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                    className={`w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                       isDark
-                        ? 'border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500 focus:border-emerald-500/60'
-                        : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600'
+                        ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400 focus:border-cyan-400'
+                        : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-cyan-600'
                     }`}
                   />
                 </div>
@@ -281,7 +281,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
               {/* Project Scope Note */}
               <div>
-                <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                <label className={`block font-semibold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                   {isNepali ? 'परियोजना वा आवश्यकताको संक्षिप्त विवरण' : 'Project Note & Requirements'}
                 </label>
                 <textarea
@@ -289,17 +289,17 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   value={projectScope}
                   onChange={(e) => setProjectScope(e.target.value)}
                   placeholder={isNepali ? 'तपाईंको मुख्य लक्ष्य र समयसीमा...' : 'Briefly describe your objectives, systems, or questions...'}
-                  className={`w-full rounded-xl border p-2.5 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${
+                  className={`w-full rounded-xl border p-2.5 text-xs transition-colors focus:outline-hidden focus:ring-2 focus:ring-cyan-500/30 ${
                     isDark
-                      ? 'border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500 focus:border-emerald-500/60'
-                      : 'border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600'
+                      ? 'border-white/15 bg-white/[0.05] text-white placeholder:text-slate-400 focus:border-cyan-400'
+                      : 'border-slate-300 bg-slate-50 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-cyan-600'
                   }`}
                 />
               </div>
 
               {/* Privacy & NDA Guarantee */}
-              <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
+              <div className={`flex items-center gap-2 text-xs pt-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                <ShieldCheck className={`h-4 w-4 shrink-0 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} aria-hidden="true" />
                 <span>
                   {isNepali
                     ? 'गोपनीयता सुरक्षित। सबै विवरणहरू व्यावसायिक मर्यादा अनुसार रहनेछन्।'
@@ -312,7 +312,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 min-h-[44px]"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs transition-colors shadow-md shadow-cyan-500/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 min-h-[44px]"
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
                   <span>
@@ -329,7 +329,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-cyan-600 dark:text-cyan-400 hover:underline font-semibold"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   <span>{isNepali ? 'वा सिधै ह्वाट्सएपमा कुरा गर्नुहोस्' : 'Or chat directly via WhatsApp'}</span>
@@ -340,7 +340,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
           ) : (
             /* Submission Confirmation */
             <div className="text-center py-8 space-y-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                 <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
               </div>
 

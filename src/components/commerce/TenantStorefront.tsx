@@ -199,7 +199,9 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
               <button
                 type="button"
                 onClick={onNavigateBack}
-                className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-400 hover:text-white cursor-pointer"
+                className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                  isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                }`}
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>{isNe ? 'फर्कनुहोस्' : 'Back'}</span>
@@ -207,19 +209,19 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
             )}
 
             <div className="flex items-center gap-2">
-              <Store className="h-5 w-5 text-cyan-400" />
-              <span className="font-bold text-sm sm:text-base tracking-tight">{storeProfile.name}</span>
+              <Store className={`h-5 w-5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+              <span className={`font-bold text-sm sm:text-base tracking-tight ${isDark ? 'text-white' : 'text-slate-950'}`}>{storeProfile.name}</span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-2 text-xs font-bold transition-all shadow-md shadow-cyan-950/20 cursor-pointer"
+            className="relative flex items-center gap-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-2 text-xs font-bold transition-colors shadow-md shadow-cyan-950/20 cursor-pointer"
           >
             <ShoppingCart className="h-4 w-4" />
             <span className="hidden sm:inline">{isNe ? 'झोला' : 'Cart'}</span>
-            <span className="ml-1 rounded-full bg-white text-cyan-900 px-1.5 py-0.2 text-2xs font-extrabold">
+            <span className="ml-1 rounded-full bg-white text-cyan-900 px-1.5 py-0.5 text-xs font-extrabold tabular-nums">
               {cart.reduce((s, i) => s + i.quantity, 0)}
             </span>
           </button>
@@ -227,34 +229,32 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
       </nav>
 
       {/* Hero Storefront Banner */}
-      <div className="relative border-b border-cyan-900/30 overflow-hidden bg-gradient-to-r from-[#0d1527] via-cyan-950/30 to-[#080d1a]">
+      <div className="relative border-b border-cyan-900/30 overflow-hidden bg-gradient-to-r from-[#0d1527] via-cyan-950/40 to-[#080d1a]">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-2xs font-bold tracking-wide uppercase mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-bold tracking-wide uppercase mb-3">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 <span>Verified NepalAI Merchant • IRD PAN: {storeProfile.panNumber}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
                 {storeProfile.name}
               </h1>
-              <p className="mt-2 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-slate-200 max-w-2xl leading-relaxed">
                 {storeProfile.tagline}
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-200">
                 <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-cyan-400" /> {storeProfile.location}</span>
                 <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-cyan-400" /> {storeProfile.phone}</span>
               </div>
             </div>
 
-            <div className={`rounded-2xl p-4 border text-center ${
-              isDark ? 'border-cyan-950/60 bg-[#0d1527]' : 'border-slate-200 bg-white shadow-xs'
-            }`}>
-              <div className="text-2xs font-semibold text-slate-400 uppercase tracking-wider">{isNe ? 'भुक्तानी स्वीकार' : 'Accepted Rails'}</div>
+            <div className="rounded-2xl p-4 border border-cyan-500/30 bg-[#0d1527] text-center">
+              <div className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{isNe ? 'भुक्तानी स्वीकार' : 'Accepted Rails'}</div>
               <div className="mt-2 flex items-center justify-center gap-2">
-                <span className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold text-xs">eSewa</span>
-                <span className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-400 font-bold text-xs">Khalti</span>
-                <span className="px-2.5 py-1 rounded-lg bg-teal-500/20 text-teal-400 font-bold text-xs">FonePay</span>
+                <span className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold text-xs">eSewa</span>
+                <span className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 font-bold text-xs">Khalti</span>
+                <span className="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 font-bold text-xs">FonePay</span>
               </div>
             </div>
           </div>
@@ -269,10 +269,10 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                 selectedCategory === 'all'
                   ? 'bg-cyan-600 text-white shadow-xs'
-                  : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : isDark ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-100'
               }`}
             >
               {isNe ? 'सबै सामान' : 'All Catalog'}
@@ -282,10 +282,10 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   selectedCategory === cat.id
                     ? 'bg-cyan-600 text-white shadow-xs'
-                    : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : isDark ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-100'
                 }`}
               >
                 {cat.name}
@@ -293,16 +293,18 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
             ))}
           </div>
 
-          <div className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-xs w-full sm:w-64 ${
-            isDark ? 'border-slate-800 bg-[#0d1527]' : 'border-slate-200 bg-white'
+          <div className={`flex items-center gap-2 rounded-xl px-3 py-2 border text-xs w-full sm:w-64 ${
+            isDark ? 'border-slate-700 bg-[#0d1527]' : 'border-slate-300 bg-white'
           }`}>
-            <Search className="h-4 w-4 text-slate-400" />
+            <Search className={`h-4 w-4 ${isDark ? 'text-slate-300' : 'text-slate-600'}`} />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder={isNe ? 'सामान खोज्नुहोस्...' : 'Search items...'}
-              className="bg-transparent outline-none w-full text-xs"
+              className={`bg-transparent outline-none w-full text-xs ${
+                isDark ? 'text-white placeholder:text-slate-400' : 'text-slate-950 placeholder:text-slate-500'
+              }`}
             />
           </div>
         </div>
@@ -312,34 +314,34 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
           {filteredProducts.map(product => (
             <div
               key={product.id}
-              className={`rounded-2xl border overflow-hidden flex flex-col justify-between transition-all hover:border-cyan-500/40 hover:shadow-lg ${
-                isDark ? 'border-slate-800/80 bg-[#0d1527]' : 'border-slate-200 bg-white shadow-xs'
+              className={`rounded-2xl border overflow-hidden flex flex-col justify-between transition-colors hover:border-cyan-500/60 ${
+                isDark ? 'border-slate-800 bg-[#0d1527]' : 'border-slate-200 bg-white shadow-xs'
               }`}
             >
-              <div className="relative aspect-4/3 w-full bg-slate-900/60 overflow-hidden">
+              <div className={`relative aspect-4/3 w-full overflow-hidden ${isDark ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
                 <img
                   src={product.images?.[0]?.url || '/api/storage/mock-media?key=placeholder'}
                   alt={product.title}
-                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                  className="h-full w-full object-cover"
                   loading="lazy"
                 />
               </div>
 
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-sm line-clamp-1">{product.title}</h3>
-                  <p className={`mt-1.5 text-xs line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <h3 className={`font-bold text-sm line-clamp-1 ${isDark ? 'text-white' : 'text-slate-950'}`}>{product.title}</h3>
+                  <p className={`mt-1.5 text-xs line-clamp-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {product.description}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
-                  <div>
-                    <div className="text-base font-bold text-cyan-400">
+                <div className={`mt-4 pt-3 border-t flex items-center justify-between ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                  <div className="tabular-nums">
+                    <div className={`text-base font-bold ${isDark ? 'text-cyan-300' : 'text-cyan-800'}`}>
                       रू {Number(product.priceNpr).toLocaleString('en-IN')}
                     </div>
                     {product.compareAtPriceNpr && (
-                      <div className="text-2xs text-slate-400 line-through">
+                      <div className={`text-xs line-through ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         रू {Number(product.compareAtPriceNpr).toLocaleString('en-IN')}
                       </div>
                     )}
@@ -348,7 +350,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                   <button
                     type="button"
                     onClick={() => addToCart(product)}
-                    className="rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                    className="rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-1.5 text-xs font-bold transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     <span>{isNe ? 'झोलामा' : 'Add to Cart'}</span>
@@ -369,26 +371,26 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               className={`w-full max-w-md h-full flex flex-col justify-between p-6 overflow-y-auto ${
-                isDark ? 'bg-[#0d1527] text-slate-100 border-l border-cyan-950/60' : 'bg-white text-slate-900 border-l border-slate-200'
+                isDark ? 'bg-[#0d1527] text-slate-100 border-l border-cyan-950/60' : 'bg-white text-slate-950 border-l border-slate-200'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div className={`flex items-center justify-between pb-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                   <div className="flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-cyan-400" />
+                    <ShoppingCart className={`h-5 w-5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                     <h3 className="font-bold text-base">{isNe ? 'तपाईंको झोला' : 'Shopping Cart'}</h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsCartOpen(false)}
-                    className="text-slate-400 hover:text-white cursor-pointer"
+                    className={`cursor-pointer p-1 rounded-lg ${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'}`}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 {cart.length === 0 ? (
-                  <div className="py-20 text-center text-slate-400 text-xs">
+                  <div className={`py-20 text-center text-xs ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {isNe ? 'तपाईंको झोला खाली छ।' : 'Your shopping cart is empty.'}
                   </div>
                 ) : (
@@ -396,7 +398,9 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                     {cart.map(item => (
                       <div
                         key={item.product.id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-xs"
+                        className={`flex items-center justify-between p-3 rounded-xl border text-xs ${
+                          isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <img
@@ -406,7 +410,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                           />
                           <div>
                             <div className="font-bold line-clamp-1">{item.product.title}</div>
-                            <div className="text-cyan-400">रू {Number(item.product.priceNpr).toLocaleString('en-IN')}</div>
+                            <div className={`tabular-nums ${isDark ? 'text-cyan-300' : 'text-cyan-800 font-semibold'}`}>रू {Number(item.product.priceNpr).toLocaleString('en-IN')}</div>
                           </div>
                         </div>
 
@@ -414,22 +418,26 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.product.id, -1)}
-                            className="h-6 w-6 rounded-md bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-200 cursor-pointer"
+                            className={`h-7 w-7 rounded-md flex items-center justify-center cursor-pointer ${
+                              isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-100' : 'bg-white border border-slate-300 hover:bg-slate-100 text-slate-900'
+                            }`}
                           >
                             <Minus className="h-3 w-3" />
                           </button>
-                          <span className="font-mono font-bold w-4 text-center">{item.quantity}</span>
+                          <span className="font-mono font-bold w-4 text-center tabular-nums">{item.quantity}</span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.product.id, 1)}
-                            className="h-6 w-6 rounded-md bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-200 cursor-pointer"
+                            className={`h-7 w-7 rounded-md flex items-center justify-center cursor-pointer ${
+                              isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-100' : 'bg-white border border-slate-300 hover:bg-slate-100 text-slate-900'
+                            }`}
                           >
                             <Plus className="h-3 w-3" />
                           </button>
                           <button
                             type="button"
                             onClick={() => removeFromCart(item.product.id)}
-                            className="ml-2 text-slate-500 hover:text-red-400 cursor-pointer"
+                            className={`ml-1 cursor-pointer ${isDark ? 'text-slate-400 hover:text-red-400' : 'text-slate-600 hover:text-red-600'}`}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -441,8 +449,8 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
               </div>
 
               {cart.length > 0 && (
-                <div className="pt-4 border-t border-slate-800 space-y-3">
-                  <div className="space-y-1 text-xs text-slate-400">
+                <div className={`pt-4 border-t space-y-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                  <div className={`space-y-1 text-xs tabular-nums ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     <div className="flex justify-between">
                       <span>Subtotal</span>
                       <span>रू {subtotal.toLocaleString('en-IN')}</span>
@@ -451,7 +459,9 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                       <span>Delivery Charge</span>
                       <span>रू {delivery}</span>
                     </div>
-                    <div className="flex justify-between text-sm font-bold text-cyan-400 pt-1 border-t border-slate-800">
+                    <div className={`flex justify-between text-sm font-bold pt-2 border-t ${
+                      isDark ? 'text-cyan-300 border-slate-800' : 'text-cyan-900 border-slate-200'
+                    }`}>
                       <span>Total Amount</span>
                       <span>रू {grandTotal.toLocaleString('en-IN')}</span>
                     </div>
@@ -463,7 +473,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                       setIsCartOpen(false);
                       setIsCheckoutOpen(true);
                     }}
-                    className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 hover:from-cyan-500 hover:to-sky-400 transition-all cursor-pointer"
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 hover:from-cyan-500 hover:to-sky-400 transition-colors cursor-pointer"
                   >
                     {isNe ? 'भुक्तानीमा जानुहोस् (Checkout)' : `Proceed to Checkout • रू ${grandTotal.toLocaleString('en-IN')}`}
                   </button>
@@ -483,18 +493,18 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl ${
-                isDark ? 'border-cyan-950/60 bg-[#0d1527] text-slate-100' : 'border-slate-200 bg-white text-slate-900'
+                isDark ? 'border-cyan-950/60 bg-[#0d1527] text-slate-100' : 'border-slate-200 bg-white text-slate-950'
               }`}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className={`flex items-center justify-between pb-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                 <div className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-cyan-400" />
+                  <CreditCard className={`h-5 w-5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                   <h3 className="font-bold text-base">{isNe ? 'अर्डर विवरण तथा भुक्तानी' : 'Checkout & Payment'}</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsCheckoutOpen(false)}
-                  className="text-slate-400 hover:text-white cursor-pointer"
+                  className={`cursor-pointer p-1 rounded-lg ${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-950'}`}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -502,42 +512,48 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
 
               <form onSubmit={handleCheckoutSubmit} className="mt-4 space-y-3 text-xs">
                 <div>
-                  <label className="font-semibold block mb-1 text-slate-300">Full Name *</label>
+                  <label className={`font-semibold block mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Full Name *</label>
                   <input
                     type="text"
                     required
                     value={customerName}
                     onChange={e => setCustomerName(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 border border-slate-700 bg-slate-900 text-slate-200 outline-none"
+                    className={`w-full rounded-xl px-3 py-2 border outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      isDark ? 'border-slate-700 bg-slate-900 text-white' : 'border-slate-300 bg-slate-50 text-slate-950 focus:bg-white'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="font-semibold block mb-1 text-slate-300">Phone (WhatsApp for alerts) *</label>
+                  <label className={`font-semibold block mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Phone (WhatsApp for alerts) *</label>
                   <input
                     type="text"
                     required
                     value={customerPhone}
                     onChange={e => setCustomerPhone(e.target.value)}
                     placeholder="9841XXXXXX"
-                    className="w-full rounded-xl px-3 py-2 border border-slate-700 bg-slate-900 text-slate-200 outline-none"
+                    className={`w-full rounded-xl px-3 py-2 border outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      isDark ? 'border-slate-700 bg-slate-900 text-white' : 'border-slate-300 bg-slate-50 text-slate-950 focus:bg-white'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="font-semibold block mb-1 text-slate-300">Delivery Address in Nepal *</label>
+                  <label className={`font-semibold block mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Delivery Address in Nepal *</label>
                   <input
                     type="text"
                     required
                     value={customerAddress}
                     onChange={e => setCustomerAddress(e.target.value)}
                     placeholder="Street, Municipality, City"
-                    className="w-full rounded-xl px-3 py-2 border border-slate-700 bg-slate-900 text-slate-200 outline-none"
+                    className={`w-full rounded-xl px-3 py-2 border outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      isDark ? 'border-slate-700 bg-slate-900 text-white' : 'border-slate-300 bg-slate-50 text-slate-950 focus:bg-white'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="font-semibold block mb-1 text-slate-300">Select Nepal Payment Rail</label>
+                  <label className={`font-semibold block mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Select Nepal Payment Rail</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'esewa', label: 'eSewa' },
@@ -548,10 +564,14 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                         key={rail.id}
                         type="button"
                         onClick={() => setPaymentMethod(rail.id as any)}
-                        className={`py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        className={`py-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer ${
                           paymentMethod === rail.id
-                            ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300 shadow-xs'
-                            : 'border-slate-700 bg-slate-900 text-slate-400'
+                            ? isDark
+                              ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200 shadow-xs'
+                              : 'border-cyan-700 bg-cyan-700 text-white shadow-xs'
+                            : isDark
+                              ? 'border-slate-700 bg-slate-900 text-slate-300'
+                              : 'border-slate-300 bg-slate-50 text-slate-700'
                         }`}
                       >
                         {rail.label}
@@ -560,7 +580,9 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex justify-between text-sm font-bold text-cyan-400">
+                <div className={`pt-3 border-t flex justify-between text-sm font-bold tabular-nums ${
+                  isDark ? 'border-slate-800 text-cyan-300' : 'border-slate-200 text-cyan-900'
+                }`}>
                   <span>Grand Total (NPR):</span>
                   <span>रू {grandTotal.toLocaleString('en-IN')}</span>
                 </div>
@@ -568,7 +590,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 hover:from-cyan-500 hover:to-sky-400 transition-all cursor-pointer disabled:opacity-50"
+                  className="w-full mt-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 hover:from-cyan-500 hover:to-sky-400 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? 'Confirming Order...' : `Confirm & Place Order`}
                 </button>
@@ -587,20 +609,22 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl ${
-                isDark ? 'border-cyan-950/60 bg-[#0d1527] text-slate-100' : 'border-slate-200 bg-white text-slate-900'
+                isDark ? 'border-cyan-950/60 bg-[#0d1527] text-slate-100' : 'border-slate-200 bg-white text-slate-950'
               }`}
             >
               <div className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3">
+                <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl mb-3 ${
+                  isDark ? 'bg-cyan-500/15 text-cyan-300' : 'bg-cyan-50 text-cyan-700'
+                }`}>
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-bold">
                   {isNe ? 'अर्डर सफलतापूर्वक सम्पन्न भयो!' : 'Order Placed Successfully!'}
                 </h3>
-                <p className="mt-1 font-mono text-sm text-cyan-400">
+                <p className={`mt-1 font-mono text-sm ${isDark ? 'text-cyan-300' : 'text-cyan-800 font-bold'}`}>
                   #{placedOrderData.order.orderNumber}
                 </p>
-                <p className="mt-2 text-xs text-slate-400">
+                <p className={`mt-2 text-xs tabular-nums ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Total: रू {Number(placedOrderData.order.totalNpr).toLocaleString('en-IN')} via {placedOrderData.order.paymentMethod.toUpperCase()}
                 </p>
               </div>
@@ -610,9 +634,13 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedInvoiceOrder(placedOrderData.order)}
-                  className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 py-2.5 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className={`w-full rounded-xl border py-2.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 ${
+                    isDark
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300'
+                  }`}
                 >
-                  <Receipt className="h-4 w-4 text-cyan-400" />
+                  <Receipt className={`h-4 w-4 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
                   <span>{isNe ? 'आधिकारिक कर बिजक हेर्नुहोस् (IRD Invoice)' : 'View Official IRD Tax Invoice'}</span>
                 </button>
 
@@ -622,7 +650,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                     href={placedOrderData.whatsappAlert.whatsappLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 text-xs font-bold transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Smartphone className="h-4 w-4" />
                     <span>{isNe ? 'ह्वाट्सएपमा रसिद पठाउनुहोस्' : 'Send WhatsApp Confirmation'}</span>
@@ -634,7 +662,7 @@ export const TenantStorefront: React.FC<TenantStorefrontProps> = ({
                 <button
                   type="button"
                   onClick={() => setPlacedOrderData(null)}
-                  className="text-xs text-slate-400 hover:text-white cursor-pointer"
+                  className={`text-xs cursor-pointer font-medium ${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'}`}
                 >
                   Continue Shopping
                 </button>

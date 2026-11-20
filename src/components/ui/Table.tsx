@@ -50,7 +50,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttr
   ({ children, className = '', ...props }, ref) => (
     <th
       ref={ref}
-      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ${className}`}
+      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-200 ${className}`}
       {...props}
     >
       {children}
@@ -63,7 +63,7 @@ export const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttr
   ({ children, className = '', ...props }, ref) => (
     <td
       ref={ref}
-      className={`px-4 py-3 text-slate-700 dark:text-slate-300 align-middle ${className}`}
+      className={`px-4 py-3 text-slate-800 dark:text-slate-200 align-middle ${className}`}
       {...props}
     >
       {children}
@@ -76,7 +76,7 @@ export const TableCaption = React.forwardRef<HTMLTableCaptionElement, React.HTML
   ({ children, className = '', ...props }, ref) => (
     <caption
       ref={ref}
-      className={`p-3 text-xs text-slate-500 dark:text-slate-400 italic text-left ${className}`}
+      className={`p-3 text-xs text-slate-600 dark:text-slate-300 italic text-left ${className}`}
       {...props}
     >
       {children}

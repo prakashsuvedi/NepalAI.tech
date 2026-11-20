@@ -33,18 +33,18 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           {kicker && (
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-1">
               {kicker}
             </p>
           )}
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-950 dark:text-white">
               {title}
             </h1>
             {badge && <div>{badge}</div>}
           </div>
           {subtitle && (
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 mt-2 max-w-3xl leading-relaxed">
               {subtitle}
             </p>
           )}

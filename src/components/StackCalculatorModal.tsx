@@ -183,7 +183,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
         }`}>
           <div className="flex items-center gap-2.5">
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl border shrink-0 ${
-              isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              isDark ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'
             }`}>
               <Calculator className="h-4 w-4" />
             </div>
@@ -191,7 +191,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
               <h2 id="stack-calculator-title" className="text-base sm:text-lg font-bold font-display">
                 {isNepali ? 'नेपाल एआई स्ट्याक तथा ROI क्याल्कुलेटर' : 'Nepal AI Stack Cost & ROI Calculator'}
               </h2>
-              <p className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 {isNepali ? 'NRB $५०० डलर कार्ड सीमा र eSewa/Khalti विश्लेषण' : 'NRB $500 Dollar Card Quota & NPR Budget Optimizer'}
               </p>
             </div>
@@ -200,7 +200,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
           <button
             onClick={onClose}
             className={`rounded-full p-2 transition-colors cursor-pointer ${
-              isDark ? 'text-slate-400 hover:bg-white/10 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+              isDark ? 'text-slate-200 hover:bg-white/10 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950'
             }`}
             aria-label="Close stack calculator modal"
           >
@@ -215,12 +215,12 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
           <div className="relative flex items-center justify-between">
             {/* Connecting Background Line */}
             <div className={`absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 z-0 ${
-              isDark ? 'bg-white/10' : 'bg-slate-200'
+              isDark ? 'bg-white/15' : 'bg-slate-300'
             }`} />
             
             {/* Connecting Active Line */}
             <div
-              className="absolute left-6 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 z-0 transition-all duration-500"
+              className="absolute left-6 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-cyan-500 to-sky-400 z-0 transition-all duration-300"
               style={{
                 width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 3rem)',
               }}
@@ -236,17 +236,17 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                   key={step.number}
                   type="button"
                   onClick={() => setCurrentStep(step.number)}
-                  className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer transition-all"
+                  className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer"
                 >
                   <div
-                    className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-xs font-bold transition-all shadow-xs ${
+                    className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-xs font-bold transition-colors shadow-xs ${
                       isCompleted
-                        ? 'bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/20'
+                        ? 'bg-cyan-500 text-slate-950 ring-4 ring-cyan-500/20'
                         : isActive
-                        ? 'bg-emerald-600 text-white ring-4 ring-emerald-500/30 scale-105'
+                        ? 'bg-cyan-600 text-white ring-4 ring-cyan-500/30'
                         : isDark
-                        ? 'bg-slate-900 border border-white/20 text-slate-400'
-                        : 'bg-white border border-slate-300 text-slate-600'
+                        ? 'bg-slate-900 border border-white/25 text-slate-200'
+                        : 'bg-white border border-slate-300 text-slate-700'
                     }`}
                   >
                     {isCompleted ? (
@@ -256,12 +256,12 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                     )}
                   </div>
                   <span
-                    className={`text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors ${
+                    className={`text-xs font-semibold whitespace-nowrap transition-colors ${
                       isActive
-                        ? isDark ? 'text-emerald-400 font-bold' : 'text-emerald-700 font-bold'
+                        ? isDark ? 'text-cyan-300 font-bold' : 'text-cyan-700 font-bold'
                         : isCompleted
-                        ? isDark ? 'text-slate-200' : 'text-slate-800'
-                        : isDark ? 'text-slate-400' : 'text-slate-500'
+                        ? isDark ? 'text-slate-100' : 'text-slate-900'
+                        : isDark ? 'text-slate-300' : 'text-slate-700'
                     }`}
                   >
                     {step.label}
@@ -273,7 +273,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
         </div>
 
         {/* Modal Step Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 text-xs">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 text-sm">
           <AnimatePresence mode="wait">
             {/* STEP 1: CONFIGURE STACK & PRESETS */}
             {currentStep === 1 && (
@@ -282,37 +282,37 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 {/* 1-Click Preset Strip */}
                 <div>
-                  <span className={`text-[11px] font-mono block mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <span className={`text-xs font-mono block mb-2 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                     {isNepali ? 'द्रुत स्ट्याक बन्डलहरू (1-Click Presets):' : 'Popular 1-Click Stack Presets for Nepal:'}
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {presets.map((preset) => (
                       <button
                         key={preset.id}
                         type="button"
                         onClick={() => handleApplyPreset(preset.toolIds)}
-                        className={`p-3 rounded-2xl border text-left transition-all group cursor-pointer ${
+                        className={`p-3 rounded-2xl border text-left transition-colors group cursor-pointer ${
                           isDark
-                            ? 'border-white/10 bg-white/[0.02] hover:bg-emerald-500/10 hover:border-emerald-500/30'
-                            : 'border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300'
+                            ? 'border-white/15 bg-white/[0.03] hover:bg-cyan-500/10 hover:border-cyan-400/50'
+                            : 'border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`font-bold text-xs ${
-                            isDark ? 'text-white group-hover:text-emerald-300' : 'text-slate-900 group-hover:text-emerald-700'
+                            isDark ? 'text-white group-hover:text-cyan-300' : 'text-slate-950 group-hover:text-cyan-800'
                           }`}>
                             {preset.name}
                           </span>
                           <Plus className={`h-3.5 w-3.5 ${
-                            isDark ? 'text-slate-400 group-hover:text-emerald-400' : 'text-slate-500 group-hover:text-emerald-600'
+                            isDark ? 'text-slate-300 group-hover:text-cyan-300' : 'text-slate-600 group-hover:text-cyan-700'
                           }`} />
                         </div>
-                        <p className={`text-[10px] mt-1 line-clamp-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <p className={`text-xs mt-1 line-clamp-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {preset.desc}
                         </p>
                       </button>
@@ -327,15 +327,15 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                     value={toolSearch}
                     onChange={(e) => setToolSearch(e.target.value)}
                     placeholder="Search & add more AI tools (e.g. ChatGPT, Perplexity, ElevenLabs)..."
-                    className={`w-full rounded-xl border px-3.5 py-2.5 text-xs transition-all focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                       isDark
-                        ? 'border-white/10 bg-[#070912] text-white placeholder-slate-500'
-                        : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400'
+                        ? 'border-white/15 bg-[#070912] text-white placeholder-slate-400'
+                        : 'border-slate-300 bg-white text-slate-950 placeholder-slate-500'
                     }`}
                   />
                   {filteredUnselectedTools.length > 0 && (
                     <div className={`absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl z-20 overflow-hidden divide-y ${
-                      isDark ? 'border-white/15 bg-slate-900 divide-white/5' : 'border-slate-200 bg-white divide-slate-100 shadow-md'
+                      isDark ? 'border-white/15 bg-slate-900 divide-white/10' : 'border-slate-200 bg-white divide-slate-100 shadow-md'
                     }`}>
                       {filteredUnselectedTools.map((t) => (
                         <div
@@ -345,11 +345,11 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                             setToolSearch('');
                           }}
                           className={`p-2.5 cursor-pointer flex items-center justify-between text-xs transition-colors ${
-                            isDark ? 'hover:bg-emerald-500/15' : 'hover:bg-emerald-50'
+                            isDark ? 'hover:bg-cyan-500/15' : 'hover:bg-cyan-50'
                           }`}
                         >
-                          <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{t.name}</span>
-                          <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-semibold">
+                          <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-950'}`}>{t.name}</span>
+                          <span className="text-cyan-700 dark:text-cyan-300 font-mono text-xs font-semibold">
                             ${t.monthlyPriceUsd}/mo • + Add
                           </span>
                         </div>
@@ -361,18 +361,18 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                 {/* Selected Stack List */}
                 <div>
                   <div className={`flex items-center justify-between text-xs font-semibold mb-2 ${
-                    isDark ? 'text-slate-300' : 'text-slate-700'
+                    isDark ? 'text-slate-200' : 'text-slate-800'
                   }`}>
                     <span>Active Tools in Stack ({stackTools.length}):</span>
                     {stackTools.length > 0 && (
                       <button
                         type="button"
                         onClick={onClearStack}
-                        className={`transition-colors flex items-center gap-1 cursor-pointer text-[11px] ${
-                          isDark ? 'text-slate-400 hover:text-red-400' : 'text-slate-500 hover:text-red-600'
+                        className={`transition-colors flex items-center gap-1 cursor-pointer text-xs ${
+                          isDark ? 'text-slate-300 hover:text-red-400' : 'text-slate-600 hover:text-red-600'
                         }`}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3.5 w-3.5" />
                         <span>Clear All</span>
                       </button>
                     )}
@@ -380,10 +380,10 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
 
                   {stackTools.length === 0 ? (
                     <div className={`rounded-2xl border border-dashed p-7 text-center text-xs space-y-1.5 ${
-                      isDark ? 'border-white/10 text-slate-400' : 'border-slate-300 text-slate-600 bg-slate-50/50'
+                      isDark ? 'border-white/15 text-slate-300' : 'border-slate-300 text-slate-700 bg-slate-50'
                     }`}>
-                      <p className="font-medium">No tools in your stack yet.</p>
-                      <p className="text-[11px] opacity-80">
+                      <p className="font-semibold text-sm">No tools in your stack yet.</p>
+                      <p className="text-xs">
                         Click any of the preset buttons above or search to calculate your stack spend.
                       </p>
                     </div>
@@ -394,18 +394,18 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                           key={tool.id}
                           className={`flex items-center justify-between rounded-xl border p-2.5 text-xs ${
                             isDark
-                              ? 'border-white/10 bg-white/[0.02]'
+                              ? 'border-white/15 bg-white/[0.03]'
                               : 'border-slate-200 bg-white shadow-2xs'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{tool.name}</span>
-                            <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                              isDark ? 'bg-white/[0.04] border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}>{tool.name}</span>
+                            <span className={`text-xs font-mono px-2 py-0.5 rounded border ${
+                              isDark ? 'bg-white/[0.06] border-white/15 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-800'
                             }`}>
                               {tool.category}
                             </span>
-                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                            <span className="text-xs text-cyan-700 dark:text-cyan-300 font-mono font-semibold">
                               ${tool.monthlyPriceUsd}/mo (रू {Math.round(tool.monthlyPriceUsd * exchangeRate).toLocaleString()})
                             </span>
                           </div>
@@ -414,7 +414,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                             type="button"
                             onClick={() => onToggleStack(tool.id)}
                             className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                              isDark ? 'text-slate-400 hover:text-red-400' : 'text-slate-500 hover:text-red-600'
+                              isDark ? 'text-slate-300 hover:text-red-400' : 'text-slate-600 hover:text-red-600'
                             }`}
                             aria-label={`Remove ${tool.name} from stack`}
                           >
@@ -435,19 +435,19 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 {/* Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className={`rounded-2xl border p-3.5 ${
-                    isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-2xs'
+                    isDark ? 'border-white/15 bg-white/[0.03]' : 'border-slate-200 bg-white shadow-2xs'
                   }`}>
-                    <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Monthly AI Spend</span>
-                    <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-1">
-                      ${totalUsd} <span className="text-xs font-normal opacity-75">/ mo</span>
+                    <span className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Monthly AI Spend</span>
+                    <div className="text-xl font-bold text-cyan-700 dark:text-cyan-300 font-mono mt-1">
+                      ${totalUsd} <span className="text-xs font-normal">/ mo</span>
                     </div>
-                    <div className={`text-xs font-mono mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    <div className={`text-xs font-mono mt-0.5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       ~रू {totalNpr.toLocaleString()}
                     </div>
                   </div>
@@ -457,17 +457,17 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                       ? 'border-red-500/40 bg-red-950/20'
                       : isNearLimit
                       ? 'border-amber-500/40 bg-amber-950/20'
-                      : isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-2xs'
+                      : isDark ? 'border-white/15 bg-white/[0.03]' : 'border-slate-200 bg-white shadow-2xs'
                   }`}>
-                    <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Annual ($500 Quota)</span>
+                    <span className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Annual ($500 Quota)</span>
                     <div className={`text-xl font-bold font-mono mt-1 ${
-                      isOverLimit ? 'text-red-500 dark:text-red-400' : isNearLimit ? 'text-amber-500 dark:text-amber-400' : isDark ? 'text-white' : 'text-slate-900'
+                      isOverLimit ? 'text-red-500 dark:text-red-400' : isNearLimit ? 'text-amber-500 dark:text-amber-400' : isDark ? 'text-white' : 'text-slate-950'
                     }`}>
-                      ${annualUsd} <span className="text-xs font-normal opacity-75">/ yr</span>
+                      ${annualUsd} <span className="text-xs font-normal">/ yr</span>
                     </div>
-                    <div className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       {isOverLimit ? (
-                        <span className="text-red-500 dark:text-red-400 font-semibold">Exceeds $500 NRB Limit</span>
+                        <span className="text-red-600 dark:text-red-400 font-semibold">Exceeds $500 NRB Limit</span>
                       ) : (
                         <span>${500 - annualUsd} remaining quota</span>
                       )}
@@ -475,13 +475,13 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                   </div>
 
                   <div className={`rounded-2xl border p-3.5 ${
-                    isDark ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-emerald-200 bg-emerald-50/70'
+                    isDark ? 'border-cyan-500/35 bg-cyan-950/25' : 'border-cyan-200 bg-cyan-50'
                   }`}>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">Est. Value Saved</span>
-                    <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300 font-mono mt-1">
+                    <span className="text-xs text-cyan-700 dark:text-cyan-300 font-mono font-semibold">Est. Value Saved</span>
+                    <div className="text-xl font-bold text-cyan-800 dark:text-cyan-200 font-mono mt-1">
                       {estimatedHoursSaved} hrs/mo
                     </div>
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                    <div className="text-xs text-cyan-700 dark:text-cyan-300 font-mono mt-0.5">
                       ~रू {estimatedNprSaved.toLocaleString()}/mo ROI
                     </div>
                   </div>
@@ -489,34 +489,34 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
 
                 {/* NRB Dollar Card Visual Quota Bar */}
                 <div className={`rounded-2xl border p-4 space-y-2 ${
-                  isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-white shadow-2xs'
+                  isDark ? 'border-white/15 bg-white/[0.03]' : 'border-slate-200 bg-white shadow-2xs'
                 }`}>
                   <div className="flex items-center justify-between text-xs">
-                    <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}>
                       Nepal Rastra Bank $500 Dollar Card Quota:
                     </span>
                     <span className={`font-mono font-bold ${
-                      isOverLimit ? 'text-red-500 dark:text-red-400' : isNearLimit ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
+                      isOverLimit ? 'text-red-600 dark:text-red-400' : isNearLimit ? 'text-amber-600 dark:text-amber-400' : 'text-cyan-700 dark:text-cyan-300'
                     }`}>
                       ${annualUsd} / $500 ({quotaUsedPercent}%)
                     </span>
                   </div>
 
-                  <div className={`w-full h-3 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-100'}`}>
+                  <div className={`w-full h-3 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
                     <div
-                      className={`h-full transition-all duration-500 ${
+                      className={`h-full transition-all duration-300 ${
                         isOverLimit
                           ? 'bg-gradient-to-r from-red-500 to-rose-600'
                           : isNearLimit
                           ? 'bg-gradient-to-r from-amber-400 to-orange-500'
-                          : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                          : 'bg-gradient-to-r from-cyan-500 to-sky-400'
                       }`}
                       style={{ width: `${Math.min(quotaUsedPercent, 100)}%` }}
                     />
                   </div>
 
                   {isOverLimit ? (
-                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-300 text-[11px] space-y-1">
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-700 dark:text-red-300 text-xs space-y-1">
                       <p className="font-bold flex items-center gap-1.5">
                         <AlertTriangle className="h-3.5 w-3.5" />
                         Annual spend exceeds the $500 NRB Dollar Card ceiling.
@@ -526,7 +526,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                       </p>
                     </div>
                   ) : (
-                    <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <p className={`text-xs ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       Your annual subscriptions fit comfortably inside 1 standard Nepali bank prepaid dollar card.
                     </p>
                   )}
@@ -535,18 +535,18 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                 {/* Payment Routing Guide */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div className={`p-3 rounded-xl border ${
-                    isDark ? 'border-white/10 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'
+                    isDark ? 'border-white/15 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
                   }`}>
-                    <span className={`font-bold block mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Direct Card Subscriptions</span>
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <span className={`font-bold block mb-1 ${isDark ? 'text-white' : 'text-slate-950'}`}>Direct Card Subscriptions</span>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       Use your PAN-linked Nabil/Global/NIC prepaid dollar card for direct OpenAI, Claude & Cursor tools.
                     </p>
                   </div>
                   <div className={`p-3 rounded-xl border ${
-                    isDark ? 'border-white/10 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'
+                    isDark ? 'border-white/15 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
                   }`}>
-                    <span className={`font-bold block mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Local NPR & eSewa Invoicing</span>
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <span className={`font-bold block mb-1 ${isDark ? 'text-white' : 'text-slate-950'}`}>Local NPR & eSewa Invoicing</span>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       Pay through eSewa, Khalti, or FonePay QR for NepalAI Studio compute credits and managed proxy gateways.
                     </p>
                   </div>
@@ -561,11 +561,11 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 <div>
-                  <span className={`text-xs font-semibold block mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <span className={`text-xs font-semibold block mb-2 ${isDark ? 'text-white' : 'text-slate-950'}`}>
                     Select Implementation & Advisory Add-ons:
                   </span>
                   <div className="space-y-2">
@@ -581,17 +581,17 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                         <div
                           key={idx}
                           onClick={() => toggleAddon(addon)}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                          className={`p-3 rounded-xl border transition-colors cursor-pointer flex items-center justify-between ${
                             isChecked
-                              ? isDark ? 'border-emerald-500/40 bg-emerald-500/10 text-white' : 'border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold'
-                              : isDark ? 'border-white/10 bg-white/[0.02] text-slate-300 hover:bg-white/[0.04]' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                              ? isDark ? 'border-cyan-500/50 bg-cyan-500/15 text-white' : 'border-cyan-600 bg-cyan-50 text-slate-950 font-semibold'
+                              : isDark ? 'border-white/15 bg-white/[0.03] text-slate-200 hover:bg-white/[0.06]' : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50'
                           }`}
                         >
                           <span className="text-xs">{addon}</span>
                           <div className={`h-5 w-5 rounded-md flex items-center justify-center border ${
                             isChecked
-                              ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold'
-                              : isDark ? 'border-white/20' : 'border-slate-300'
+                              ? 'bg-cyan-600 border-cyan-500 text-white font-bold'
+                              : isDark ? 'border-white/25' : 'border-slate-400'
                           }`}>
                             {isChecked && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                           </div>
@@ -603,15 +603,15 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
 
                 {/* Final Stack Summary Box */}
                 <div className={`rounded-2xl border p-4 space-y-2 ${
-                  isDark ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-emerald-200 bg-emerald-50'
+                  isDark ? 'border-cyan-500/35 bg-cyan-950/25' : 'border-cyan-200 bg-cyan-50'
                 }`}>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-700 dark:text-emerald-300 text-xs">Final Stack Assessment:</span>
-                    <span className={`text-xs font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <span className="font-bold text-cyan-800 dark:text-cyan-300 text-xs">Final Stack Assessment:</span>
+                    <span className={`text-xs font-mono font-bold ${isDark ? 'text-white' : 'text-slate-950'}`}>
                       ${totalUsd}/mo (~रू {totalNpr.toLocaleString()})
                     </span>
                   </div>
-                  <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <p className={`text-xs ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                     {stackTools.length} selected AI tools with ~{estimatedHoursSaved} hours saved monthly and ~रू {estimatedNprSaved.toLocaleString()}/mo in productivity ROI.
                   </p>
                 </div>
@@ -622,14 +622,14 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
 
         {/* Bottom Navigation Actions */}
         <div className={`px-5 sm:px-6 py-4 border-t flex items-center justify-between gap-3 shrink-0 ${
-          isDark ? 'border-white/10 bg-white/[0.01]' : 'border-slate-200 bg-slate-50/70'
+          isDark ? 'border-white/10 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
         }`}>
           {currentStep > 1 ? (
             <button
               type="button"
               onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 1))}
-              className={`min-h-[40px] px-4 py-2 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-medium ${
-                isDark ? 'border-slate-700 text-slate-300 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-white'
+              className={`min-h-[40px] px-4 py-2 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-semibold ${
+                isDark ? 'border-slate-600 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-800 hover:bg-white'
               }`}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -639,8 +639,8 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className={`min-h-[40px] px-4 py-2 rounded-xl border transition-colors cursor-pointer text-xs font-medium ${
-                isDark ? 'border-slate-700 text-slate-400 hover:text-white' : 'border-slate-300 text-slate-600 hover:text-slate-900 hover:bg-white'
+              className={`min-h-[40px] px-4 py-2 rounded-xl border transition-colors cursor-pointer text-xs font-semibold ${
+                isDark ? 'border-slate-600 text-slate-200 hover:text-white' : 'border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-white'
               }`}
             >
               {isNepali ? 'बन्द गर्नुहोस्' : 'Close'}
@@ -652,12 +652,12 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
               <button
                 type="button"
                 onClick={handleCopySummary}
-                className={`min-h-[40px] px-3.5 py-2 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-medium ${
-                  isDark ? 'border-white/20 text-slate-200 hover:bg-white/10' : 'border-slate-300 text-slate-700 hover:bg-white'
+                className={`min-h-[40px] px-3.5 py-2 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-semibold ${
+                  isDark ? 'border-white/20 text-slate-100 hover:bg-white/10' : 'border-slate-300 text-slate-800 hover:bg-white'
                 }`}
                 title="Copy Stack Summary"
               >
-                <Copy className="h-3.5 w-3.5 text-emerald-500" />
+                <Copy className="h-3.5 w-3.5 text-cyan-500" />
                 <span className="hidden sm:inline">Copy Report</span>
               </button>
             )}
@@ -666,7 +666,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
               <button
                 type="button"
                 onClick={() => setCurrentStep((prev) => Math.min(prev + 1, 3))}
-                className={`min-h-[40px] px-5 py-2 rounded-xl font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer text-xs ${
+                className={`min-h-[40px] px-5 py-2 rounded-xl font-bold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer text-xs ${
                   isDark ? 'bg-white text-slate-950 hover:bg-slate-200' : 'bg-slate-900 text-white hover:bg-slate-800'
                 }`}
               >
@@ -680,7 +680,7 @@ export const StackCalculatorModal: React.FC<StackCalculatorModalProps> = ({
                   onClose();
                   onOpenConsultation(`Stack Deployment (${stackTools.map(t => t.name).join(', ')})`);
                 }}
-                className="min-h-[40px] px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer text-xs"
+                className="min-h-[40px] px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-colors flex items-center gap-2 shadow-xs cursor-pointer text-xs"
               >
                 <Sparkles className="h-4 w-4" />
                 <span>{isNepali ? 'स्ट्याक सेटअप परामर्श लिनुहोस्' : 'Book 1-Click Stack Consultation'}</span>

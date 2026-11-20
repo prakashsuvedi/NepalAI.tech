@@ -20,7 +20,7 @@ console.log('[Test 1] Validating UTILITY_REGISTRY schema and metadata...');
 assert(UTILITY_REGISTRY.length >= 10, 'Registry should have at least 10 verified tools');
 
 const validPages = ['home', 'command-center', 'dashboard', 'directory', 'daily', 'free', 'consulting', 'compliance', 'commerce'];
-const validTabs = ['fx', 'letter', 'voice', 'ocr', 'tax', 'market', 'ev', 'nepse', 'it_export', 'bullion'];
+const validTabs = ['fx', 'letter', 'voice', 'ocr', 'tax', 'market', 'ev', 'nepse', 'it_export', 'bullion', 'khata', 'contract', 'health', 'sarkari'];
 const ids = new Set<string>();
 
 UTILITY_REGISTRY.forEach((tool) => {

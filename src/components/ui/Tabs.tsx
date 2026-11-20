@@ -64,16 +64,16 @@ export const Tabs: React.FC<TabsProps> = ({
               disabled={tab.disabled}
               onClick={() => onChange(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className={`flex items-center gap-2 py-3 border-b-2 text-sm font-semibold transition-all cursor-pointer whitespace-nowrap min-h-[44px] ${
+              className={`flex items-center gap-2 py-3 border-b-2 text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap min-h-[44px] ${
                 isActive
-                  ? 'border-emerald-600 dark:border-emerald-400 text-emerald-600 dark:text-emerald-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'border-cyan-700 dark:border-cyan-400 text-cyan-700 dark:text-cyan-300'
+                  : 'border-transparent text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className="text-xs px-1.5 py-0.5 rounded-sm bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 font-mono">
+                <span className="text-xs px-1.5 py-0.5 rounded-sm bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 font-mono">
                   {tab.count}
                 </span>
               )}
@@ -105,17 +105,17 @@ export const Tabs: React.FC<TabsProps> = ({
             disabled={tab.disabled}
             onClick={() => onChange(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`flex items-center gap-1.5 rounded-md font-medium transition-all duration-150 cursor-pointer whitespace-nowrap select-none ${sizeClasses} ${
+            className={`flex items-center gap-1.5 rounded-md font-medium transition-colors duration-150 cursor-pointer whitespace-nowrap select-none ${sizeClasses} ${
               isActive
-                ? 'bg-white dark:bg-[#111726] text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                ? 'bg-white dark:bg-[#111726] text-slate-950 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}
             <span>{tab.label}</span>
             {tab.count !== undefined && (
-              <span className={`text-[10px] px-1 py-0.2 rounded font-mono ${
-                isActive ? 'bg-slate-100 dark:bg-white/15 text-slate-900 dark:text-white' : 'text-slate-500'
+              <span className={`text-xs px-1 py-0.2 rounded font-mono ${
+                isActive ? 'bg-slate-100 dark:bg-white/15 text-slate-950 dark:text-white' : 'text-slate-600 dark:text-slate-300'
               }`}>
                 {tab.count}
               </span>

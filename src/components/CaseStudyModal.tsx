@@ -36,13 +36,13 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="case-study-title"
-        className="relative w-full max-w-3xl rounded-2xl border border-slate-700/80 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-emerald-950/40 my-8 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-3xl rounded-2xl border border-slate-700/80 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-cyan-950/40 my-8 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+          className="absolute top-5 right-5 rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500"
           aria-label="Close case study details"
         >
           <X className="h-5 w-5" aria-hidden="true" />
@@ -51,7 +51,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
         {/* Modal Header */}
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
+            <span className="rounded-md bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 text-xs font-semibold text-cyan-400">
               {caseStudy.category}
             </span>
             <span className="flex items-center gap-1 text-xs text-slate-400">
@@ -74,14 +74,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
         </div>
 
         {/* Verified Impact Metrics Banner */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 tabular-nums">
           {caseStudy.metrics.map((m, idx) => (
             <div key={idx} className="space-y-0.5">
-              <div className="text-xl sm:text-2xl font-extrabold text-emerald-300 font-display">
+              <div className="text-xl sm:text-2xl font-extrabold text-cyan-300 font-display">
                 {m.value}
               </div>
               <div className="text-xs font-semibold text-white">{m.label}</div>
-              {m.subtext && <div className="text-[10px] text-slate-400">{m.subtext}</div>}
+              {m.subtext && <div className="text-xs text-slate-300">{m.subtext}</div>}
             </div>
           ))}
         </div>
@@ -94,31 +94,31 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               <ShieldAlert className="h-4 w-4" />
               <span>The Operational Challenge</span>
             </div>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-200 leading-relaxed">
               {caseStudy.challenge}
             </p>
           </div>
 
           <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-2">
+            <div className="flex items-center gap-2 text-cyan-300 font-semibold mb-2">
               <Sparkles className="h-4 w-4" />
               <span>The NepalAI Engineering Solution</span>
             </div>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-slate-200 leading-relaxed">
               {caseStudy.solution}
             </p>
           </div>
 
           {/* Technical Architecture Breakdown */}
           <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="flex items-center gap-2 text-indigo-400 font-semibold mb-3">
+            <div className="flex items-center gap-2 text-sky-300 font-semibold mb-3">
               <Server className="h-4 w-4" />
               <span>Production System Architecture</span>
             </div>
             <ul className="space-y-2">
               {caseStudy.architecture.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-300">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-200">
+                  <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -128,13 +128,13 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           {/* Tech Stack & ROI */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-2">
-                <Code2 className="h-4 w-4 text-slate-400" />
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 mb-2">
+                <Code2 className="h-4 w-4 text-slate-300" />
                 <span>Technologies & Frameworks</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {caseStudy.technologies.map((t) => (
-                  <span key={t} className="rounded bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-200">
+                  <span key={t} className="rounded bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-100">
                     {t}
                   </span>
                 ))}
@@ -142,14 +142,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-2">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 mb-2">
+                <TrendingUp className="h-4 w-4 text-cyan-400" />
                 <span>Annualized Economic Impact</span>
               </div>
-              <p className="text-sm font-semibold text-emerald-300">
+              <p className="text-sm font-semibold text-cyan-300">
                 {caseStudy.roi}
               </p>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-xs text-slate-300 mt-1">
                 Verified performance metrics validated with client engineering leadership.
               </p>
             </div>
@@ -171,7 +171,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               onClose();
               onOpenConsultation(`Replicate ${caseStudy.title}`);
             }}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-xs font-bold text-slate-950 hover:brightness-110 active:scale-95 transition-all shadow-md shadow-emerald-500/20"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold transition-all shadow-md shadow-cyan-500/25 cursor-pointer"
           >
             <span>Commission Similar AI Solution</span>
             <ArrowRight className="h-4 w-4" />

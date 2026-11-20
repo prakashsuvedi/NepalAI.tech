@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { 
@@ -17,9 +17,140 @@ import {
 import {
   verifyEsewaPayment,
   verifyKhaltiPayment,
+  createEsewaV2FormPayload,
+  initiateKhaltiPayment,
+  getGatewayReadinessStatus,
   generateNepalQRInvoicePayload,
   generateWhatsAppOrderAlert
 } from "./src/lib/payments/nepalPayments";
+import {
+  requireAuth,
+  optionalAuth,
+  requireSuperAdmin,
+  ensureBusinessAuthorization,
+  AuthRequest,
+} from "./src/middleware/auth.ts";
+import {
+  getOrCreateUser,
+  getUserBusinesses,
+  createBusinessForUser,
+  listStudioUsersFromDb,
+} from "./src/db/users.ts";
+import {
+  listLeads,
+  createLead,
+  updateLead,
+  deleteLeadById,
+} from "./src/db/leads.ts";
+import {
+  getWorkspaceState,
+  upsertUserPreferences,
+  createSavedCalculation,
+  deleteSavedCalculation,
+} from "./src/db/workspace.ts";
+import {
+  getCategoriesByBusiness,
+  createCategoryRecord,
+  getProductsByFilter,
+  getProductById,
+  createProductRecord,
+  updateProductRecord,
+  deleteProductRecord,
+  getOrdersWithItems,
+  getOrderByIdOrNumber,
+  createOrderRecord,
+  updateOrderStatusRecord,
+  recordVerifiedPayment,
+  getCommerceAnalyticsFromDb,
+  getPublicStoreBySlug,
+} from "./src/db/commerce.ts";
+import { pool } from "./src/db/index.ts";
+import {
+  fetchLiveNrbForex,
+  fetchLiveKalimatiPrices,
+  fetchLiveFenegosidaRates,
+} from "./src/services/nepalOfficialFeeds.ts";
+import {
+  getToolSeoBySlug,
+  resolveToolFromUrl,
+  buildWebApplicationJsonLd,
+  ToolSeoMetadata,
+} from "./src/utils/toolSeo.ts";
+import { buildSovereignLetterDraft } from "./src/utils/letterDrafter.ts";
+import { parseHandwrittenKhataText, reconcileKhataLedger } from "./src/utils/khataEngine.ts";
+import { analyzeContractRiskFallback } from "./src/utils/contractRiskEngine.ts";
+import { translateHealthReportFallback } from "./src/utils/healthTranslatorEngine.ts";
+import { findSarkariWorkflow } from "./src/utils/sarkariNavigatorEngine.ts";
+import {
+  resolveTrendsRouteFromPath,
+  buildTrendsListingSeo,
+  buildTrendDetailSeo,
+  TrendsSeoMeta,
+} from "./src/utils/trendsSeo.ts";
+import {
+  BUSINESS_KEYWORD_PACKS,
+  normalizeKeyword,
+  TREND_CATEGORIES,
+  SEASONAL_PILLARS,
+  buildSeasonalCurveSeries,
+  computeSeasonalDirection,
+  buildDigestEmailContent,
+  evaluateVelocityThresholdAlerts,
+  buildVelocityThresholdEmailContent,
+  buildWhatsappDigestMessage,
+  buildWhatsappThresholdMessage,
+  isValidWhatsappNumber,
+  normalizeWhatsappNumber,
+} from "./src/utils/trendsEngine.ts";
+import {
+  listTrendsFromDb,
+  getTrendDetailFromDb,
+  getCategoryCountsFromDb,
+  getRecentTrendsForSitemap,
+  getCachedKeywordMetric,
+  saveKeywordAnalysisToDb,
+  saveContentBriefToDb,
+  upsertAlertSubscription,
+  getAlertSubscriptionByEmail,
+  deactivateAlertSubscriptionByEmail,
+  removeAlertSubscriptionByToken,
+  listRecentContentBriefsFromDb,
+  getActiveAlertSubscribersFromDb,
+  markAlertSubscriptionSent,
+  listWatchlistFromDb,
+  addWatchlistItemToDb,
+  removeWatchlistItemFromDb,
+  createTrendApiKeyInDb,
+  listTrendApiKeysFromDb,
+  revokeTrendApiKeyInDb,
+  verifyAndConsumeTrendApiKey,
+  listVelocityAlertsFromDb,
+  getActiveVelocityAlertsFromDb,
+  createVelocityAlertInDb,
+  updateVelocityAlertInDb,
+  deleteVelocityAlertInDb,
+  deleteVelocityAlertByToken,
+  markVelocityAlertTriggered,
+  listActiveTrendsWithLatestDelta,
+  listSeasonalBenchmarksFromDb,
+  recordWhatsappDeliveryLog,
+  listRecentWhatsappLogsFromDb,
+  listDiasporaPartnerSlotsFromDb,
+  trackDiasporaPartnerEventInDb,
+  createDiasporaPartnerSlotInDb,
+} from "./src/db/trends.ts";
+import {
+  syncNepalAndDiasporaTrends,
+  fetchComparativeInterestSeries,
+  fetchSeasonalGoogleTrendsMonthly,
+  analyzeKeywordWithGemini,
+  generateTrendContentBrief,
+} from "./src/services/trendsIngestion.ts";
+import {
+  dispatchWhatsappAlertMessage,
+  getWhatsappRelayCapabilities,
+  verifyWhatsappWebhookSignature,
+} from "./src/services/whatsappRelay.ts";
 
 dotenv.config();
 
@@ -196,14 +327,49 @@ async function startServer() {
     res.status(404).send("robots.txt not found");
   });
 
-  app.get("/sitemap.xml", (req, res) => {
+  app.get("/sitemap.xml", async (req, res) => {
     const filePath = path.join(process.cwd(), "public", "sitemap.xml");
-    if (fs.existsSync(filePath)) {
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send("sitemap.xml not found");
+    }
+
+    try {
+      const staticXml = fs.readFileSync(filePath, "utf-8");
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const nowNpt = new Date().toISOString();
+
+      const dynamicUrls: string[] = [
+        `<url><loc>${origin}/trending/nepal</loc><lastmod>${nowNpt}</lastmod><changefreq>hourly</changefreq><priority>0.98</priority></url>`,
+        `<url><loc>${origin}/trending/diaspora</loc><lastmod>${nowNpt}</lastmod><changefreq>hourly</changefreq><priority>0.94</priority></url>`,
+        `<url><loc>${origin}/keywords/nepal</loc><lastmod>${nowNpt}</lastmod><changefreq>daily</changefreq><priority>0.95</priority></url>`,
+        `<url><loc>${origin}/keywords/nepal/business</loc><lastmod>${nowNpt}</lastmod><changefreq>weekly</changefreq><priority>0.92</priority></url>`,
+        ...TREND_CATEGORIES.map(
+          (cat) =>
+            `<url><loc>${origin}/trending/nepal/${cat.slug}</loc><lastmod>${nowNpt}</lastmod><changefreq>hourly</changefreq><priority>0.90</priority></url>`
+        ),
+      ];
+
+      try {
+        const recentTrends = await getRecentTrendsForSitemap(60);
+        for (const t of recentTrends) {
+          const lastMod = t.lastSeenAt ? new Date(t.lastSeenAt).toISOString() : nowNpt;
+          const safeSlug = encodeURIComponent(t.slug);
+          dynamicUrls.push(
+            `<url><loc>${origin}/trending/nepal/${safeSlug}</loc><lastmod>${lastMod}</lastmod><changefreq>${t.isActive ? 'hourly' : 'daily'}</changefreq><priority>${t.isActive ? '0.92' : '0.80'}</priority></url>`
+          );
+        }
+      } catch (dbErr) {
+        console.warn("[Sitemap] Trend query skipped:", dbErr);
+      }
+
+      const mergedXml = staticXml.replace("</urlset>", `  ${dynamicUrls.join("\n  ")}\n</urlset>`);
       res.setHeader("Content-Type", "application/xml; charset=utf-8");
-      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader("Cache-Control", "public, max-age=1800");
+      return res.send(mergedXml);
+    } catch {
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
       return res.sendFile(filePath);
     }
-    res.status(404).send("sitemap.xml not found");
   });
 
   // API 1: Health check
@@ -216,31 +382,122 @@ async function startServer() {
     });
   });
 
-  // API 2: Live Nepal Rastra Bank (NRB) Forex & Regulatory Benchmark API
-  app.get("/api/forex/nrb", async (req, res) => {
+  // =========================================================================
+  // AUTHENTICATION & USER WORKSPACE PERSISTENCE (FIREBASE + CLOUD SQL)
+  // =========================================================================
+
+  app.get("/api/auth/me", requireAuth, async (req: AuthRequest, res) => {
     try {
-      // Dynamic daily rate based on NRB current published benchmark
-      const baseUsdBuy = 135.30;
-      const baseUsdSell = 135.90;
-      const midRate = Number(((baseUsdBuy + baseUsdSell) / 2).toFixed(2));
+      const fbUser = req.user!;
+      const { profile } = await getOrCreateUser(
+        fbUser.uid,
+        fbUser.email || `${fbUser.uid}@users.nepalai.tech`,
+        fbUser.name,
+        fbUser.picture
+      );
+      const userBusinesses = await getUserBusinesses(fbUser.uid);
 
       return res.json({
         success: true,
-        source: "Nepal Rastra Bank (NRB) Official Benchmark",
-        publishedAt: new Date().toISOString().split("T")[0],
-        rates: {
-          USD: { buy: baseUsdBuy, sell: baseUsdSell, mid: midRate, unit: 1 },
-          EUR: { buy: 144.15, sell: 144.80, mid: 144.48, unit: 1 },
-          GBP: { buy: 172.80, sell: 173.55, mid: 173.18, unit: 1 },
-          AUD: { buy: 88.75, sell: 89.20, mid: 88.98, unit: 1 },
-          CAD: { buy: 98.30, sell: 98.80, mid: 98.55, unit: 1 },
-          INR: { buy: 160.00, sell: 160.15, mid: 160.00, unit: 100 },
-          JPY: { buy: 8.85, sell: 8.92, mid: 8.88, unit: 10 },
-          QAR: { buy: 37.10, sell: 37.30, mid: 37.20, unit: 1 },
-          AED: { buy: 36.80, sell: 37.00, mid: 36.90, unit: 1 },
-          SAR: { buy: 36.05, sell: 36.25, mid: 36.15, unit: 1 },
-          CNY: { buy: 18.70, sell: 18.85, mid: 18.78, unit: 1 }
-        },
+        profile,
+        businesses: userBusinesses,
+      });
+    } catch (error: any) {
+      console.error("Auth profile sync failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to load account" });
+    }
+  });
+
+  app.post("/api/auth/businesses", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const fbUser = req.user!;
+      const { name, panNumber, isVatRegistered } = req.body;
+      if (!name || typeof name !== "string" || !name.trim()) {
+        return res.status(400).json({ error: "Business name is required" });
+      }
+
+      await getOrCreateUser(
+        fbUser.uid,
+        fbUser.email || `${fbUser.uid}@users.nepalai.tech`,
+        fbUser.name,
+        fbUser.picture
+      );
+
+      const created = await createBusinessForUser({
+        uid: fbUser.uid,
+        name,
+        panNumber,
+        isVatRegistered,
+        email: fbUser.email,
+      });
+
+      return res.json({ success: true, business: created });
+    } catch (error: any) {
+      console.error("Create business failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to create business" });
+    }
+  });
+
+  app.get("/api/workspace/state", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const state = await getWorkspaceState(req.user!.uid);
+      return res.json({ success: true, ...state });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load workspace" });
+    }
+  });
+
+  app.put("/api/workspace/preferences", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { pinnedTools, recentTools, preferredLanguage } = req.body;
+      const saved = await upsertUserPreferences(req.user!.uid, {
+        pinnedTools: Array.isArray(pinnedTools) ? pinnedTools : undefined,
+        recentTools: Array.isArray(recentTools) ? recentTools : undefined,
+        preferredLanguage: typeof preferredLanguage === "string" ? preferredLanguage : undefined,
+      });
+      return res.json({ success: true, preferences: saved });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update preferences" });
+    }
+  });
+
+  app.post("/api/workspace/calculations", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, type, title, summary, timestamp, payload } = req.body;
+      if (!type || !title || !summary) {
+        return res.status(400).json({ error: "Calculation type, title, and summary are required" });
+      }
+      const created = await createSavedCalculation(req.user!.uid, {
+        id,
+        type,
+        title,
+        summary,
+        timestampLabel: timestamp || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        payload,
+      });
+      return res.json({ success: true, calculation: created });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to save calculation" });
+    }
+  });
+
+  app.delete("/api/workspace/calculations/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const removed = await deleteSavedCalculation(req.user!.uid, req.params.id);
+      return res.json({ success: true, removed });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to remove calculation" });
+    }
+  });
+
+  // API 2: Live Nepal Rastra Bank (NRB) Forex & Regulatory Benchmark API
+  app.get("/api/forex/nrb", async (req, res) => {
+    try {
+      const forceRefresh = req.query.refresh === "1" || req.query.refresh === "true";
+      const feed = await fetchLiveNrbForex(forceRefresh);
+
+      return res.json({
+        ...feed,
         regulatoryFramework: {
           dollarCardAnnualLimitUsd: 500,
           digitalServicesTaxPercent: 2.0,
@@ -250,10 +507,31 @@ async function startServer() {
           itExportCompanyTdsPercent: 1.0,
           directiveRef: "NRB Foreign Exchange Management Department Directive No. 12/2080"
         },
-        timestamp: new Date().toISOString()
       });
     } catch (e: any) {
       return res.status(500).json({ error: "Failed to fetch forex rates" });
+    }
+  });
+
+  // API 2B: Live Kalimati Fruits & Vegetable Market Development Board Daily Prices
+  app.get("/api/market/kalimati", async (req, res) => {
+    try {
+      const forceRefresh = req.query.refresh === "1" || req.query.refresh === "true";
+      const feed = await fetchLiveKalimatiPrices(forceRefresh);
+      return res.json(feed);
+    } catch (e: any) {
+      return res.status(500).json({ error: "Failed to fetch Kalimati market prices" });
+    }
+  });
+
+  // API 2C: Live FENEGOSIDA Daily Gold & Silver Bullion Bulletin
+  app.get("/api/bullion/fenegosida", async (req, res) => {
+    try {
+      const forceRefresh = req.query.refresh === "1" || req.query.refresh === "true";
+      const feed = await fetchLiveFenegosidaRates(forceRefresh);
+      return res.json(feed);
+    } catch (e: any) {
+      return res.status(500).json({ error: "Failed to fetch FENEGOSIDA bullion rates" });
     }
   });
 
@@ -592,30 +870,202 @@ const forex = await forexRes.json();`
     }
   });
 
-  // API 3.5: Conversational Sovereign AI Engine for Hamro AI Chat Modal
+  // API 3.5: Conversational Sovereign AI Engine & Official Letter Drafter
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, language = "en", history = [] } = req.body;
+      const {
+        message,
+        language = "en",
+        history = [],
+        persona = "general",
+        task = "chat",
+        letterContext = {},
+      } = req.body;
       if (!message || typeof message !== "string" || !message.trim()) {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      const systemInstruction = `You are "Hamro AI" (हाम्रो एआई), the verified sovereign artificial intelligence assistant for NepalAI (https://nepalai.tech), based in Kathmandu, Nepal.
-Key knowledge and guidelines:
-- You specialize in Nepal's tech ecosystem, Nepal Rastra Bank (NRB) guidelines, IT software exports (Section 95Ka 5% individual / 1% company final TDS), annual $500 prepaid dollar card rules, local payment rails (eSewa, Khalti, FonePay dynamic QR, NPR invoicing), and Devanagari OCR / NLP models.
-- If the user writes in Nepali (Devanagari or Romanized Nepali like 'kasto cha', 'namaste daaju'), reply in fluent, warm, respectful authentic Nepali.
-- If the user writes in English, reply in professional, concise, tech-savvy English.
-- Always provide actionable, real, grounded answers. If they ask about services, recommend NepalAI's sovereign consulting sprints ($750 / NPR 95,000 MVP or enterprise air-gapped on-premise clusters).
-- Keep answers concise (2-4 crisp paragraphs or bullet points).`;
+      // Dedicated Official Letter Drafting Mode (returns structured A4-ready draft)
+      if (task === "letter_draft") {
+        const draftReq = {
+          prompt: message,
+          persona: String(persona || "all"),
+          applicantName: typeof letterContext?.applicantName === "string" ? letterContext.applicantName : undefined,
+          applicantAddress: typeof letterContext?.applicantAddress === "string" ? letterContext.applicantAddress : undefined,
+          applicantCitizenship: typeof letterContext?.applicantCitizenship === "string" ? letterContext.applicantCitizenship : undefined,
+          letterDate: typeof letterContext?.letterDate === "string" ? letterContext.letterDate : undefined,
+          patraSankhya: typeof letterContext?.patraSankhya === "string" ? letterContext.patraSankhya : undefined,
+          chalaniNo: typeof letterContext?.chalaniNo === "string" ? letterContext.chalaniNo : undefined,
+          language: language === "ne" ? ("ne" as const) : ("en" as const),
+        };
+
+        const ai = getGeminiClient();
+        if (ai) {
+          try {
+            const draftInstruction = `You draft clean, polite, print-ready official letters and everyday applications for Nepal.
+User Role / Persona: ${draftReq.persona}
+Sender Details:
+- Name: ${draftReq.applicantName || "राम प्रसाद अधिकारी"}
+- Address: ${draftReq.applicantAddress || "काठमाडौं, नेपाल"}
+- ID/Roll/PAN: ${draftReq.applicantCitizenship || "२७-०१-७६-०९१२४"}
+- Date (BS): ${draftReq.letterDate || "२०८१/०८/१५"}
+- Patra Sankhya: ${draftReq.patraSankhya || "२०८१/०८२"}
+- Chalani No: ${draftReq.chalaniNo || "१२४९"}
+
+Rules:
+- If the user prompt is in Romanized Nepali (e.g. "bida chahiyeko chha", "dollar card nibedan") or Devanagari Nepali, write the entire letter in polite, formal everyday Nepali (Devanagari Unicode) with proper Nepali salutation ("श्री ...", "विषय:", "महोदय,", "भवदीय,").
+- If the user prompt is in English (e.g. corporate proposal, client offer, payment reminder, English leave application) and doesn't ask for Nepali, write clean, crisp, polite English.
+- Include the sender's details and signature block cleanly. No markdown fences or extra commentary.`;
+
+            let rawJson: string | undefined;
+            const timeoutPromise = <T>(p: Promise<T>, ms = 8000): Promise<T> =>
+              Promise.race([
+                p,
+                new Promise<T>((_, reject) => setTimeout(() => reject(new Error("AI request timeout")), ms)),
+              ]);
+
+            try {
+              const g4Response = await timeoutPromise(
+                ai.models.generateContent({
+                  model: "gemini-4-hydrogen",
+                  contents: message,
+                  config: {
+                    systemInstruction: draftInstruction,
+                    thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                      type: Type.OBJECT,
+                      properties: {
+                        officeName: { type: Type.STRING, description: "Addressed recipient / office title" },
+                        subject: { type: Type.STRING, description: "Concise letter subject line" },
+                        reason: { type: Type.STRING, description: "Core 1-2 sentence reason/summary" },
+                        letterBody: { type: Type.STRING, description: "Complete print-ready formatted letter text" },
+                        recommendedOffice: { type: Type.STRING, description: "Which Nepal office desk/counter to submit this letter to" },
+                        estimatedFee: { type: Type.STRING, description: "Estimated government stamp/revenue fee in NPR (or Free)" },
+                        checklist: {
+                          type: Type.ARRAY,
+                          items: { type: Type.STRING },
+                          description: "3 concise documents or actions to carry when submitting",
+                        },
+                      },
+                      required: ["officeName", "subject", "reason", "letterBody", "checklist"],
+                    },
+                  },
+                })
+              );
+              rawJson = g4Response?.text;
+            } catch {
+              rawJson = await timeoutPromise(
+                callGeminiWithRetryAndFallback({
+                  contents: message,
+                  config: {
+                    systemInstruction: draftInstruction,
+                    responseMimeType: "application/json",
+                  },
+                }),
+                6000
+              );
+            }
+
+            if (rawJson) {
+              const parsed = JSON.parse(rawJson);
+              if (parsed?.letterBody && typeof parsed.letterBody === "string") {
+                const sovereignHints = buildSovereignLetterDraft(draftReq);
+                return res.json({
+                  success: true,
+                  mode: "gemini_letter_draft",
+                  letterDraft: {
+                    officeName: String(parsed.officeName || sovereignHints.officeName),
+                    subject: String(parsed.subject || sovereignHints.subject),
+                    reason: String(parsed.reason || sovereignHints.reason),
+                    letterBody: String(parsed.letterBody).trim(),
+                    recommendedOffice: String(parsed.recommendedOffice || sovereignHints.recommendedOffice || ""),
+                    estimatedFee: String(parsed.estimatedFee || sovereignHints.estimatedFee || ""),
+                    checklist: Array.isArray(parsed.checklist) && parsed.checklist.length > 0
+                      ? parsed.checklist.map(String)
+                      : sovereignHints.checklist,
+                  },
+                });
+              }
+            }
+          } catch {
+            // Fall through cleanly to deterministic sovereign drafter
+          }
+        }
+
+        const fallbackDraft = buildSovereignLetterDraft(draftReq);
+        return res.json({
+          success: true,
+          mode: fallbackDraft.mode || "sovereign_letter_draft",
+          letterDraft: fallbackDraft,
+        });
+      }
+
+      const personaHints: Record<string, string> = {
+        student:
+          "Focus on clear study plans, exam prep outlines, scholarship/college application help, assignment explanations, and beginner coding help.",
+        officer:
+          "Focus on formal Nepali administrative drafting (टिप्पणी/आदेश, सिफारिस, सूचना), clear citizen service checklists, RTI responses, and office productivity.",
+        business:
+          "Focus on small/medium business growth in Nepal, VAT/PAN clarity, supplier/client messages, pricing/margin calculation, and QR/digital commerce tips.",
+        corporate:
+          "Focus on executive emails, client proposals, project follow-ups, meeting minutes/action items, NRB compliance, and IT export Section 95Ka clarity.",
+        marketer:
+          "Focus on catchy Nepal festival & seasonal campaign hooks (Facebook/TikTok/Instagram), local Nepali & English ad copy, offer positioning, and customer retention.",
+        homemaker:
+          "Focus on practical weekly Nepali family meal/tiffin plans, simple household budget & grocery lists (Kalimati seasonal savings), family school notes, and gold/savings awareness.",
+        general:
+          "Provide clear, friendly, practical help across daily life, study, office work, business, and Nepal digital utilities.",
+      };
+
+      const activePersonaGuide = personaHints[String(persona)] || personaHints.general;
+
+      const systemInstruction = `You are "Hamro AI" (हाम्रो एआई), a warm, practical, easy-to-understand AI assistant on NepalAI (https://nepalai.tech), Kathmandu, Nepal.
+User Persona Focus (${persona}): ${activePersonaGuide}
+Guidelines:
+- Keep answers clean, structured, practical, and easy for anyone of any age to read (short steps or bullets).
+- If the user writes in Romanized Nepali (e.g. 'kasto cha', 'bida ko nibedan') or Devanagari Nepali, reply naturally in clear, polite, everyday Nepali.
+- If the user writes in English, reply in crisp, friendly English.
+- You also know Nepal specifics well: NRB forex & $500 dollar card rules, Section 95Ka IT export TDS (5% individual / 1% company), EV road tax, NEPSE CGT, official Ward letters, and everyday eSewa/Khalti workflows.
+- Do NOT push unnecessary sales pitches unless the user specifically asks for custom software/consulting.`;
 
       const ai = getGeminiClient();
       if (!ai) {
+        const personaFallbacks: Record<string, { ne: string; en: string }> = {
+          student: {
+            ne: `नमस्ते! विद्यार्थी सहायक मोड सक्रिय छ।\n• **अध्ययन तालिका**: बिहान २ घण्टा कठिन विषय, दिउँसो अभ्यास र बेलुका १ घण्टा रिभिजन गर्नुहोस्।\n• **निवेदन/छात्रवृत्ति**: कलेज बिदा वा छात्रवृत्ति निवेदनका लागि "Daily Tools → Ward & Official Letters" मा गएर रोमन नेपालीमै ड्राफ्ट तयार पार्न सक्नुहुन्छ।`,
+            en: `Namaste! Student Helper ready:\n• Break topics into 45-min focus blocks + 10-min recall summaries.\n• Need a College Leave or Scholarship letter? Open Daily Tools → Letter Studio and type directly in Roman Nepali for instant PDF download.`,
+          },
+          officer: {
+            ne: `नमस्ते! सरकारी/कार्यालय सहायक तयार छ।\n• **टिप्पणी तथा पत्र लेखन**: विषय, प्रचलित ऐन/नियमको सन्दर्भ र स्पष्ट निर्णय प्रस्ताव ३ छोटो अनुच्छेदमा राख्नुहोस्।\n• **सिफारिस ढाँचा**: नागरिकता, नाता प्रमाणित, चारकिल्ला र प्यान सिफारिसका लागि हाम्रो Letter Studio बाट सिधै प्रिन्ट वा PDF सेभ गर्नुहोस्।`,
+            en: `Namaste! Officer Desk ready:\n• Structure official memos (Tippani) into 3 parts: Background, Legal Reference (e.g. Local Gov Act 2074), and Recommended Decision.\n• Use Letter Studio with Roman-to-Devanagari typing to generate print-ready A4 letters and Word docs in seconds.`,
+          },
+          business: {
+            ne: `नमस्ते! व्यवसाय सहायक तयार छ।\n• **दैनिक हिसाब र कर**: १३% भ्याट, प्यान बिल र डलर कारोबार हिसाबका लागि Income Tax र IT Export टुल प्रयोग गर्नुहोस्।\n• **ग्राहक सन्देश**: अर्डर कन्फर्म र पेमेन्ट रिमाइन्डर छोटा, स्पष्ट र विनम्र भाषामा पठाउनुहोस्।`,
+            en: `Namaste! Business Helper ready:\n• Keep VAT/PAN invoices crisp and track real landed margins after delivery and payment fees.\n• Use our Tax & Bullion/Forex tools to audit costs or launch your store catalog inside Commerce Portal.`,
+          },
+          corporate: {
+            ne: `नमस्ते! कर्पोरेट र क्लाइन्ट सहायक तयार छ।\n• **प्रस्तावना र इमेल**: क्लाइन्टलाई इमेल पठाउँदा समस्या, समाधान, समयसीमा र स्पष्ट अर्को कदम (Next Step) ४ बुँदामा लेख्नुहोस्।\n• **वैदेशिक भुक्तानी**: सफ्टवेयर एक्सपोर्टको ५%/१% TDS बैंक स्वघोषणा पत्र IT Export टुलबाट १ क्लिकमा PDF बनाउनुहोस्।`,
+            en: `Namaste! Corporate & Client Helper ready:\n• Keep executive updates to 4 scannable blocks: Outcome, Timeline, Cost/Tax impact, and Next Action.\n• For international client wires, use our Section 95Ka IT Export tool for instant bank self-declaration PDFs.`,
+          },
+          marketer: {
+            ne: `नमस्ते! मार्केटिङ सहायक तयार छ।\n• **हुक (Hook)**: पहिलो २ सेकेन्डमा ग्राहकको मुख्य फाइदा बताउनुहोस्।\n• **अफर र CTA**: चाडपर्व वा सीमित समयको स्पष्ट अफर राखी ह्वाट्सएप/मेसेन्जर लिंक दिनुहोस्।`,
+            en: `Namaste! Marketer Helper ready:\n• Lead every post with a 1-line local benefit hook, social proof from real customers, and a direct CTA.\n• Test one Nepali + one English ad variation and check FX ad spend in our Forex Auditor.`,
+          },
+          homemaker: {
+            ne: `नमस्ते! परिवार तथा घरायसी सहायक तयार छ।\n• **साप्ताहिक भान्सा योजना**: मौसमी तरकारी (कालिमाटी दर अनुसार) मिलाएर बिहान दाल-भात-तरकारी, दिउँसो हल्का खाजा (रोटी/चिउरा/अण्डा) र बेलुका सन्तुलित खानाको सूची बनाउनुहोस्।\n• **बचत टिप्स**: सुनचाँदी किन्दा ज्याला-जर्ती र विलासिता कर Bullion Calculator बाट पहिले नै जाँच्नुहोस्।`,
+            en: `Namaste! Household & Family Helper ready:\n• Plan weekly meals around fresh seasonal Kalimati produce to cut grocery waste by 20–30%.\n• Before buying family jewelry, verify fair making charges (ज्याला) & wastage (जर्ती) with our Bullion Calculator, or draft school parent notes in Letter Studio.`,
+          },
+          general: {
+            ne: `नमस्ते! म हाम्रो एआई (Hamro AI) हुँ। अध्ययन, कार्यालयको पत्र, व्यापार हिसाब, मार्केटिङ वा घरायसी योजना — तपाईंलाई आज कुन काममा मद्दत चाहिन्छ, सोध्नुहोस्।`,
+            en: `Namaste! I am Hamro AI. Whether you need help with study notes, official Nepali letters, business/tax calculations, marketing copy, or family planning, tell me what you need.`,
+          },
+        };
+        const chosen = personaFallbacks[String(persona)] || personaFallbacks.general;
         return res.json({
           success: true,
           mode: "sovereign_knowledge_engine",
-          reply: language === "ne"
-            ? `नमस्ते! नेपालएआई (NepalAI) को सार्वभौम इन्जिनमा यहाँलाई स्वागत छ। हामी स्थानीय नेपाल राष्ट्र बैंक (NRB) नीति अनुसार एयर-ग्याप अन-प्रेम क्लस्टर, ५% सफ्टवेयर निर्यात कर (Section 95Ka), डलर कार्ड गाइड तथा देवनागरी ओसीआर समाधान प्रदान गर्दछौँ। थप जानकारीका लागि परामर्श बुक गर्न सक्नुहुन्छ।`
-            : `Namaste! Welcome to NepalAI. We deliver sovereign AI solutions tailored to Nepal's regulatory landscape: NRB-compliant air-gapped on-premise clusters, 5% IT software export TDS clarity, $500 dollar card audits, and native NPR billing via eSewa and Khalti.`
+          reply: language === "ne" ? chosen.ne : chosen.en,
         });
       }
 
@@ -644,90 +1094,786 @@ Key knowledge and guidelines:
       return res.json({
         success: true,
         mode: "gemini_grounded",
-        reply: responseText || (language === "ne" ? "नमस्ते! म तपाईंलाई कसरी सहयोग गर्न सक्छु?" : "Namaste! How may I assist you with Nepal's AI ecosystem today?")
+        reply: responseText || (language === "ne" ? "नमस्ते! म तपाईंलाई कसरी सहयोग गर्न सक्छु?" : "Namaste! How may I assist you today?")
       });
     } catch (err: any) {
       return res.json({
         success: true,
         mode: "fallback_rule_engine",
         reply: req.body?.language === "ne"
-          ? `नेपालएआईको सार्वभौम क्लस्टरले नेपाली बजारका लागि इन्टरप्राइज एआई, देवनागरी ओसीआर, र राष्ट्र बैंक अनुपालन सुनिश्चित गर्दछ। ईसेवा, खल्ती र फोनपे मार्फत स्थानीय भुक्तानी लिन सकिन्छ।`
-          : `NepalAI operates low-latency sovereign AI infrastructure for Nepal with full NRB compliance, Devanagari OCR, dual NPR/USD invoicing, and seamless eSewa/Khalti integration.`
+          ? `नमस्ते! हाम्रो एआई तयार छ — तपाईं रोमन नेपाली, देवनागरी वा अंग्रेजीमा प्रश्न सोध्न सक्नुहुन्छ। दैनिक टुलहरू (EV Tax, NEPSE, IT Export, Bullion, Letter Studio) बाट सिधै हिसाब र PDF पाउनुहोस्।`
+          : `Hamro AI is ready to help across Nepali/Romanized/English workflows — or open Daily Tools directly for EV Tax, NEPSE, IT Export, Bullion, and Roman Nepali Letter PDFs.`
       });
     }
   });
 
-  // Persistent Lead Storage & Management
-  const LEADS_FILE_PATH = path.join(process.cwd(), "data-leads.json");
-
-  const initialSeedLeads = [
-    {
-      id: "lead_seed_101",
-      fullName: "Suman Adhikari",
-      email: "suman.adhikari@himalayanbank.com.np",
-      phone: "+977 9851023456",
-      organization: "Himalayan Commercial Bank Ltd.",
-      industry: "Banking & Financial Institutions (BFIs)",
-      serviceCategory: "NRB Compliant AI Audit & Air-Gapped Deploy",
-      budgetRange: "रू ५,००,०००+ ($3,800+ USD)",
-      timeline: "2-Week Rapid MVP Sprint (Urgent)",
-      billingPreference: "Local NPR Invoicing (FonePay Bank Direct)",
-      message: "We need an on-premise Devanagari OCR pipeline to process 15,000 daily loan citizenship and Lalpurja documents with zero cloud data export in compliance with NRB cyber guidelines.",
-      submittedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-      status: "new",
-      adminNotes: "High-priority enterprise lead. Technical scoping required for Kathmandu data center deployment.",
-      source: "consultation_modal",
-      notificationDispatched: true
-    },
-    {
-      id: "lead_seed_102",
-      fullName: "Pooja Shrestha",
-      email: "pooja@everesttravels.com.np",
-      phone: "+977 9841987654",
-      organization: "Everest Trekking & Expeditions",
-      industry: "Hospitality & Tourism Logistics",
-      serviceCategory: "Nepali / Newari Dialect Neural Voice & Conversational Chat",
-      budgetRange: "रू १,५०,००० – ५,००,००० ($1,150 – $3,800 USD)",
-      timeline: "1-Month Comprehensive Implementation",
-      billingPreference: "eSewa / Khalti Digital Wallet",
-      message: "Looking for an automated 24/7 WhatsApp AI concierge in Nepali, English, and French that accepts itinerary inquiries and generates customized trek packing plans.",
-      submittedAt: new Date(Date.now() - 3600000 * 22).toISOString(),
-      status: "reviewing",
-      adminNotes: "Followed up via WhatsApp. Scheduling Zoom architecture demo with engineering team.",
-      source: "contact_section",
-      notificationDispatched: true
-    }
-  ];
-
-  const loadLeads = (): any[] => {
+  // API 3.6: Voice-to-Official-PDF Engine (Audio Transcription + Structured Letter + Checklist)
+  app.post("/api/voice-to-letter", async (req, res) => {
     try {
-      if (fs.existsSync(LEADS_FILE_PATH)) {
-        const raw = fs.readFileSync(LEADS_FILE_PATH, "utf-8");
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+      const {
+        audioBase64,
+        mimeType = "audio/webm",
+        transcript: providedTranscript = "",
+        persona = "all",
+        language = "ne",
+        letterContext = {},
+      } = req.body || {};
+
+      let finalTranscript = typeof providedTranscript === "string" ? providedTranscript.trim() : "";
+      const ai = getGeminiClient();
+      let transcribedByAi = false;
+
+      // Step 1: If audioBase64 is supplied and no crisp transcript yet (or to refine dialect audio), transcribe via Gemini
+      if (ai && typeof audioBase64 === "string" && audioBase64.length > 64) {
+        const cleanBase64 = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
+        const normalizedMime = typeof mimeType === "string" && mimeType.startsWith("audio/") ? mimeType.split(";")[0] : "audio/webm";
+        const audioPart = {
+          inlineData: {
+            mimeType: normalizedMime,
+            data: cleanBase64,
+          },
+        };
+
+        try {
+          const transcribeRes = await ai.models.generateContent({
+            model: "gemini-3.5-transcribe",
+            contents: {
+              parts: [
+                audioPart,
+                { text: "Transcribe this spoken Nepali or English request accurately. Keep names, numbers, dates, and ward numbers intact." },
+              ],
+            },
+          });
+          if (transcribeRes?.text?.trim()) {
+            finalTranscript = transcribeRes.text.trim();
+            transcribedByAi = true;
+          }
+        } catch {
+          try {
+            const fallbackAudioRes = await ai.models.generateContent({
+              model: "gemini-4-hydrogen",
+              contents: {
+                parts: [
+                  audioPart,
+                  { text: "Transcribe this spoken Nepali or English voice note verbatim in plain text." },
+                ],
+              },
+            });
+            if (fallbackAudioRes?.text?.trim()) {
+              finalTranscript = fallbackAudioRes.text.trim();
+              transcribedByAi = true;
+            }
+          } catch {
+            // Keep providedTranscript if audio transcription model fails
+          }
         }
       }
-    } catch (e) {
-      console.error("Error reading data-leads.json:", e);
-    }
-    try {
-      fs.writeFileSync(LEADS_FILE_PATH, JSON.stringify(initialSeedLeads, null, 2), "utf-8");
-    } catch (e) {
-      console.error("Error initializing data-leads.json:", e);
-    }
-    return [...initialSeedLeads];
-  };
 
-  let activeLeads = loadLeads();
+      if (!finalTranscript) {
+        return res.status(400).json({
+          error: "No voice transcript or readable audio detected. Please speak clearly or try again.",
+        });
+      }
 
-  const persistLeads = () => {
-    try {
-      fs.writeFileSync(LEADS_FILE_PATH, JSON.stringify(activeLeads, null, 2), "utf-8");
-    } catch (e) {
-      console.error("Failed to write to data-leads.json:", e);
+      const draftReq = {
+        prompt: finalTranscript,
+        persona: String(persona || "all"),
+        applicantName: typeof letterContext?.applicantName === "string" ? letterContext.applicantName : undefined,
+        applicantAddress: typeof letterContext?.applicantAddress === "string" ? letterContext.applicantAddress : undefined,
+        applicantCitizenship: typeof letterContext?.applicantCitizenship === "string" ? letterContext.applicantCitizenship : undefined,
+        letterDate: typeof letterContext?.letterDate === "string" ? letterContext.letterDate : undefined,
+        patraSankhya: typeof letterContext?.patraSankhya === "string" ? letterContext.patraSankhya : undefined,
+        chalaniNo: typeof letterContext?.chalaniNo === "string" ? letterContext.chalaniNo : undefined,
+        language: language === "ne" ? ("ne" as const) : ("en" as const),
+      };
+
+      const sovereignHints = buildSovereignLetterDraft(draftReq);
+
+      if (ai) {
+        try {
+          const voiceDraftInstruction = `You convert a citizen's spoken Nepali, Romanized, or English voice request into a complete, ready-to-print A4 official Nepal letter AND a simple carry-with-you checklist.
+Sender Info:
+- Name: ${draftReq.applicantName || "राम प्रसाद अधिकारी"}
+- Address: ${draftReq.applicantAddress || "काठमाडौं, नेपाल"}
+- ID/Citizenship/Roll: ${draftReq.applicantCitizenship || "२७-०१-७६-०९१२४"}
+- Date (BS): ${draftReq.letterDate || "२०८१/०८/१५"}
+- Patra Sankhya: ${draftReq.patraSankhya || "२०८१/०८२"}
+- Chalani No: ${draftReq.chalaniNo || "१२४९"}
+
+Rules:
+- Extract any name, ward number, dates, school/bank/office mentioned in the voice request and use them accurately in the letter.
+- If the spoken request is in Nepali or mixed Nepali-English (unless explicitly requesting English), write the letter in polite, clear formal Nepali (Devanagari Unicode) with proper Nepali salutation ("श्री ...", "विषय:", "महोदय,", "भवदीय,").
+- Provide a super clear, 3-item Nepali/bilingual checklist of documents & fees to carry.`;
+
+          let rawVoiceJson: string | undefined;
+          try {
+            const g4Voice = await Promise.race([
+              ai.models.generateContent({
+                model: "gemini-4-hydrogen",
+                contents: finalTranscript,
+                config: {
+                  systemInstruction: voiceDraftInstruction,
+                  thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                      officeName: { type: Type.STRING },
+                      subject: { type: Type.STRING },
+                      reason: { type: Type.STRING },
+                      letterBody: { type: Type.STRING },
+                      recommendedOffice: { type: Type.STRING },
+                      estimatedFee: { type: Type.STRING },
+                      checklist: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    },
+                    required: ["officeName", "subject", "reason", "letterBody", "checklist"],
+                  },
+                },
+              }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Voice draft timeout")), 5500)),
+            ]);
+            rawVoiceJson = g4Voice?.text;
+          } catch {
+            rawVoiceJson = await Promise.race([
+              callGeminiWithRetryAndFallback({
+                contents: finalTranscript,
+                config: {
+                  systemInstruction: voiceDraftInstruction,
+                  responseMimeType: "application/json",
+                },
+              }),
+              new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Voice fallback timeout")), 4500)),
+            ]);
+          }
+
+          if (rawVoiceJson) {
+            const parsed = JSON.parse(rawVoiceJson);
+            if (parsed?.letterBody) {
+              return res.json({
+                success: true,
+                mode: transcribedByAi ? "gemini_voice_transcribe_and_draft" : "gemini_voice_to_letter",
+                transcript: finalTranscript,
+                letterDraft: {
+                  officeName: String(parsed.officeName || sovereignHints.officeName),
+                  subject: String(parsed.subject || sovereignHints.subject),
+                  reason: String(parsed.reason || sovereignHints.reason),
+                  letterBody: String(parsed.letterBody).trim(),
+                  recommendedOffice: String(parsed.recommendedOffice || sovereignHints.recommendedOffice || ""),
+                  estimatedFee: String(parsed.estimatedFee || sovereignHints.estimatedFee || ""),
+                  checklist: Array.isArray(parsed.checklist) && parsed.checklist.length > 0
+                    ? parsed.checklist.map(String)
+                    : sovereignHints.checklist,
+                },
+              });
+            }
+          }
+        } catch {
+          // Fall through cleanly to sovereignHints
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: sovereignHints.mode || "sovereign_voice_to_letter",
+        transcript: finalTranscript,
+        letterDraft: sovereignHints,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to convert voice to letter" });
     }
-  };
+  });
+
+  // API 3.7: Handwritten Bill & Udharo Khata Snapper (Image Vision + Bilingual Ledger Parser)
+  app.post("/api/khata-snap", async (req, res) => {
+    try {
+      const {
+        imageBase64,
+        mimeType = "image/jpeg",
+        rawText = "",
+        ledgerMode = "udharo_khata",
+        language = "ne",
+      } = req.body || {};
+
+      const hasImage = typeof imageBase64 === "string" && imageBase64.length > 64;
+      const cleanText = typeof rawText === "string" ? rawText.trim() : "";
+
+      if (!hasImage && !cleanText) {
+        return res.status(400).json({
+          error: "Please upload a bill photo or paste handwritten bill notes to extract.",
+        });
+      }
+
+      const fallbackRecord = parseHandwrittenKhataText(
+        cleanText || (language === "ne" ? "हस्तलिखित बिल" : "Handwritten Bill"),
+        { ledgerMode, language }
+      );
+
+      const ai = getGeminiClient();
+      if (ai) {
+        try {
+          const khataInstruction = `You extract Nepali & English handwritten shop bills, kirana udharo khata (credit notebooks), grocery hisab, and split receipts into clean, accurate structured JSON.
+Rules:
+- Read Devanagari script, mixed English-Nepali, and Nepali digits (०-९) carefully, converting all numbers cleanly to standard numeric NPR values.
+- Extract party/customer/shop name, phone number if shown, Bikram Sambat date if shown (default 2081/08/15 if absent), itemized products (name, qty, rateNpr, amountNpr), totalNpr, paidNpr (advance/cash paid), and dueNpr (remaining balance).
+- Ensure math is consistent: dueNpr = max(0, totalNpr - paidNpr). Return ONLY valid JSON.`;
+
+          const contentParts: any[] = [];
+          if (hasImage) {
+            const cleanBase64 = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
+            const safeMime =
+              typeof mimeType === "string" && mimeType.startsWith("image/")
+                ? mimeType.split(";")[0]
+                : "image/jpeg";
+            contentParts.push({
+              inlineData: {
+                mimeType: safeMime,
+                data: cleanBase64,
+              },
+            });
+          }
+          contentParts.push({
+            text:
+              cleanText
+                ? `Mode: ${ledgerMode}\nHandwritten / Text Note:\n${cleanText}`
+                : `Mode: ${ledgerMode}\nRead every handwritten line item, quantity, price, total, paid amount, customer/shop name, and mobile number from this photo accurately.`,
+          });
+
+          const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+              shopOrPartyName: { type: Type.STRING },
+              phone: { type: Type.STRING },
+              billDateBs: { type: Type.STRING },
+              items: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    qty: { type: Type.STRING },
+                    rateNpr: { type: Type.NUMBER },
+                    amountNpr: { type: Type.NUMBER },
+                  },
+                  required: ["name", "amountNpr"],
+                },
+              },
+              totalNpr: { type: Type.NUMBER },
+              paidNpr: { type: Type.NUMBER },
+              dueNpr: { type: Type.NUMBER },
+              confidenceNote: { type: Type.STRING },
+            },
+            required: ["shopOrPartyName", "items", "totalNpr", "paidNpr", "dueNpr"],
+          };
+
+          let rawJson: string | undefined;
+          try {
+            const g4Res = await Promise.race([
+              ai.models.generateContent({
+                model: "gemini-4-hydrogen",
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: khataInstruction,
+                  thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                  responseMimeType: "application/json",
+                  responseSchema,
+                },
+              }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Khata vision timeout")), 6500)),
+            ]);
+            rawJson = g4Res?.text;
+          } catch {
+            rawJson = await Promise.race([
+              callGeminiWithRetryAndFallback({
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: khataInstruction,
+                  responseMimeType: "application/json",
+                },
+              }),
+              new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Khata fallback timeout")), 5000)),
+            ]);
+          }
+
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson);
+            if (Array.isArray(parsed?.items) && parsed.items.length > 0) {
+              const reconciled = reconcileKhataLedger({
+                id: `khata_${Date.now()}`,
+                shopOrPartyName: String(parsed.shopOrPartyName || fallbackRecord.shopOrPartyName),
+                phone: String(parsed.phone || fallbackRecord.phone || ""),
+                billDateBs: String(parsed.billDateBs || fallbackRecord.billDateBs),
+                entryType: "udharo_due",
+                ledgerMode,
+                items: parsed.items.map((it: any, idx: number) => ({
+                  id: `item_${idx + 1}`,
+                  name: String(it.name || `Item ${idx + 1}`),
+                  qty: String(it.qty || "1"),
+                  rateNpr: Number(it.rateNpr) || Number(it.amountNpr) || 0,
+                  amountNpr: Number(it.amountNpr) || 0,
+                })),
+                totalNpr: Number(parsed.totalNpr) || 0,
+                paidNpr: Number(parsed.paidNpr) || 0,
+                dueNpr: Number(parsed.dueNpr) || 0,
+                confidenceNote: String(
+                  parsed.confidenceNote ||
+                    (hasImage
+                      ? "Extracted from handwritten photo via Gemini Vision"
+                      : "Structured via Gemini Ledger AI")
+                ),
+                rawSummaryText: cleanText || undefined,
+                updatedAt: new Date().toISOString(),
+              });
+
+              return res.json({
+                success: true,
+                mode: hasImage ? "gemini_vision_khata" : "gemini_text_khata",
+                ledgerRecord: reconciled,
+              });
+            }
+          }
+        } catch {
+          // Fall through cleanly to sovereign parser
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: "sovereign_khata_parser",
+        ledgerRecord: fallbackRecord,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to parse handwritten bill" });
+    }
+  });
+
+  // API 3.8: Contract & Tamasuk Risk Scanner (Photo Vision + Text Risk Analysis)
+  app.post("/api/contract-risk", async (req, res) => {
+    try {
+      const {
+        imageBase64,
+        mimeType = "image/jpeg",
+        rawText = "",
+        docType = "rent_agreement",
+        language = "ne",
+      } = req.body || {};
+
+      const hasImage = typeof imageBase64 === "string" && imageBase64.length > 64;
+      const cleanText = typeof rawText === "string" ? rawText.trim() : "";
+
+      if (!hasImage && !cleanText) {
+        return res.status(400).json({
+          error: "Please upload an agreement photo or paste contract text to scan.",
+        });
+      }
+
+      const fallbackReport = analyzeContractRiskFallback({
+        text: cleanText || (language === "ne" ? "सम्झौता तथा तमसुक कागजात" : "Contract Document"),
+        docType,
+        language,
+      });
+
+      const ai = getGeminiClient();
+      if (ai) {
+        try {
+          const contractInstruction = `You scan Nepalese and English contracts, house rent agreements (घरभाडा सम्झौता), loan tamasuk papers (कपाली तमसुक), job offer letters, and business deeds for unfair traps and missing safeguards.
+Rules:
+- Keep Nepal law context accurate (e.g., Muluki Civil Code 2074 max 10% simple annual loan interest, zero compounding on personal tamasuk, ward certification above NPR 50,000, reasonable vacating notice, Nepal Labor Act 2074 8h/day 48h/week & 1.5x overtime, no earned wage forfeiture).
+- Explain every finding in crystal-clear, warm everyday ${language === "ne" ? "Nepali (Devanagari)" : "English"} that any citizen can understand.
+- Provide actionable saferRewrite clauses and polite questionsToAsk before signing.
+- Return ONLY valid JSON matching the schema.`;
+
+          const contentParts: any[] = [];
+          if (hasImage) {
+            const cleanBase64 = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
+            const safeMime =
+              typeof mimeType === "string" && mimeType.startsWith("image/")
+                ? mimeType.split(";")[0]
+                : "image/jpeg";
+            contentParts.push({ inlineData: { mimeType: safeMime, data: cleanBase64 } });
+          }
+          contentParts.push({
+            text: cleanText
+              ? `Document Type: ${docType}\nAgreement Text:\n${cleanText}`
+              : `Document Type: ${docType}\nRead this handwritten or printed agreement photo carefully and identify all red flags, missing protections, safer clause rewrites, and polite questions to ask before signing.`,
+          });
+
+          const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+              docTitle: { type: Type.STRING },
+              safetyScore: { type: Type.NUMBER },
+              riskLevel: { type: Type.STRING },
+              plainSummary: { type: Type.STRING },
+              redFlags: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    severity: { type: Type.STRING },
+                    title: { type: Type.STRING },
+                    clauseFound: { type: Type.STRING },
+                    whyRisky: { type: Type.STRING },
+                    saferRewrite: { type: Type.STRING },
+                  },
+                  required: ["severity", "title", "whyRisky", "saferRewrite"],
+                },
+              },
+              missingProtections: { type: Type.ARRAY, items: { type: Type.STRING } },
+              goodClauses: { type: Type.ARRAY, items: { type: Type.STRING } },
+              questionsToAsk: { type: Type.ARRAY, items: { type: Type.STRING } },
+            },
+            required: ["docTitle", "safetyScore", "riskLevel", "plainSummary", "redFlags", "missingProtections", "questionsToAsk"],
+          };
+
+          let rawJson: string | undefined;
+          try {
+            const g4Res = await Promise.race([
+              ai.models.generateContent({
+                model: "gemini-4-hydrogen",
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: contractInstruction,
+                  thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                  responseMimeType: "application/json",
+                  responseSchema,
+                },
+              }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Contract scan timeout")), 6500)),
+            ]);
+            rawJson = g4Res?.text;
+          } catch {
+            rawJson = await Promise.race([
+              callGeminiWithRetryAndFallback({
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: contractInstruction,
+                  responseMimeType: "application/json",
+                },
+              }),
+              new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Contract fallback timeout")), 5000)),
+            ]);
+          }
+
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson);
+            if (parsed?.plainSummary && Array.isArray(parsed?.redFlags)) {
+              const scoreNum = Math.max(10, Math.min(98, Math.round(Number(parsed.safetyScore) || fallbackReport.safetyScore)));
+              const normLevel: "high" | "medium" | "low" =
+                parsed.riskLevel === "high" || parsed.riskLevel === "medium" || parsed.riskLevel === "low"
+                  ? parsed.riskLevel
+                  : scoreNum < 55
+                  ? "high"
+                  : scoreNum < 78
+                  ? "medium"
+                  : "low";
+
+              return res.json({
+                success: true,
+                mode: hasImage ? "gemini_vision_contract_risk" : "gemini_contract_risk",
+                report: {
+                  docTitle: String(parsed.docTitle || fallbackReport.docTitle),
+                  docType,
+                  safetyScore: scoreNum,
+                  riskLevel: normLevel,
+                  plainSummary: String(parsed.plainSummary),
+                  redFlags: parsed.redFlags.map((f: any, idx: number) => ({
+                    id: `ai_flag_${idx + 1}`,
+                    severity: f.severity === "high" ? "high" : "medium",
+                    title: String(f.title || "Risk Clause"),
+                    clauseFound: String(f.clauseFound || ""),
+                    whyRisky: String(f.whyRisky || ""),
+                    saferRewrite: String(f.saferRewrite || ""),
+                  })),
+                  missingProtections: Array.isArray(parsed.missingProtections)
+                    ? parsed.missingProtections.map(String)
+                    : fallbackReport.missingProtections,
+                  goodClauses: Array.isArray(parsed.goodClauses)
+                    ? parsed.goodClauses.map(String)
+                    : fallbackReport.goodClauses,
+                  questionsToAsk: Array.isArray(parsed.questionsToAsk)
+                    ? parsed.questionsToAsk.map(String)
+                    : fallbackReport.questionsToAsk,
+                  analyzedAt: new Date().toISOString(),
+                },
+              });
+            }
+          }
+        } catch {
+          // Fall through cleanly to deterministic legal risk fallback
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: "sovereign_contract_risk_engine",
+        report: fallbackReport,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to scan agreement risks" });
+    }
+  });
+
+  // API 3.9: Lab Report & Prescription Translator for Parents (Vision + Nepali Audio Script)
+  app.post("/api/health-translate", async (req, res) => {
+    try {
+      const {
+        imageBase64,
+        mimeType = "image/jpeg",
+        rawText = "",
+        mode = "lab_report",
+        language = "ne",
+      } = req.body || {};
+
+      const hasImage = typeof imageBase64 === "string" && imageBase64.length > 64;
+      const cleanText = typeof rawText === "string" ? rawText.trim() : "";
+
+      if (!hasImage && !cleanText) {
+        return res.status(400).json({
+          error: "Please upload a lab report or prescription photo, or paste the values below.",
+        });
+      }
+
+      const fallbackReport = translateHealthReportFallback({
+        text: cleanText || (mode === "prescription" ? "Doctor Prescription" : "Lab Report"),
+        mode,
+        language,
+      });
+
+      const ai = getGeminiClient();
+      if (ai) {
+        try {
+          const healthInstruction = `You are a calm, respectful family health communicator in Nepal translating hospital lab reports and doctors' handwritten/printed prescriptions so parents and elders can easily understand them.
+Rules:
+- NEVER diagnose diseases or change prescriptions. Explain numbers gently in simple everyday Nepali (Devanagari Unicode) and plain English.
+- Translate abbreviations clearly: OD = बिहान १ पटक (Once daily), BD = बिहान र राति २ पटक (Twice daily), TDS = बिहान, दिउँसो र राति (3x daily), HS = राति सुत्ने बेला (Bedtime), AC = खाना खानु अगाडि (Before meal), PC = खाना खाएपछि (After meal).
+- Write warmSummaryNe and audioScriptNe in gentle, reassuring spoken Nepali suitable for text-to-speech for elderly parents.
+- Return ONLY valid JSON matching the schema.`;
+
+          const contentParts: any[] = [];
+          if (hasImage) {
+            const cleanBase64 = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
+            const safeMime =
+              typeof mimeType === "string" && mimeType.startsWith("image/")
+                ? mimeType.split(";")[0]
+                : "image/jpeg";
+            contentParts.push({ inlineData: { mimeType: safeMime, data: cleanBase64 } });
+          }
+          contentParts.push({
+            text: cleanText
+              ? `Document Mode: ${mode}\nReport / Prescription Text:\n${cleanText}`
+              : `Document Mode: ${mode}\nRead this hospital lab sheet or doctor's prescription photo carefully and explain every marker or medicine dose calmly in Nepali & English.`,
+          });
+
+          const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+              reportTitle: { type: Type.STRING },
+              warmSummaryNe: { type: Type.STRING },
+              warmSummaryEn: { type: Type.STRING },
+              labMarkers: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    value: { type: Type.STRING },
+                    normalRange: { type: Type.STRING },
+                    status: { type: Type.STRING },
+                    meaningSimple: { type: Type.STRING },
+                  },
+                  required: ["name", "value", "status", "meaningSimple"],
+                },
+              },
+              medicineSchedule: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    medicineName: { type: Type.STRING },
+                    timingBadge: { type: Type.STRING },
+                    morning: { type: Type.BOOLEAN },
+                    afternoon: { type: Type.BOOLEAN },
+                    night: { type: Type.BOOLEAN },
+                    mealNote: { type: Type.STRING },
+                    duration: { type: Type.STRING },
+                    purposeSimple: { type: Type.STRING },
+                  },
+                  required: ["medicineName", "morning", "afternoon", "night", "mealNote", "purposeSimple"],
+                },
+              },
+              homeCareTips: { type: Type.ARRAY, items: { type: Type.STRING } },
+              questionsForDoctor: { type: Type.ARRAY, items: { type: Type.STRING } },
+              audioScriptNe: { type: Type.STRING },
+            },
+            required: ["reportTitle", "warmSummaryNe", "warmSummaryEn", "homeCareTips", "questionsForDoctor", "audioScriptNe"],
+          };
+
+          let rawJson: string | undefined;
+          try {
+            const g4Res = await Promise.race([
+              ai.models.generateContent({
+                model: "gemini-4-hydrogen",
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: healthInstruction,
+                  thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                  responseMimeType: "application/json",
+                  responseSchema,
+                },
+              }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Health translate timeout")), 6500)),
+            ]);
+            rawJson = g4Res?.text;
+          } catch {
+            rawJson = await Promise.race([
+              callGeminiWithRetryAndFallback({
+                contents: { parts: contentParts },
+                config: {
+                  systemInstruction: healthInstruction,
+                  responseMimeType: "application/json",
+                },
+              }),
+              new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Health fallback timeout")), 5000)),
+            ]);
+          }
+
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson);
+            if (parsed?.warmSummaryNe) {
+              return res.json({
+                success: true,
+                mode: hasImage ? "gemini_vision_health" : "gemini_health_translator",
+                report: {
+                  reportTitle: String(parsed.reportTitle || fallbackReport.reportTitle),
+                  mode,
+                  warmSummaryNe: String(parsed.warmSummaryNe),
+                  warmSummaryEn: String(parsed.warmSummaryEn || fallbackReport.warmSummaryEn),
+                  labMarkers: Array.isArray(parsed.labMarkers)
+                    ? parsed.labMarkers.map((m: any) => ({
+                        name: String(m.name || ""),
+                        value: String(m.value || ""),
+                        normalRange: String(m.normalRange || ""),
+                        status:
+                          m.status === "attention" || m.status === "borderline" || m.status === "normal"
+                            ? m.status
+                            : "borderline",
+                        meaningSimple: String(m.meaningSimple || ""),
+                      }))
+                    : fallbackReport.labMarkers,
+                  medicineSchedule: Array.isArray(parsed.medicineSchedule)
+                    ? parsed.medicineSchedule.map((med: any) => ({
+                        medicineName: String(med.medicineName || ""),
+                        timingBadge: String(med.timingBadge || ""),
+                        morning: Boolean(med.morning),
+                        afternoon: Boolean(med.afternoon),
+                        night: Boolean(med.night),
+                        mealNote: String(med.mealNote || ""),
+                        duration: String(med.duration || ""),
+                        purposeSimple: String(med.purposeSimple || ""),
+                      }))
+                    : fallbackReport.medicineSchedule,
+                  homeCareTips: Array.isArray(parsed.homeCareTips)
+                    ? parsed.homeCareTips.map(String)
+                    : fallbackReport.homeCareTips,
+                  questionsForDoctor: Array.isArray(parsed.questionsForDoctor)
+                    ? parsed.questionsForDoctor.map(String)
+                    : fallbackReport.questionsForDoctor,
+                  audioScriptNe: String(parsed.audioScriptNe || parsed.warmSummaryNe),
+                  analyzedAt: new Date().toISOString(),
+                },
+              });
+            }
+          }
+        } catch {
+          // Fall through cleanly to deterministic translator
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: "sovereign_health_translator",
+        report: fallbackReport,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to translate health report" });
+    }
+  });
+
+  // API 3.10: Sarkari Kaam Zero-Mistake Counter Navigator Q&A
+  app.post("/api/sarkari-guide", async (req, res) => {
+    try {
+      const { workflowId = "passport", question = "", language = "ne" } = req.body || {};
+      const cleanQuestion = typeof question === "string" ? question.trim() : "";
+      if (!cleanQuestion) {
+        return res.status(400).json({ error: "Question is required" });
+      }
+
+      const wf = findSarkariWorkflow(workflowId);
+      const isNe = language === "ne" || /[\u0900-\u097F]/.test(cleanQuestion);
+
+      const fallbackAnswer = isNe
+        ? `${wf.titleNe} (${wf.officeNe}):\n• आवश्यक कागजात: ${wf.requiredDocs
+            .filter((d) => d.mandatory)
+            .map((d) => d.labelNe)
+            .join(", ")}\n• दस्तुर र समय: ${wf.estimatedFeeNe} (${wf.estimatedTimeNe})\n• मुख्य सुझाव: ${wf.commonMistakes[0]?.ne || wf.counterSteps[0]?.actionNe}`
+        : `${wf.titleEn} (${wf.officeEn}):\n• Mandatory docs: ${wf.requiredDocs
+            .filter((d) => d.mandatory)
+            .map((d) => d.labelEn)
+            .join(", ")}\n• Fee & Time: ${wf.estimatedFeeEn} (${wf.estimatedTimeEn})\n• Key Tip: ${wf.commonMistakes[0]?.en || wf.counterSteps[0]?.actionEn}`;
+
+      const ai = getGeminiClient();
+      if (ai) {
+        try {
+          const guideInstruction = `You are NepalAI's practical Nepal Citizen Office Desk Helper (e-Passport, NID, Yatayat Driving License, IRD PAN/VAT, OCR Company Registration, Malpot Land Pass, Police Clearance OPCR).
+Answer the citizen's exact edge-case question clearly in ${isNe ? "polite everyday Nepali (Devanagari)" : "clear English"} in 3–5 concise bullet points covering exact counter/document steps so they don't make two trips.`;
+
+          let answerText: string | undefined;
+          try {
+            const g4Res = await Promise.race([
+              ai.models.generateContent({
+                model: "gemini-4-hydrogen",
+                contents: `Workflow: ${wf.titleEn} (${wf.officeEn})\nQuestion: ${cleanQuestion}`,
+                config: {
+                  systemInstruction: guideInstruction,
+                  thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                },
+              }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Sarkari guide timeout")), 5500)),
+            ]);
+            answerText = g4Res?.text;
+          } catch {
+            answerText = await Promise.race([
+              callGeminiWithRetryAndFallback({
+                contents: `Workflow: ${wf.titleEn}\nQuestion: ${cleanQuestion}`,
+                config: { systemInstruction: guideInstruction },
+              }),
+              new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Sarkari fallback timeout")), 4500)),
+            ]);
+          }
+
+          if (answerText && answerText.trim()) {
+            return res.json({
+              success: true,
+              mode: "gemini_sarkari_guide",
+              workflowId: wf.id,
+              answer: answerText.trim(),
+            });
+          }
+        } catch {
+          // Fall through cleanly
+        }
+      }
+
+      return res.json({
+        success: true,
+        mode: "sovereign_sarkari_guide",
+        workflowId: wf.id,
+        answer: fallbackAnswer,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to generate counter guidance" });
+    }
+  });
 
   // Private server-side email dispatcher (recipient is hidden from client)
   const sendAdminNotificationEmail = async (lead: any) => {
@@ -844,8 +1990,8 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
     return { success: true, mode: "server_dispatch_logged" };
   };
 
-  // API 4: Contact & Consultation Lead submission endpoint (receives all forms via secure email proxy)
-  app.post(["/api/contact", "/api/leads", "/api/consultation/submit"], async (req, res) => {
+  // API 4: Contact & Consultation Lead submission endpoint (persisted in Cloud SQL)
+  app.post(["/api/contact", "/api/leads", "/api/consultation/submit"], optionalAuth, async (req: AuthRequest, res) => {
     try {
       const {
         fullName,
@@ -868,35 +2014,25 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
 
       const contentMessage = (message || projectScope || "").trim() || "Consultation requested via portal.";
 
-      const newLead = {
-        id: `lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: (phone || "").trim() || "N/A",
-        organization: (organization || "").trim() || "N/A",
-        industry: (industry || "").trim() || "General",
-        serviceCategory: (serviceCategory || "").trim() || "General AI Advisory",
-        budgetRange: (budgetRange || "").trim() || "Standard",
-        timeline: (timeline || "").trim() || "2-Week Rapid Sprint",
-        billingPreference: (billingPreference || "").trim() || "NPR (eSewa / Khalti / FonePay)",
+      const newLead = await createLead({
+        userUid: req.user?.uid || null,
+        fullName,
+        email,
+        phone,
+        organization,
+        industry,
+        serviceCategory,
+        budgetRange,
+        timeline,
+        billingPreference,
         message: contentMessage,
-        submittedAt: new Date().toISOString(),
-        status: "new",
-        adminNotes: "",
         source: source || "web_portal",
-        notificationDispatched: true
-      };
+      });
 
-      // Save to active in-memory list & persistent JSON file
-      activeLeads.unshift(newLead);
-      persistLeads();
-
-      // Dispatch to ADMIN_NOTIFICATION_EMAIL on server (async)
       sendAdminNotificationEmail(newLead).catch((err) => {
         console.error("Background email dispatch notice:", err);
       });
 
-      // Respond to client (Notice: Never expose admin email to client!)
       return res.json({
         success: true,
         message: "Inquiry recorded successfully. NepalAI administrative team has been notified.",
@@ -927,7 +2063,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // Request pre-signed PUT upload URL for direct browser-to-R2 upload
-  app.post("/api/storage/presigned-url", async (req, res) => {
+  app.post("/api/storage/presigned-url", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { filename, contentType, folder, tenantId } = req.body;
 
@@ -953,7 +2089,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // Direct server-side upload of base64 document or image
-  app.post("/api/storage/upload-direct", async (req, res) => {
+  app.post("/api/storage/upload-direct", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { filename, contentType, dataBase64, folder, tenantId } = req.body;
 
@@ -988,7 +2124,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // Delete media object
-  app.delete("/api/storage/file", async (req, res) => {
+  app.delete("/api/storage/file", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { fileKey } = req.body;
       if (!fileKey) {
@@ -1026,80 +2162,89 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
     `);
   });
 
-  // API 5: Admin leads retrieval (for Admin Panel)
-  app.get("/api/admin/leads", (req, res) => {
-    return res.json({
-      success: true,
-      count: activeLeads.length,
-      newCount: activeLeads.filter(l => l.status === "new").length,
-      leads: activeLeads
-    });
+  // API 5: Admin leads retrieval (Protected Super Admin + Cloud SQL)
+  app.get("/api/admin/leads", requireAuth, requireSuperAdmin, async (req, res) => {
+    try {
+      const leads = await listLeads();
+      return res.json({
+        success: true,
+        count: leads.length,
+        newCount: leads.filter(l => l.status === "new").length,
+        leads
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to fetch leads" });
+    }
   });
 
   // API 6: Admin update lead status & notes
-  app.patch("/api/admin/leads/:id", (req, res) => {
-    const { id } = req.params;
-    const { status, adminNotes } = req.body;
-
-    const leadIndex = activeLeads.findIndex(l => l.id === id);
-    if (leadIndex === -1) {
-      return res.status(404).json({ error: "Lead not found" });
+  app.patch("/api/admin/leads/:id", requireAuth, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, adminNotes } = req.body;
+      const updated = await updateLead(id, status, adminNotes);
+      if (!updated) {
+        return res.status(404).json({ error: "Lead not found" });
+      }
+      return res.json({ success: true, lead: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update lead" });
     }
-
-    if (status) activeLeads[leadIndex].status = status;
-    if (adminNotes !== undefined) activeLeads[leadIndex].adminNotes = adminNotes;
-
-    persistLeads();
-
-    return res.json({
-      success: true,
-      lead: activeLeads[leadIndex]
-    });
   });
 
   // API 7: Admin delete lead
-  app.delete("/api/admin/leads/:id", (req, res) => {
-    const { id } = req.params;
-    const initialLen = activeLeads.length;
-    activeLeads = activeLeads.filter(l => l.id !== id);
-
-    if (activeLeads.length !== initialLen) {
-      persistLeads();
-      return res.json({ success: true, message: "Lead removed successfully" });
+  app.delete("/api/admin/leads/:id", requireAuth, requireSuperAdmin, async (req, res) => {
+    try {
+      const removed = await deleteLeadById(req.params.id);
+      if (removed) {
+        return res.json({ success: true, message: "Lead removed successfully" });
+      }
+      return res.status(404).json({ error: "Lead not found" });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to delete lead" });
     }
-    return res.status(404).json({ error: "Lead not found" });
   });
 
   // API 8: Studio.nepalai.tech Admin Dashboard Connection Status & Sync
-  app.get("/api/admin/studio-connection", (req, res) => {
-    const newCount = activeLeads.filter(l => l.status === "new").length;
-    const reviewingCount = activeLeads.filter(l => l.status === "reviewing").length;
-    const pendingCount = newCount + reviewingCount;
+  app.get("/api/admin/studio-connection", requireAuth, requireSuperAdmin, async (req, res) => {
+    try {
+      const leads = await listLeads();
+      const newCount = leads.filter(l => l.status === "new").length;
+      const reviewingCount = leads.filter(l => l.status === "reviewing").length;
+      const pendingCount = newCount + reviewingCount;
 
-    return res.json({
-      success: true,
-      status: "connected",
-      studioUrl: "https://studio.nepalai.tech",
-      studioAdminUrl: STUDIO_ADMIN_URL,
-      platform: "NepalAI Studio Sovereign Cloud Hub",
-      totalLeads: activeLeads.length,
-      pendingLeadsCount: pendingCount,
-      newLeadsCount: newCount,
-      reviewingLeadsCount: reviewingCount,
-      convertedLeadsCount: activeLeads.filter(l => l.status === "converted").length,
-      lastSync: new Date().toISOString(),
-      syncSupported: true
-    });
+      return res.json({
+        success: true,
+        status: "connected",
+        studioUrl: "https://studio.nepalai.tech",
+        studioAdminUrl: STUDIO_ADMIN_URL,
+        platform: "NepalAI Studio Sovereign Cloud Hub",
+        totalLeads: leads.length,
+        pendingLeadsCount: pendingCount,
+        newLeadsCount: newCount,
+        reviewingLeadsCount: reviewingCount,
+        convertedLeadsCount: leads.filter(l => l.status === "converted").length,
+        lastSync: new Date().toISOString(),
+        syncSupported: true
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to fetch connection status" });
+    }
   });
 
-  app.post("/api/admin/studio-sync", (req, res) => {
-    return res.json({
-      success: true,
-      syncedCount: activeLeads.length,
-      targetStudioUrl: STUDIO_ADMIN_URL,
-      timestamp: new Date().toISOString(),
-      message: `Successfully synchronized ${activeLeads.length} inquiries with studio.nepalai.tech administrative hub.`
-    });
+  app.post("/api/admin/studio-sync", requireAuth, requireSuperAdmin, async (req, res) => {
+    try {
+      const leads = await listLeads();
+      return res.json({
+        success: true,
+        syncedCount: leads.length,
+        targetStudioUrl: STUDIO_ADMIN_URL,
+        timestamp: new Date().toISOString(),
+        message: `Successfully synchronized ${leads.length} inquiries with studio.nepalai.tech administrative hub.`
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to sync leads" });
+    }
   });
 
   // =========================================================================
@@ -1185,32 +2330,52 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   }
 
   // 1. GET /api/admin/studio/users -> Fetches registered users, token usage, platform revenue
-  app.get("/api/admin/studio/users", async (req, res) => {
+  app.get("/api/admin/studio/users", requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/admin/users");
     if (remote.success && remote.data) {
       return res.json(remote.data);
     }
 
+    let dbProfiles: any[] = [];
+    try {
+      dbProfiles = await listStudioUsersFromDb();
+    } catch {
+      dbProfiles = [];
+    }
+
+    const mappedDbUsers = dbProfiles.map((p) => ({
+      id: p.id,
+      email: p.email,
+      name: p.fullName || p.email,
+      role: p.systemRole === "super_admin" ? "admin" : "user",
+      tier: p.systemRole === "super_admin" ? "pro_studio" : "starter",
+      credits: p.systemRole === "super_admin" ? 999999 : 5000,
+      usage: { totalTokensUsed: 0 },
+      transactionsCount: 0,
+      totalPaidUSD: 0,
+    }));
+
+    const combinedUsers = mappedDbUsers.length > 0 ? mappedDbUsers : studioUsersState;
     const totalTokens = studioUsersState.reduce((acc, u) => acc + (u.usage?.totalTokensUsed || 0), 0);
     const totalRev = studioUsersState.reduce((acc, u) => acc + (u.totalPaidUSD || 0), 0);
 
     return res.json({
       success: true,
-      users: studioUsersState,
+      users: combinedUsers,
       transactions: [],
       metrics: {
-        totalUsers: studioUsersState.length,
+        totalUsers: combinedUsers.length,
         totalTokensUsed: totalTokens || 184500,
         totalRevenueUSD: totalRev || 249.00,
-        activePaidSubscribers: studioUsersState.filter(u => u.tier !== "free").length
+        activePaidSubscribers: combinedUsers.filter(u => u.tier !== "free").length
       },
-      source: "nepalai-studio-bridge",
+      source: "nepalai-cloudsql-bridge",
       timestamp: new Date().toISOString()
     });
   });
 
   // 2. POST /api/admin/studio/user/:id/update -> Updates credits, tier, roles, or resets daily trial quota
-  app.post("/api/admin/studio/user/:id/update", async (req, res) => {
+  app.post("/api/admin/studio/user/:id/update", requireAuth, requireSuperAdmin, async (req, res) => {
     const { id } = req.params;
     const { credits, tier, role, resetTrial } = req.body;
 
@@ -1239,7 +2404,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // 3. GET /api/admin/studio/daily-reset-audit -> Audits 24-hr daily free quota reset cycle
-  app.get("/api/admin/studio/daily-reset-audit", async (req, res) => {
+  app.get("/api/admin/studio/daily-reset-audit", requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/admin/daily-reset-audit");
     if (remote.success && remote.data) {
       return res.json(remote.data);
@@ -1260,7 +2425,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // 4. POST /api/admin/studio/pricing -> Updates real-time credit package pricing (NPR & USD)
-  app.post("/api/admin/studio/pricing", async (req, res) => {
+  app.post("/api/admin/studio/pricing", requireAuth, requireSuperAdmin, async (req, res) => {
     const { tiers } = req.body;
     if (tiers && Array.isArray(tiers)) {
       studioPricingState = tiers;
@@ -1277,8 +2442,8 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
     });
   });
 
-  // 5. GET /api/admin/studio/verify-studio-suite -> Audits all AI engines (Azure Sora-2, GPT-Image, Azure TTS, HF)
-  app.get("/api/admin/studio/verify-studio-suite", async (req, res) => {
+  // 5. GET /api/admin/studio/verify-studio-suite -> Audits all AI engines
+  app.get("/api/admin/studio/verify-studio-suite", requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/admin/verify-studio-suite");
     if (remote.success && remote.data) {
       return res.json(remote.data);
@@ -1298,24 +2463,34 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // 6. GET /api/admin/studio/postgres/verify -> Verifies PostgreSQL Cloud SQL latency and tables
-  app.get("/api/admin/studio/postgres/verify", async (req, res) => {
-    const remote = await proxyStudioCall("/api/admin/postgres/verify");
-    if (remote.success && remote.data) {
-      return res.json(remote.data);
+  app.get("/api/admin/studio/postgres/verify", requireAuth, requireSuperAdmin, async (req, res) => {
+    const start = Date.now();
+    try {
+      const result = await pool.query(
+        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
+      );
+      return res.json({
+        success: true,
+        database: process.env.SQL_DB_NAME || "app_db",
+        connection: "healthy",
+        latencyMs: Math.max(1, Date.now() - start),
+        tables: result.rows.map((r: any) => r.table_name),
+        ssl: "CloudSQL_Auth_Proxy"
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        success: false,
+        database: process.env.SQL_DB_NAME || "app_db",
+        connection: "error",
+        latencyMs: Date.now() - start,
+        tables: [],
+        error: "Cloud SQL query check failed"
+      });
     }
-
-    return res.json({
-      success: true,
-      database: "nepalai_studio_cloudsql",
-      connection: "healthy",
-      latencyMs: 12,
-      tables: ["users", "tokens", "transactions", "inquiries", "models", "audit_logs"],
-      ssl: "TLS_1_3_STRICT"
-    });
   });
 
   // 7. Diagnostic Heartbeat endpoint aliases
-  app.get(["/api/diagnostic", "/api/admin/studio/diagnostic"], async (req, res) => {
+  app.get(["/api/diagnostic", "/api/admin/studio/diagnostic"], requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/diagnostic");
     if (remote.success && remote.data) {
       return res.json(remote.data);
@@ -1334,7 +2509,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // 8. AI Credentials Diagnostic endpoint aliases
-  app.get(["/api/diagnostic/ai-credentials", "/api/admin/studio/diagnostic/ai-credentials"], async (req, res) => {
+  app.get(["/api/diagnostic/ai-credentials", "/api/admin/studio/diagnostic/ai-credentials"], requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/diagnostic/ai-credentials");
     if (remote.success && remote.data) {
       return res.json(remote.data);
@@ -1350,7 +2525,7 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // 9. Storage Diagnostic endpoint aliases
-  app.get(["/api/diagnostic/storage/r2", "/api/admin/studio/diagnostic/storage/r2"], async (req, res) => {
+  app.get(["/api/diagnostic/storage/r2", "/api/admin/studio/diagnostic/storage/r2"], requireAuth, requireSuperAdmin, async (req, res) => {
     const remote = await proxyStudioCall("/api/diagnostic/storage/r2");
     if (remote.success && remote.data) {
       return res.json(remote.data);
@@ -1368,644 +2543,366 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
   });
 
   // =========================================================================
-  // NEPALAI COMMERCE MULTI-TENANT BACKEND APIS
+  // NEPALAI COMMERCE MULTI-TENANT BACKEND APIS (CLOUD SQL POSTGRESQL)
   // =========================================================================
 
-  const COMMERCE_DATA_PATH = path.join(process.cwd(), "data-commerce.json");
-
-  const defaultCommerceState = {
-    categories: [
-      {
-        id: "cat_agro_01",
-        businessId: "biz_default",
-        name: "Himalayan Organic Agro & Coffee",
-        slug: "himalayan-organic-agro",
-        description: "Direct mountain farm products with organic traceability",
-        imageUrl: "/api/storage/mock-media?key=categories/coffee.jpg",
-        displayOrder: "1"
-      },
-      {
-        id: "cat_tech_02",
-        businessId: "biz_default",
-        name: "Sovereign AI Appliances & Kits",
-        slug: "sovereign-ai-hardware",
-        description: "Local Devanagari OCR scanners and air-gapped edge devices",
-        imageUrl: "/api/storage/mock-media?key=categories/ai_device.jpg",
-        displayOrder: "2"
-      },
-      {
-        id: "cat_handicraft_03",
-        businessId: "biz_default",
-        name: "Handcrafted Heritage & Dhaka",
-        slug: "heritage-dhaka",
-        description: "Authentic Palpali Dhaka textiles and Pashmina shawls",
-        imageUrl: "/api/storage/mock-media?key=categories/dhaka.jpg",
-        displayOrder: "3"
-      }
-    ],
-    products: [
-      {
-        id: "prod_coffee_101",
-        businessId: "biz_default",
-        categoryId: "cat_agro_01",
-        title: "Single-Origin Nuwakot Highland Coffee (500g)",
-        slug: "single-origin-nuwakot-coffee",
-        description: "Grown at 1,450m elevation in Nuwakot. Hand-picked, washed Arabica beans with hints of dark cocoa and Himalayan citrus. Perfect for espresso and French press.",
-        priceNpr: "1250",
-        compareAtPriceNpr: "1450",
-        costPerItemNpr: "800",
-        sku: "NWK-COF-500",
-        barcode: "8901234567890",
-        inventoryQuantity: "42",
-        trackQuantity: true,
-        status: "active",
-        images: [
-          { key: "tenants/biz_default/products/coffee-beans.jpg", url: "/api/storage/mock-media?key=products/coffee-beans.jpg", alt: "Nuwakot Highland Coffee" }
-        ],
-        metadata: { weightGrams: 500, origin: "Nuwakot, Nepal", roaster: "Kathmandu Artisan Roasters" }
-      },
-      {
-        id: "prod_ocr_device_102",
-        businessId: "biz_default",
-        categoryId: "cat_tech_02",
-        title: "NepalAI Devanagari OCR Scanner Appliance V2",
-        slug: "nepalai-devanagari-ocr-scanner",
-        description: "Plug-and-play local edge document scanner with onboard Devanagari OCR model. Scans Nepali Citizenship Cards, Lalpurja land deeds, and Ward bills in 350ms with zero cloud egress.",
-        priceNpr: "28500",
-        compareAtPriceNpr: "32000",
-        costPerItemNpr: "19000",
-        sku: "NEP-OCR-HW02",
-        barcode: "8909876543210",
-        inventoryQuantity: "14",
-        trackQuantity: true,
-        status: "active",
-        images: [
-          { key: "tenants/biz_default/products/ocr-scanner.jpg", url: "/api/storage/mock-media?key=products/ocr-scanner.jpg", alt: "NepalAI Sovereign OCR Scanner" }
-        ],
-        metadata: { warrantyMonths: 12, interface: "USB-C & Gigabit LAN", chip: "Hailo-8 / Edge LPU" }
-      },
-      {
-        id: "prod_tea_103",
-        businessId: "biz_default",
-        categoryId: "cat_agro_01",
-        title: "Ilam First Flush Golden Tips Organic Tea (250g)",
-        slug: "ilam-first-flush-golden-tips",
-        description: "Certified organic orthodox black tea harvested from high-altitude gardens of Ilam, Eastern Nepal. Rich muscatel bouquet and smooth finish.",
-        priceNpr: "950",
-        compareAtPriceNpr: "1150",
-        costPerItemNpr: "550",
-        sku: "ILM-TEA-250",
-        barcode: "8905671234567",
-        inventoryQuantity: "68",
-        trackQuantity: true,
-        status: "active",
-        images: [
-          { key: "tenants/biz_default/products/ilam-tea.jpg", url: "/api/storage/mock-media?key=products/ilam-tea.jpg", alt: "Ilam First Flush Tea" }
-        ],
-        metadata: { harvestSeason: "Spring 2026", altitudeM: 1800, grade: "FTGFOP1" }
-      },
-      {
-        id: "prod_dhaka_104",
-        businessId: "biz_default",
-        categoryId: "cat_handicraft_03",
-        title: "Palpali Handwoven Dhaka Executive Sleeve (14-inch)",
-        slug: "palpali-handwoven-dhaka-laptop-sleeve",
-        description: "Traditional geometric hand-loomed Palpali Dhaka pattern lined with shock-absorbent wool felt. Fits MacBook Pro 14 and standard ultrabooks.",
-        priceNpr: "2200",
-        compareAtPriceNpr: "2600",
-        costPerItemNpr: "1300",
-        sku: "PLP-DHK-SLV14",
-        barcode: "8903456789012",
-        inventoryQuantity: "25",
-        trackQuantity: true,
-        status: "active",
-        images: [
-          { key: "tenants/biz_default/products/dhaka-sleeve.jpg", url: "/api/storage/mock-media?key=products/dhaka-sleeve.jpg", alt: "Palpali Dhaka Sleeve" }
-        ],
-        metadata: { weave: "100% Cotton Handloom", location: "Tansen, Palpa" }
-      }
-    ],
-    customers: [
-      {
-        id: "cust_101",
-        businessId: "biz_default",
-        fullName: "Aayush Maharjan",
-        phone: "+977 9841234567",
-        email: "aayush.m@gmail.com",
-        address: "Patan Dhoka, Lalitpur",
-        city: "Lalitpur",
-        totalOrders: "2",
-        totalSpendNpr: "4100"
-      },
-      {
-        id: "cust_102",
-        businessId: "biz_default",
-        fullName: "Sujata Gurung",
-        phone: "+977 9801987654",
-        email: "sujata.g@techhub.np",
-        address: "Lakeside, Pokhara",
-        city: "Pokhara",
-        totalOrders: "1",
-        totalSpendNpr: "28500"
-      }
-    ],
-    orders: [
-      {
-        id: "ord_2081_1001",
-        businessId: "biz_default",
-        customerId: "cust_101",
-        orderNumber: "ORD-2081-1001",
-        subtotalNpr: "3450",
-        deliveryChargeNpr: "150",
-        discountNpr: "0",
-        totalNpr: "3600",
-        paymentMethod: "esewa",
-        paymentStatus: "paid",
-        fulfillmentStatus: "delivered",
-        shippingAddress: {
-          fullName: "Aayush Maharjan",
-          phone: "+977 9841234567",
-          address: "Patan Dhoka, Ward 3",
-          city: "Lalitpur",
-          province: "Bagmati"
-        },
-        items: [
-          {
-            id: "item_01",
-            productId: "prod_coffee_101",
-            title: "Single-Origin Nuwakot Highland Coffee (500g)",
-            unitPriceNpr: "1250",
-            quantity: "2",
-            totalPriceNpr: "2500"
-          },
-          {
-            id: "item_02",
-            productId: "prod_tea_103",
-            title: "Ilam First Flush Golden Tips Organic Tea (250g)",
-            unitPriceNpr: "950",
-            quantity: "1",
-            totalPriceNpr: "950"
-          }
-        ],
-        notes: "Deliver before 4 PM to Patan office",
-        createdAt: new Date(Date.now() - 3600000 * 48).toISOString()
-      },
-      {
-        id: "ord_2081_1002",
-        businessId: "biz_default",
-        customerId: "cust_102",
-        orderNumber: "ORD-2081-1002",
-        subtotalNpr: "28500",
-        deliveryChargeNpr: "0",
-        discountNpr: "0",
-        totalNpr: "28500",
-        paymentMethod: "khalti",
-        paymentStatus: "paid",
-        fulfillmentStatus: "processing",
-        shippingAddress: {
-          fullName: "Sujata Gurung",
-          phone: "+977 9801987654",
-          address: "Lakeside Street 6, Pokhara",
-          city: "Pokhara",
-          province: "Gandaki"
-        },
-        items: [
-          {
-            id: "item_03",
-            productId: "prod_ocr_device_102",
-            title: "NepalAI Devanagari OCR Scanner Appliance V2",
-            unitPriceNpr: "28500",
-            quantity: "1",
-            totalPriceNpr: "28500"
-          }
-        ],
-        notes: "Corporate warranty certificate required",
-        createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
-      }
-    ],
-    payments: [
-      {
-        id: "pay_01",
-        orderId: "ord_2081_1001",
-        businessId: "biz_default",
-        gateway: "esewa",
-        transactionId: "ESW-9840129",
-        amountNpr: "3600",
-        status: "verified",
-        rawResponse: { mode: "esewa_epay", refId: "ESW-9840129", status: "COMPLETE" },
-        verifiedAt: new Date(Date.now() - 3600000 * 48).toISOString()
-      },
-      {
-        id: "pay_02",
-        orderId: "ord_2081_1002",
-        businessId: "biz_default",
-        gateway: "khalti",
-        transactionId: "KHLTI-8910471",
-        amountNpr: "28500",
-        status: "verified",
-        rawResponse: { mode: "khalti_v2", pidx: "KHLTI-8910471", status: "Completed" },
-        verifiedAt: new Date(Date.now() - 3600000 * 5).toISOString()
-      }
-    ]
-  };
-
-  const loadCommerceData = () => {
+  // 1. GET /api/commerce/categories (Public storefront read)
+  app.get("/api/commerce/categories", async (req, res) => {
     try {
-      if (fs.existsSync(COMMERCE_DATA_PATH)) {
-        const raw = fs.readFileSync(COMMERCE_DATA_PATH, "utf-8");
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.products) && parsed.products.length > 0) {
-          return parsed;
-        }
+      const businessId = (req.query.businessId as string) || "biz_default";
+      const cats = await getCategoriesByBusiness(businessId);
+      return res.json({ success: true, count: cats.length, categories: cats });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load categories" });
+    }
+  });
+
+  // 2. POST /api/commerce/categories (Protected tenant mutation)
+  app.post("/api/commerce/categories", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { name, slug, description, imageUrl, businessId = "biz_default" } = req.body;
+      if (!name) {
+        return res.status(400).json({ error: "Category name is required" });
       }
-    } catch (e) {
-      console.error("Error reading data-commerce.json:", e);
+      if (!(await ensureBusinessAuthorization(req, res, businessId))) return;
+
+      const created = await createCategoryRecord({ businessId, name, slug, description, imageUrl });
+      return res.json({ success: true, category: created });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to create category" });
     }
+  });
+
+  // 3. GET /api/commerce/products (Public for active storefront; tenant-checked for drafts/all)
+  app.get("/api/commerce/products", optionalAuth, async (req: AuthRequest, res) => {
     try {
-      fs.writeFileSync(COMMERCE_DATA_PATH, JSON.stringify(defaultCommerceState, null, 2), "utf-8");
-    } catch (e) {
-      console.error("Error initializing data-commerce.json:", e);
-    }
-    return JSON.parse(JSON.stringify(defaultCommerceState));
-  };
+      const businessId = (req.query.businessId as string) || "biz_default";
+      const categoryId = req.query.categoryId as string;
+      const requestedStatus = (req.query.status as string) || "active";
+      const search = (req.query.q as string) || "";
 
-  let commerceState = loadCommerceData();
-
-  const persistCommerceData = () => {
-    try {
-      fs.writeFileSync(COMMERCE_DATA_PATH, JSON.stringify(commerceState, null, 2), "utf-8");
-    } catch (e) {
-      console.error("Failed to write to data-commerce.json:", e);
-    }
-  };
-
-  // 1. GET /api/commerce/categories
-  app.get("/api/commerce/categories", (req, res) => {
-    const businessId = (req.query.businessId as string) || "biz_default";
-    const categories = commerceState.categories.filter((c: any) => c.businessId === businessId || businessId === "all");
-    return res.json({ success: true, count: categories.length, categories });
-  });
-
-  // 2. POST /api/commerce/categories
-  app.post("/api/commerce/categories", (req, res) => {
-    const { name, slug, description, imageUrl, businessId = "biz_default" } = req.body;
-    if (!name) {
-      return res.status(400).json({ error: "Category name is required" });
-    }
-
-    const newCategory = {
-      id: `cat_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      businessId,
-      name: name.trim(),
-      slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      description: description || "",
-      imageUrl: imageUrl || "",
-      displayOrder: String(commerceState.categories.length + 1)
-    };
-
-    commerceState.categories.push(newCategory);
-    persistCommerceData();
-
-    return res.json({ success: true, category: newCategory });
-  });
-
-  // 3. GET /api/commerce/products
-  app.get("/api/commerce/products", (req, res) => {
-    const businessId = (req.query.businessId as string) || "biz_default";
-    const categoryId = req.query.categoryId as string;
-    const status = req.query.status as string;
-    const search = ((req.query.q || "") as string).toLowerCase().trim();
-
-    let items = commerceState.products.filter((p: any) => p.businessId === businessId || businessId === "all");
-
-    if (categoryId && categoryId !== "all") {
-      items = items.filter((p: any) => p.categoryId === categoryId);
-    }
-
-    if (status && status !== "all") {
-      items = items.filter((p: any) => p.status === status);
-    }
-
-    if (search) {
-      items = items.filter((p: any) => 
-        (p.title || "").toLowerCase().includes(search) || 
-        (p.description || "").toLowerCase().includes(search) ||
-        (p.sku || "").toLowerCase().includes(search)
-      );
-    }
-
-    return res.json({
-      success: true,
-      count: items.length,
-      products: items
-    });
-  });
-
-  // 4. POST /api/commerce/products
-  app.post("/api/commerce/products", (req, res) => {
-    const {
-      title,
-      description,
-      priceNpr,
-      compareAtPriceNpr,
-      costPerItemNpr,
-      categoryId,
-      sku,
-      barcode,
-      inventoryQuantity = "0",
-      trackQuantity = true,
-      status = "active",
-      images = [],
-      metadata = {},
-      businessId = "biz_default"
-    } = req.body;
-
-    if (!title || !priceNpr) {
-      return res.status(400).json({ error: "Product title and priceNpr are required" });
-    }
-
-    const newProduct = {
-      id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      businessId,
-      categoryId: categoryId || null,
-      title: title.trim(),
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      description: description || "",
-      priceNpr: String(priceNpr),
-      compareAtPriceNpr: compareAtPriceNpr ? String(compareAtPriceNpr) : null,
-      costPerItemNpr: costPerItemNpr ? String(costPerItemNpr) : null,
-      sku: sku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
-      barcode: barcode || null,
-      inventoryQuantity: String(inventoryQuantity),
-      trackQuantity: Boolean(trackQuantity),
-      status: status || "active",
-      images: Array.isArray(images) ? images : [],
-      metadata: metadata || {},
-      createdAt: new Date().toISOString()
-    };
-
-    commerceState.products.unshift(newProduct);
-    persistCommerceData();
-
-    return res.json({ success: true, product: newProduct });
-  });
-
-  // 5. PATCH /api/commerce/products/:id
-  app.patch("/api/commerce/products/:id", (req, res) => {
-    const { id } = req.params;
-    const index = commerceState.products.findIndex((p: any) => p.id === id);
-    if (index === -1) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    const updated = {
-      ...commerceState.products[index],
-      ...req.body,
-      id, // Preserve ID
-      updatedAt: new Date().toISOString()
-    };
-
-    commerceState.products[index] = updated;
-    persistCommerceData();
-
-    return res.json({ success: true, product: updated });
-  });
-
-  // 6. DELETE /api/commerce/products/:id
-  app.delete("/api/commerce/products/:id", (req, res) => {
-    const { id } = req.params;
-    const initialLen = commerceState.products.length;
-    commerceState.products = commerceState.products.filter((p: any) => p.id !== id);
-
-    if (commerceState.products.length !== initialLen) {
-      persistCommerceData();
-      return res.json({ success: true, message: "Product deleted successfully" });
-    }
-    return res.status(404).json({ error: "Product not found" });
-  });
-
-  // 7. GET /api/commerce/orders
-  app.get("/api/commerce/orders", (req, res) => {
-    const businessId = (req.query.businessId as string) || "biz_default";
-    const status = req.query.status as string;
-    const paymentStatus = req.query.paymentStatus as string;
-
-    let orders = commerceState.orders.filter((o: any) => o.businessId === businessId || businessId === "all");
-
-    if (status && status !== "all") {
-      orders = orders.filter((o: any) => o.fulfillmentStatus === status);
-    }
-    if (paymentStatus && paymentStatus !== "all") {
-      orders = orders.filter((o: any) => o.paymentStatus === paymentStatus);
-    }
-
-    return res.json({ success: true, count: orders.length, orders });
-  });
-
-  // 8. POST /api/commerce/orders
-  app.post("/api/commerce/orders", (req, res) => {
-    const {
-      businessId = "biz_default",
-      customer,
-      items,
-      paymentMethod = "cod",
-      deliveryChargeNpr = 100,
-      notes = ""
-    } = req.body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Order must contain at least one item" });
-    }
-    if (!customer || !customer.fullName || !customer.phone) {
-      return res.status(400).json({ error: "Customer full name and phone number are required" });
-    }
-
-    // Calculate subtotal
-    let subtotal = 0;
-    const orderItemsList = items.map((item: any) => {
-      const unitPrice = parseFloat(item.unitPriceNpr || item.priceNpr || "0");
-      const qty = parseInt(item.quantity || "1", 10);
-      const totalItemPrice = unitPrice * qty;
-      subtotal += totalItemPrice;
-
-      // Update product inventory if tracked
-      const prod = commerceState.products.find((p: any) => p.id === item.productId);
-      if (prod && prod.trackQuantity) {
-        const currentQty = parseInt(prod.inventoryQuantity || "0", 10);
-        prod.inventoryQuantity = String(Math.max(0, currentQty - qty));
+      if (requestedStatus !== "active") {
+        if (!(await ensureBusinessAuthorization(req, res, businessId))) return;
       }
 
-      return {
-        id: `item_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        productId: item.productId || null,
-        title: item.title || "Product Item",
-        unitPriceNpr: String(unitPrice),
-        quantity: String(qty),
-        totalPriceNpr: String(totalItemPrice)
-      };
-    });
-
-    const deliveryNum = parseFloat(deliveryChargeNpr) || 0;
-    const totalNpr = subtotal + deliveryNum;
-
-    // Record or update customer
-    let custId = customer.id;
-    const existingCust = commerceState.customers.find((c: any) => c.phone === customer.phone);
-    if (existingCust) {
-      custId = existingCust.id;
-      existingCust.totalOrders = String(parseInt(existingCust.totalOrders || "0", 10) + 1);
-      existingCust.totalSpendNpr = String(parseFloat(existingCust.totalSpendNpr || "0") + totalNpr);
-    } else {
-      custId = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-      commerceState.customers.push({
-        id: custId,
+      const items = await getProductsByFilter({
         businessId,
-        fullName: customer.fullName,
-        phone: customer.phone,
-        email: customer.email || "",
-        address: customer.address || "",
-        city: customer.city || "Kathmandu",
-        totalOrders: "1",
-        totalSpendNpr: String(totalNpr)
+        categoryId,
+        status: requestedStatus,
+        search,
       });
+
+      return res.json({ success: true, count: items.length, products: items });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to fetch products" });
     }
+  });
 
-    const orderNumber = `ORD-2081-${1000 + commerceState.orders.length + 1}`;
-    const newOrder = {
-      id: `ord_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      businessId,
-      customerId: custId,
-      orderNumber,
-      subtotalNpr: String(subtotal),
-      deliveryChargeNpr: String(deliveryNum),
-      discountNpr: "0",
-      totalNpr: String(totalNpr),
-      paymentMethod, // 'esewa' | 'khalti' | 'fonepay' | 'cod'
-      paymentStatus: paymentMethod === "cod" ? "pending" : (paymentMethod === "esewa" || paymentMethod === "khalti" ? "pending" : "pending"),
-      fulfillmentStatus: "unfulfilled",
-      shippingAddress: {
-        fullName: customer.fullName,
-        phone: customer.phone,
-        address: customer.address || "Kathmandu Valley",
-        city: customer.city || "Kathmandu"
-      },
-      items: orderItemsList,
-      notes,
-      createdAt: new Date().toISOString()
-    };
+  // 4. POST /api/commerce/products (Protected tenant mutation)
+  app.post("/api/commerce/products", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const {
+        title,
+        description,
+        priceNpr,
+        compareAtPriceNpr,
+        costPerItemNpr,
+        categoryId,
+        sku,
+        barcode,
+        inventoryQuantity = "0",
+        trackQuantity = true,
+        status = "active",
+        images = [],
+        metadata = {},
+        businessId = "biz_default"
+      } = req.body;
 
-    commerceState.orders.unshift(newOrder);
-    persistCommerceData();
+      if (!title || !priceNpr) {
+        return res.status(400).json({ error: "Product title and priceNpr are required" });
+      }
+      if (!(await ensureBusinessAuthorization(req, res, businessId))) return;
 
-    // Generate WhatsApp notification dispatch link
-    const wa = generateWhatsAppOrderAlert({
-      businessName: "NepalAI Commerce",
-      customerPhone: customer.phone,
-      customerName: customer.fullName,
-      orderNumber,
-      items: orderItemsList.map((i: any) => ({
-        title: i.title,
-        quantity: i.quantity,
-        priceNpr: i.totalPriceNpr
-      })),
-      totalNpr: String(totalNpr),
-      deliveryAddress: customer.address || "Kathmandu",
-      paymentMethod,
-      paymentStatus: newOrder.paymentStatus
-    });
+      const product = await createProductRecord({
+        businessId,
+        categoryId,
+        title,
+        description,
+        priceNpr: String(priceNpr),
+        compareAtPriceNpr,
+        costPerItemNpr,
+        sku,
+        barcode,
+        inventoryQuantity: String(inventoryQuantity),
+        trackQuantity,
+        status,
+        images,
+        metadata,
+      });
 
+      return res.json({ success: true, product });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to create product" });
+    }
+  });
+
+  // 5. PATCH /api/commerce/products/:id (Protected tenant mutation)
+  app.patch("/api/commerce/products/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const existing = await getProductById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      if (!(await ensureBusinessAuthorization(req, res, existing.businessId))) return;
+
+      const updated = await updateProductRecord(req.params.id, req.body);
+      return res.json({ success: true, product: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update product" });
+    }
+  });
+
+  // 6. DELETE /api/commerce/products/:id (Protected tenant mutation)
+  app.delete("/api/commerce/products/:id", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const existing = await getProductById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      if (!(await ensureBusinessAuthorization(req, res, existing.businessId))) return;
+
+      await deleteProductRecord(req.params.id);
+      return res.json({ success: true, message: "Product deleted successfully" });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to delete product" });
+    }
+  });
+
+  // 7. GET /api/commerce/orders (Protected merchant ledger)
+  app.get("/api/commerce/orders", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const businessId = (req.query.businessId as string) || "biz_default";
+      if (!(await ensureBusinessAuthorization(req, res, businessId))) return;
+
+      const orders = await getOrdersWithItems({
+        businessId,
+        status: req.query.status as string,
+        paymentStatus: req.query.paymentStatus as string,
+      });
+
+      return res.json({ success: true, count: orders.length, orders });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load orders" });
+    }
+  });
+
+  // 8. POST /api/commerce/orders (Public shopper checkout)
+  app.post("/api/commerce/orders", async (req, res) => {
+    try {
+      const {
+        businessId = "biz_default",
+        customer,
+        items,
+        paymentMethod = "cod",
+        deliveryChargeNpr = 100,
+        notes = ""
+      } = req.body;
+
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: "Order must contain at least one item" });
+      }
+      if (!customer || !customer.fullName || !customer.phone) {
+        return res.status(400).json({ error: "Customer full name and phone number are required" });
+      }
+
+      const newOrder = await createOrderRecord({
+        businessId,
+        customer,
+        items,
+        paymentMethod,
+        deliveryChargeNpr,
+        notes,
+      });
+
+      const wa = generateWhatsAppOrderAlert({
+        businessName: "NepalAI Commerce",
+        customerPhone: customer.phone,
+        customerName: customer.fullName,
+        orderNumber: newOrder.orderNumber,
+        items: newOrder.items.map((i: any) => ({
+          title: i.title,
+          quantity: i.quantity,
+          priceNpr: i.totalPriceNpr
+        })),
+        totalNpr: String(newOrder.totalNpr),
+        deliveryAddress: customer.address || "Kathmandu",
+        paymentMethod,
+        paymentStatus: newOrder.paymentStatus
+      });
+
+      return res.json({
+        success: true,
+        order: newOrder,
+        whatsappAlert: wa
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to place order" });
+    }
+  });
+
+  // 9. PATCH /api/commerce/orders/:id/status (Protected merchant fulfillment)
+  app.patch("/api/commerce/orders/:id/status", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const existing = await getOrderByIdOrNumber(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      if (!(await ensureBusinessAuthorization(req, res, existing.businessId))) return;
+
+      const { fulfillmentStatus, paymentStatus } = req.body;
+      const updated = await updateOrderStatusRecord(req.params.id, {
+        fulfillmentStatus,
+        paymentStatus,
+      });
+
+      return res.json({ success: true, order: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update order status" });
+    }
+  });
+
+  // 10. POST /api/commerce/orders/:id/notify (Protected WhatsApp Dispatch Generator)
+  app.post("/api/commerce/orders/:id/notify", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const order = await getOrderByIdOrNumber(req.params.id);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      if (!(await ensureBusinessAuthorization(req, res, order.businessId))) return;
+
+      const wa = generateWhatsAppOrderAlert({
+        businessName: "NepalAI Commerce",
+        customerPhone: order.shippingAddress?.phone || "+977 9841000000",
+        customerName: order.shippingAddress?.fullName || "Valued Shopper",
+        orderNumber: order.orderNumber,
+        items: (order.items || []).map((i: any) => ({
+          title: i.title,
+          quantity: i.quantity,
+          priceNpr: i.totalPriceNpr
+        })),
+        totalNpr: order.totalNpr,
+        deliveryAddress: `${order.shippingAddress?.address || ''}, ${order.shippingAddress?.city || ''}`,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus
+      });
+
+      return res.json({ success: true, whatsapp: wa });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to build notification" });
+    }
+  });
+
+  // 10.5 GET /api/commerce/payments/status (Protected non-secret gateway readiness)
+  app.get("/api/commerce/payments/status", requireAuth, (req: AuthRequest, res) => {
+    const status = getGatewayReadinessStatus();
     return res.json({
       success: true,
-      order: newOrder,
-      whatsappAlert: wa
+      ...status,
+      r2Configured: isR2Configured(),
+      smtpConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+      appUrl: process.env.APP_URL || "https://nepalai.tech",
     });
   });
 
-  // 9. PATCH /api/commerce/orders/:id/status
-  app.patch("/api/commerce/orders/:id/status", (req, res) => {
-    const { id } = req.params;
-    const { fulfillmentStatus, paymentStatus } = req.body;
+  // 10.6 POST /api/commerce/payments/esewa/initiate (Server-authoritative eSewa v2 HMAC payload)
+  app.post("/api/commerce/payments/esewa/initiate", async (req, res) => {
+    try {
+      const { orderIdOrNumber, successUrl, failureUrl } = req.body;
+      if (!orderIdOrNumber) {
+        return res.status(400).json({ error: "orderIdOrNumber is required" });
+      }
+      const order = await getOrderByIdOrNumber(orderIdOrNumber);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
 
-    const order = commerceState.orders.find((o: any) => o.id === id || o.orderNumber === id);
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+      const payload = createEsewaV2FormPayload({
+        amt: order.subtotalNpr,
+        deliveryCharge: order.deliveryChargeNpr,
+        totalAmt: order.totalNpr,
+        transactionUuid: order.orderNumber,
+        successUrl: successUrl || `${baseUrl}/#commerce`,
+        failureUrl: failureUrl || `${baseUrl}/#commerce`,
+      });
+
+      return res.json({
+        success: true,
+        orderNumber: order.orderNumber,
+        totalNpr: Number(order.totalNpr),
+        ...payload,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || "Failed to initiate eSewa v2 payment" });
     }
-
-    if (fulfillmentStatus) order.fulfillmentStatus = fulfillmentStatus;
-    if (paymentStatus) order.paymentStatus = paymentStatus;
-    order.updatedAt = new Date().toISOString();
-
-    persistCommerceData();
-
-    return res.json({ success: true, order });
-  });
-
-  // 10. POST /api/commerce/orders/:id/notify (WhatsApp Dispatch Generator)
-  app.post("/api/commerce/orders/:id/notify", (req, res) => {
-    const { id } = req.params;
-    const order = commerceState.orders.find((o: any) => o.id === id || o.orderNumber === id);
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-
-    const wa = generateWhatsAppOrderAlert({
-      businessName: "NepalAI Commerce",
-      customerPhone: order.shippingAddress?.phone || "+977 9841000000",
-      customerName: order.shippingAddress?.fullName || "Valued Shopper",
-      orderNumber: order.orderNumber,
-      items: (order.items || []).map((i: any) => ({
-        title: i.title,
-        quantity: i.quantity,
-        priceNpr: i.totalPriceNpr
-      })),
-      totalNpr: order.totalNpr,
-      deliveryAddress: `${order.shippingAddress?.address || ''}, ${order.shippingAddress?.city || ''}`,
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus
-    });
-
-    return res.json({
-      success: true,
-      whatsapp: wa
-    });
   });
 
   // 11. POST /api/commerce/payments/esewa/verify
   app.post("/api/commerce/payments/esewa/verify", async (req, res) => {
     try {
-      const { amt, oid, refId, scd } = req.body;
-      const verification = await verifyEsewaPayment({ amt, oid, refId, scd });
+      const { amt, oid, refId, scd, encodedData } = req.body;
+      const verification = await verifyEsewaPayment({ amt, oid, refId, scd, encodedData });
 
-      if (verification.verified) {
-        // Find order and update to paid
-        const order = commerceState.orders.find((o: any) => o.id === oid || o.orderNumber === oid);
-        if (order) {
-          order.paymentStatus = "paid";
-          order.paymentMethod = "esewa";
-        }
-
-        // Record payment
-        const newPayment = {
-          id: `pay_${Date.now()}`,
-          orderId: order ? order.id : oid,
-          businessId: order ? order.businessId : "biz_default",
-          gateway: "esewa",
-          transactionId: verification.transactionId,
-          amountNpr: String(verification.amountNpr),
-          status: "verified",
-          rawResponse: verification.rawResponse,
-          verifiedAt: new Date().toISOString()
-        };
-        commerceState.payments.unshift(newPayment);
-        persistCommerceData();
+      if (!verification.verified) {
+        return res.status(400).json({ success: false, ...verification });
       }
 
+      const updatedOrder = await recordVerifiedPayment({
+        orderIdOrNumber: verification.orderId || oid,
+        gateway: "esewa",
+        transactionId: verification.transactionId,
+        amountNpr: verification.amountNpr,
+        rawResponse: verification.rawResponse,
+      });
+
+      return res.json({ success: true, ...verification, order: updatedOrder });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, error: err.message || "Failed to verify eSewa payment" });
+    }
+  });
+
+  // 11.5 POST /api/commerce/payments/khalti/initiate
+  app.post("/api/commerce/payments/khalti/initiate", async (req, res) => {
+    try {
+      const { orderIdOrNumber, returnUrl, websiteUrl } = req.body;
+      if (!orderIdOrNumber) {
+        return res.status(400).json({ error: "orderIdOrNumber is required" });
+      }
+      const order = await getOrderByIdOrNumber(orderIdOrNumber);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+      const initiation = await initiateKhaltiPayment({
+        amountNpr: order.totalNpr,
+        purchaseOrderId: order.orderNumber,
+        purchaseOrderName: `Order #${order.orderNumber}`,
+        returnUrl: returnUrl || `${baseUrl}/#commerce`,
+        websiteUrl: websiteUrl || baseUrl,
+        customerInfo: {
+          name: order.shippingAddress?.fullName,
+          phone: order.shippingAddress?.phone,
+        },
+      });
+
       return res.json({
-        success: verification.verified,
-        ...verification
+        ...initiation,
+        orderNumber: order.orderNumber,
+        totalNpr: Number(order.totalNpr),
       });
     } catch (err: any) {
-      return res.status(500).json({ error: err.message || "Failed to verify eSewa payment" });
+      return res.status(500).json({ error: err.message || "Failed to initiate Khalti payment" });
     }
   });
 
@@ -2015,35 +2912,55 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
       const { pidx, amountNpr, orderId } = req.body;
       const verification = await verifyKhaltiPayment({ pidx, amountNpr });
 
-      if (verification.verified) {
-        // Find order and update to paid
-        const order = commerceState.orders.find((o: any) => o.id === orderId || o.orderNumber === orderId);
-        if (order) {
-          order.paymentStatus = "paid";
-          order.paymentMethod = "khalti";
-        }
-
-        const newPayment = {
-          id: `pay_${Date.now()}`,
-          orderId: order ? order.id : (orderId || pidx),
-          businessId: order ? order.businessId : "biz_default",
-          gateway: "khalti",
-          transactionId: verification.transactionId,
-          amountNpr: String(verification.amountNpr),
-          status: "verified",
-          rawResponse: verification.rawResponse,
-          verifiedAt: new Date().toISOString()
-        };
-        commerceState.payments.unshift(newPayment);
-        persistCommerceData();
+      if (!verification.verified) {
+        return res.status(400).json({ success: false, ...verification });
       }
 
+      const updatedOrder = await recordVerifiedPayment({
+        orderIdOrNumber: orderId || pidx,
+        gateway: "khalti",
+        transactionId: verification.transactionId,
+        amountNpr: verification.amountNpr,
+        rawResponse: verification.rawResponse,
+      });
+
+      return res.json({ success: true, ...verification, order: updatedOrder });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, error: err.message || "Failed to verify Khalti payment" });
+    }
+  });
+
+  // 12.5 POST /api/commerce/payments/fonepay/verify
+  app.post("/api/commerce/payments/fonepay/verify", async (req, res) => {
+    try {
+      const { orderIdOrNumber, traceId, amountNpr } = req.body;
+      if (!orderIdOrNumber || !traceId) {
+        return res.status(400).json({ error: "orderIdOrNumber and traceId are required" });
+      }
+      const order = await getOrderByIdOrNumber(orderIdOrNumber);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const paidNpr = Number(amountNpr ?? order.totalNpr);
+      const updatedOrder = await recordVerifiedPayment({
+        orderIdOrNumber: order.id,
+        gateway: "fonepay",
+        transactionId: String(traceId).trim(),
+        amountNpr: paidNpr,
+        rawResponse: { mode: "nepal_qr_emvco_reconciled", traceId: String(traceId).trim() },
+      });
+
       return res.json({
-        success: verification.verified,
-        ...verification
+        success: true,
+        verified: true,
+        gateway: "fonepay",
+        transactionId: String(traceId).trim(),
+        amountNpr: paidNpr,
+        order: updatedOrder,
       });
     } catch (err: any) {
-      return res.status(500).json({ error: err.message || "Failed to verify Khalti payment" });
+      return res.status(400).json({ success: false, error: err.message || "Failed to reconcile Nepal QR payment" });
     }
   });
 
@@ -2062,181 +2979,1713 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
       city
     });
 
-    return res.json({
-      success: true,
-      ...payload
-    });
+    return res.json({ success: true, ...payload });
   });
 
-  // 14. GET /api/commerce/analytics
-  app.get("/api/commerce/analytics", (req, res) => {
-    const businessId = (req.query.businessId as string) || "biz_default";
-    const orders = commerceState.orders.filter((o: any) => o.businessId === businessId || businessId === "all");
-    const products = commerceState.products.filter((p: any) => p.businessId === businessId || businessId === "all");
-    
-    const totalRevenueNpr = orders
-      .filter((o: any) => o.paymentStatus === "paid")
-      .reduce((sum: number, o: any) => sum + parseFloat(o.totalNpr || "0"), 0);
+  // 14. GET /api/commerce/analytics (Protected merchant metrics)
+  app.get("/api/commerce/analytics", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const businessId = (req.query.businessId as string) || "biz_default";
+      if (!(await ensureBusinessAuthorization(req, res, businessId))) return;
 
-    const pendingRevenueNpr = orders
-      .filter((o: any) => o.paymentStatus === "pending")
-      .reduce((sum: number, o: any) => sum + parseFloat(o.totalNpr || "0"), 0);
-
-    const gatewayStats = {
-      esewa: orders.filter((o: any) => o.paymentMethod === "esewa").length,
-      khalti: orders.filter((o: any) => o.paymentMethod === "khalti").length,
-      fonepay: orders.filter((o: any) => o.paymentMethod === "fonepay").length,
-      cod: orders.filter((o: any) => o.paymentMethod === "cod").length
-    };
-
-    const statusStats = {
-      unfulfilled: orders.filter((o: any) => o.fulfillmentStatus === "unfulfilled").length,
-      processing: orders.filter((o: any) => o.fulfillmentStatus === "processing").length,
-      dispatched: orders.filter((o: any) => o.fulfillmentStatus === "dispatched").length,
-      delivered: orders.filter((o: any) => o.fulfillmentStatus === "delivered").length
-    };
-
-    return res.json({
-      success: true,
-      totalOrders: orders.length,
-      totalRevenueNpr,
-      pendingRevenueNpr,
-      totalProducts: products.length,
-      averageOrderValueNpr: orders.length > 0 ? Math.round(totalRevenueNpr / (orders.filter((o: any) => o.paymentStatus === "paid").length || 1)) : 0,
-      gateways: gatewayStats,
-      fulfillment: statusStats,
-      currency: "NPR",
-      vatIncluded: true,
-      lastOrderAt: orders[0]?.createdAt || null
-    });
+      const analytics = await getCommerceAnalyticsFromDb(businessId);
+      return res.json(analytics);
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to fetch analytics" });
+    }
   });
 
   // 15. GET /api/commerce/stores/:slug (Public Storefront Profile & Active Products)
-  app.get("/api/commerce/stores/:slug", (req, res) => {
-    const { slug } = req.params;
-    
-    // In-memory / DB mapped store profiles
-    const store = {
-      id: "biz_default",
-      slug: slug || "himalayan-coffee",
-      name: slug === "himalayan-coffee" ? "Himalayan Sovereign Organic Store" : "NepalAI Artisan Collective",
-      description: "Direct mountain farm products, handloom crafts, and Devanagari sovereign devices with instant eSewa & Khalti settlement.",
-      panNumber: "609812453",
-      isVatRegistered: true,
-      phone: "+977 9841234567",
-      email: "store@nepalai.tech",
-      address: "Ward No. 3, Patan Dhoka, Lalitpur, Nepal",
-      bannerUrl: "/api/storage/mock-media?key=banners/store-banner.jpg",
-      logoUrl: "/api/storage/mock-media?key=logos/store-logo.jpg",
-      currency: "NPR",
-      tier: "growth"
-    };
-
-    const categories = commerceState.categories.filter((c: any) => c.businessId === store.id || c.businessId === "biz_default");
-    const activeProducts = commerceState.products.filter((p: any) => 
-      (p.businessId === store.id || p.businessId === "biz_default") && p.status === "active"
-    );
-
-    return res.json({
-      success: true,
-      store,
-      categories,
-      productsCount: activeProducts.length,
-      products: activeProducts
-    });
+  app.get("/api/commerce/stores/:slug", async (req, res) => {
+    try {
+      const data = await getPublicStoreBySlug(req.params.slug);
+      return res.json({
+        success: true,
+        matchedBySlug: data.matchedBySlug,
+        store: data.store,
+        categories: data.categories,
+        productsCount: data.products.length,
+        products: data.products
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to fetch storefront" });
+    }
   });
 
-  // 16. POST /api/commerce/webhooks/esewa (Asynchronous Server Webhook)
+  // 16. POST /api/commerce/webhooks/esewa
   app.post("/api/commerce/webhooks/esewa", async (req, res) => {
     try {
-      const { amt, oid, refId, scd, data } = req.body;
-      console.log(`[eSewa Webhook] Received payment callback for order ${oid || 'unknown'}, ref: ${refId}`);
-
+      const { amt, oid, refId, scd, encodedData } = req.body;
       const verification = await verifyEsewaPayment({
-        amt: amt || 100,
-        oid: oid || "ORD-UNKNOWN",
-        refId: refId || "ESW-WEBHOOK-REF",
-        scd: scd || "EPAYTEST"
+        amt: amt || 0,
+        oid: oid || "",
+        refId: refId || "",
+        scd: scd || process.env.ESEWA_MERCHANT_CODE || "EPAYTEST",
+        encodedData,
       });
 
-      if (verification.verified) {
-        const order = commerceState.orders.find((o: any) => o.id === oid || o.orderNumber === oid);
-        if (order) {
-          order.paymentStatus = "paid";
-          order.paymentMethod = "esewa";
-          order.updatedAt = new Date().toISOString();
-        }
-
-        const newPayment = {
-          id: `pay_hook_${Date.now()}`,
-          orderId: order ? order.id : oid,
-          businessId: order ? order.businessId : "biz_default",
-          gateway: "esewa",
-          transactionId: verification.transactionId,
-          amountNpr: String(verification.amountNpr),
-          status: "verified",
-          rawResponse: { mode: "webhook_callback", verification: verification.rawResponse },
-          verifiedAt: new Date().toISOString()
-        };
-        commerceState.payments.unshift(newPayment);
-        persistCommerceData();
+      if (!verification.verified) {
+        return res.status(400).json({ success: false, acknowledged: false, verified: false, message: verification.message });
       }
+
+      await recordVerifiedPayment({
+        orderIdOrNumber: verification.orderId || oid,
+        gateway: "esewa",
+        transactionId: verification.transactionId,
+        amountNpr: verification.amountNpr,
+        rawResponse: { mode: "webhook_callback", verification: verification.rawResponse },
+      });
 
       return res.status(200).json({
         success: true,
         acknowledged: true,
-        verified: verification.verified
+        verified: true
       });
     } catch (err: any) {
       console.error("[eSewa Webhook] Processing error:", err);
-      return res.status(500).json({ error: "Webhook processing error" });
+      return res.status(400).json({ success: false, error: err?.message || "Webhook processing error" });
     }
   });
 
-  // 17. POST /api/commerce/webhooks/khalti (Asynchronous Server Webhook)
+  // 17. POST /api/commerce/webhooks/khalti
   app.post("/api/commerce/webhooks/khalti", async (req, res) => {
     try {
       const { pidx, amountNpr, orderId } = req.body;
-      console.log(`[Khalti Webhook] Received callback for pidx ${pidx}`);
-
       const verification = await verifyKhaltiPayment({ pidx, amountNpr });
 
-      if (verification.verified) {
-        const order = commerceState.orders.find((o: any) => o.id === orderId || o.orderNumber === orderId);
-        if (order) {
-          order.paymentStatus = "paid";
-          order.paymentMethod = "khalti";
-          order.updatedAt = new Date().toISOString();
-        }
-
-        const newPayment = {
-          id: `pay_hook_${Date.now()}`,
-          orderId: order ? order.id : (orderId || pidx),
-          businessId: order ? order.businessId : "biz_default",
-          gateway: "khalti",
-          transactionId: verification.transactionId,
-          amountNpr: String(verification.amountNpr),
-          status: "verified",
-          rawResponse: { mode: "webhook_callback", verification: verification.rawResponse },
-          verifiedAt: new Date().toISOString()
-        };
-        commerceState.payments.unshift(newPayment);
-        persistCommerceData();
+      if (!verification.verified) {
+        return res.status(400).json({ success: false, acknowledged: false, verified: false, message: verification.message });
       }
+
+      await recordVerifiedPayment({
+        orderIdOrNumber: orderId || pidx,
+        gateway: "khalti",
+        transactionId: verification.transactionId,
+        amountNpr: verification.amountNpr,
+        rawResponse: { mode: "webhook_callback", verification: verification.rawResponse },
+      });
 
       return res.status(200).json({
         success: true,
         acknowledged: true,
-        verified: verification.verified
+        verified: true
       });
     } catch (err: any) {
       console.error("[Khalti Webhook] Processing error:", err);
-      return res.status(500).json({ error: "Webhook processing error" });
+      return res.status(400).json({ success: false, error: err?.message || "Webhook processing error" });
     }
   });
 
 
-  // Vite middleware for development
+  // =========================================================================
+  // NEPAL AI + TRENDS PLATFORM APIs & BACKGROUND RSS SCHEDULER
+  // =========================================================================
+
+  let lastManualSyncMs = 0;
+  let lastSyncResult: any = null;
+
+  app.get("/api/trends/nepal", async (req, res) => {
+    try {
+      const category = typeof req.query.category === "string" ? req.query.category : "all";
+      const audience = typeof req.query.audience === "string" ? req.query.audience : "all";
+      const search = typeof req.query.search === "string" ? req.query.search : "";
+      const activeOnly = req.query.active === "true";
+      const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 40));
+
+      let items = await listTrendsFromDb({
+        country: "NP",
+        category,
+        audience,
+        search,
+        activeOnly,
+        limit,
+      });
+
+      // Bootstrap first live RSS sync if DB is empty and no recent fetch was attempted
+      if (items.length === 0 && !search && category === "all" && Date.now() - lastManualSyncMs > 30000) {
+        lastManualSyncMs = Date.now();
+        lastSyncResult = await syncNepalAndDiasporaTrends({ includeDiaspora: false, maxEnrichPerCycle: 6 });
+        items = await listTrendsFromDb({
+          country: "NP",
+          category,
+          audience,
+          activeOnly,
+          limit,
+        });
+      }
+
+      const categoryCounts = await getCategoryCountsFromDb("NP");
+      return res.json({
+        success: true,
+        country: "NP",
+        count: items.length,
+        trends: items,
+        categoryCounts,
+        lastSync: lastSyncResult,
+      });
+    } catch (error: any) {
+      console.error("[Trends API] Failed to load Nepal trends:", error);
+      return res.status(500).json({ error: error?.message || "Failed to load Nepal trends" });
+    }
+  });
+
+  app.get("/api/trends/diaspora", async (req, res) => {
+    try {
+      const countryParam = typeof req.query.country === "string" ? req.query.country.toUpperCase() : "ALL";
+      const search = typeof req.query.search === "string" ? req.query.search : "";
+      const limit = Math.min(80, Math.max(1, Number(req.query.limit) || 30));
+
+      const targetCountries = countryParam === "ALL" ? ["US", "AU", "GB", "AE", "JP", "CA"] : [countryParam];
+      let items = await listTrendsFromDb({
+        countries: targetCountries,
+        search,
+        limit,
+      });
+
+      // Fallback also include NP trends flagged as diaspora/global_nepali if specific geo feed returned zero matches
+      if (items.length === 0) {
+        items = await listTrendsFromDb({
+          country: "NP",
+          audience: "diaspora",
+          search,
+          limit,
+        });
+      }
+
+      const partners = await listDiasporaPartnerSlotsFromDb(countryParam);
+
+      return res.json({
+        success: true,
+        countries: targetCountries,
+        count: items.length,
+        trends: items,
+        partners,
+      });
+    } catch (error: any) {
+      console.error("[Trends API] Diaspora fetch error:", error);
+      return res.status(500).json({ error: error?.message || "Failed to load diaspora trends" });
+    }
+  });
+
+  app.get("/api/trends/seasonal", async (req, res) => {
+    try {
+      const pillar = typeof req.query.pillar === "string" ? req.query.pillar : "all";
+      const search = typeof req.query.search === "string" ? req.query.search : "";
+      const [rawBenchmarks, liveActive] = await Promise.all([
+        listSeasonalBenchmarksFromDb({ pillar, search }),
+        listActiveTrendsWithLatestDelta("NP", 40),
+      ]);
+
+      const trendsApiConfigured = Boolean(
+        process.env.GOOGLE_TRENDS_API_KEY?.trim() && process.env.GOOGLE_TRENDS_API_ENDPOINT?.trim()
+      );
+      const currentMonth = new Date().getUTCMonth() + 1;
+      let liveApiEnrichedCount = 0;
+
+      const benchmarks = trendsApiConfigured
+        ? await Promise.all(
+            rawBenchmarks.map(async (b) => {
+              const apiMonthly = await fetchSeasonalGoogleTrendsMonthly(b.keyword, "NP");
+              if (!apiMonthly) return b;
+              liveApiEnrichedCount++;
+              const dyn = computeSeasonalDirection(apiMonthly.monthlyIndex, currentMonth);
+              return {
+                ...b,
+                monthlyIndex: apiMonthly.monthlyIndex,
+                currentInterestScore: dyn.currentScore,
+                direction: dyn.direction,
+                dataSource: apiMonthly.dataSource,
+              };
+            })
+          )
+        : rawBenchmarks;
+
+      const curvePoints = buildSeasonalCurveSeries(benchmarks);
+      const risingLiveTrends = liveActive
+        .filter((tr) => {
+          if (search.trim()) {
+            const q = search.trim().toLowerCase();
+            if (!tr.keyword.toLowerCase().includes(q) && !tr.category.toLowerCase().includes(q)) {
+              return false;
+            }
+          }
+          if (pillar === "festivals") return tr.category === "festivals-culture";
+          if (pillar === "exams") return tr.category === "jobs-education";
+          if (pillar === "trekking") return tr.category === "travel-tourism" || tr.category === "weather-disasters";
+          if (pillar === "ecommerce") return tr.category === "business-finance" || tr.category === "diaspora-remittance";
+          return true;
+        })
+        .sort((a, b) => (b.latestVelocityDelta + b.trendScore) - (a.latestVelocityDelta + a.trendScore))
+        .slice(0, 8);
+
+      return res.json({
+        success: true,
+        activePillar: pillar,
+        pillars: SEASONAL_PILLARS,
+        curvePoints,
+        benchmarks,
+        risingLiveTrends,
+        trendsApiConfigured,
+        liveApiEnrichedCount,
+      });
+    } catch (error: any) {
+      console.error("[Trends API] Seasonal analytics error:", error);
+      return res.status(500).json({ error: error?.message || "Failed to load seasonal analytics" });
+    }
+  });
+
+  app.post("/api/diaspora/partners/track", async (req, res) => {
+    try {
+      const id = String(req.body?.id || "").trim();
+      const eventType = req.body?.eventType === "click" ? "click" : "impression";
+      if (!id) return res.status(400).json({ error: "Missing partner slot ID." });
+      const updated = await trackDiasporaPartnerEventInDb(id, eventType);
+      if (!updated) return res.status(404).json({ error: "Partner slot not found." });
+      return res.json({ success: true, partner: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to track partner event" });
+    }
+  });
+
+  app.post("/api/diaspora/partners/apply", async (req, res) => {
+    try {
+      const partnerName = String(req.body?.partnerName || "").trim();
+      const tagline = String(req.body?.tagline || "").trim();
+      const ctaUrl = String(req.body?.ctaUrl || "").trim();
+      const contactEmail = String(req.body?.contactEmail || "").trim();
+      const categoryLabel = String(req.body?.categoryLabel || "Diaspora Service").trim();
+      const targetCountries = Array.isArray(req.body?.targetCountries)
+        ? req.body.targetCountries.map(String)
+        : ["US", "AU", "GB", "AE", "JP", "CA"];
+
+      if (partnerName.length < 2 || tagline.length < 10 || !ctaUrl.startsWith("http")) {
+        return res.status(400).json({
+          error: "Provide partner name, a clear 10+ character description, and a valid https:// destination URL.",
+        });
+      }
+
+      const draftSlot = await createDiasporaPartnerSlotInDb({
+        partnerName,
+        tagline,
+        ctaLabel: String(req.body?.ctaLabel || "Visit Partner"),
+        ctaUrl,
+        categoryLabel,
+        targetCountries,
+      });
+
+      if (contactEmail) {
+        await createLead({
+          fullName: partnerName,
+          email: contactEmail,
+          organization: partnerName,
+          serviceCategory: "Diaspora Trends Sponsorship",
+          budgetRange: "Partner Slot",
+          message: `Diaspora Partner inquiry (${targetCountries.join(", ")}): ${tagline} -> ${ctaUrl}`,
+          source: "diaspora_partner_slot",
+        }).catch(() => null);
+      }
+
+      return res.status(201).json({
+        success: true,
+        slot: draftSlot,
+        message: "Partner slot application queued for editorial verification.",
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to submit partner slot application" });
+    }
+  });
+
+  app.get("/api/trends/detail/:slug", async (req, res) => {
+    try {
+      const slug = decodeURIComponent(req.params.slug || "").trim();
+      if (!slug) return res.status(400).json({ error: "Missing trend slug" });
+
+      const detail = await getTrendDetailFromDb(slug);
+      if (!detail) {
+        return res.status(404).json({ error: "Trend not found" });
+      }
+      return res.json({ success: true, trend: detail });
+    } catch (error: any) {
+      console.error("[Trends API] Detail error:", error);
+      return res.status(500).json({ error: error?.message || "Failed to load trend detail" });
+    }
+  });
+
+  app.post("/api/trends/ingest", async (req, res) => {
+    try {
+      const force = req.body?.force === true;
+      if (!force && Date.now() - lastManualSyncMs < 45_000) {
+        return res.json({
+          success: true,
+          cached: true,
+          message: "Recent sync already completed within the last 45 seconds.",
+          result: lastSyncResult,
+        });
+      }
+      lastManualSyncMs = Date.now();
+      const includeDiaspora = req.body?.includeDiaspora !== false;
+      const result = await syncNepalAndDiasporaTrends({
+        includeDiaspora,
+        maxEnrichPerCycle: 10,
+      });
+      lastSyncResult = result;
+      return res.json({ success: true, cached: false, result });
+    } catch (error: any) {
+      console.error("[Trends Ingest] Sync failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to sync Google Trends RSS" });
+    }
+  });
+
+  app.post("/api/trends/:slug/content-brief", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const slug = decodeURIComponent(req.params.slug || "").trim();
+      const detail = await getTrendDetailFromDb(slug);
+      if (!detail) {
+        return res.status(404).json({ error: "Trend not found" });
+      }
+
+      const briefJson = await generateTrendContentBrief({
+        keyword: detail.keyword,
+        category: detail.category,
+        whyTrending:
+          detail.aiWhyTrending ||
+          `${detail.keyword} is trending in Nepal (${detail.trafficBand}).`,
+        relatedQueries: detail.relatedQueries || [],
+      });
+
+      const saved = await saveContentBriefToDb({
+        trendId: detail.id,
+        keyword: detail.keyword,
+        userUid: req.user?.uid || null,
+        languageMode: req.body?.languageMode || "bilingual",
+        outlineJson: briefJson,
+      });
+
+      return res.json({ success: true, brief: saved });
+    } catch (error: any) {
+      console.error("[Trends Content Brief] Generation failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to generate content brief" });
+    }
+  });
+
+  app.all("/api/keywords/explore", async (req, res) => {
+    try {
+      const rawKeyword =
+        (req.method === "GET" ? req.query.q : req.body?.keyword || req.body?.q) || "";
+      const keyword = String(rawKeyword).trim();
+      const country = String(
+        (req.method === "GET" ? req.query.country : req.body?.country) || "NP"
+      ).toUpperCase();
+
+      if (!keyword || keyword.length < 2) {
+        return res.status(400).json({ error: "Please enter a keyword of at least 2 characters." });
+      }
+
+      const normalized = normalizeKeyword(keyword);
+      const cached = await getCachedKeywordMetric(normalized, country);
+      if (cached) {
+        return res.json({ success: true, cached: true, analysis: cached });
+      }
+
+      const [analysis, comparative] = await Promise.all([
+        analyzeKeywordWithGemini(keyword),
+        fetchComparativeInterestSeries(keyword, country),
+      ]);
+
+      const saved = await saveKeywordAnalysisToDb({
+        analysis,
+        country,
+        interestScore: comparative.interestScore,
+        dataSource: comparative.dataSource,
+        interestSeries: comparative.series,
+      });
+
+      return res.json({ success: true, cached: false, analysis: saved });
+    } catch (error: any) {
+      console.error("[Keyword Explorer API] Failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to analyze keyword" });
+    }
+  });
+
+  app.get("/api/keywords/business", async (_req, res) => {
+    try {
+      const recentCommercial = await listTrendsFromDb({
+        country: "NP",
+        category: "business-finance",
+        limit: 8,
+      });
+      return res.json({
+        success: true,
+        packs: BUSINESS_KEYWORD_PACKS.map((p) => ({
+          category: p.category,
+          direction: p.direction,
+          localIntentScore: p.localIntentScore,
+          diasporaIntentScore: p.diasporaIntentScore,
+          variants: p.variants,
+          contentAngles: p.contentAngles,
+        })),
+        liveCommercialTrends: recentCommercial,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load business keywords" });
+    }
+  });
+
+  app.get("/api/alerts/status", async (req, res) => {
+    try {
+      const email = String(req.query.email || "").trim().toLowerCase();
+      const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+      const waCaps = getWhatsappRelayCapabilities();
+      const sub = email ? await getAlertSubscriptionByEmail(email) : null;
+      return res.json({
+        success: true,
+        smtpConfigured,
+        ...waCaps,
+        subscription: sub
+          ? {
+              email: sub.email,
+              categories: sub.categories,
+              cadence: sub.cadence,
+              preferredLanguage: sub.preferredLanguage || "bilingual",
+              deliveryChannel: sub.deliveryChannel || "email",
+              whatsappNumber: sub.whatsappNumber || "",
+              whatsappWebhookUrl: sub.whatsappWebhookUrl || "",
+              isVerified: sub.isVerified,
+              lastSentAt: sub.lastSentAt ? sub.lastSentAt.toISOString() : null,
+            }
+          : null,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load alert status" });
+    }
+  });
+
+  app.post("/api/alerts/subscribe", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const email = String(req.body?.email || "").trim();
+      const categories = Array.isArray(req.body?.categories) && req.body.categories.length > 0
+        ? req.body.categories.map(String)
+        : ["technology-ai", "business-finance"];
+      const cadence = req.body?.cadence === "breaking" ? "breaking" : "daily";
+      const preferredLanguage: "en" | "ne" | "bilingual" =
+        req.body?.preferredLanguage === "en" || req.body?.preferredLanguage === "ne"
+          ? req.body.preferredLanguage
+          : "bilingual";
+      const countryFilter = String(req.body?.countryFilter || "NP").toUpperCase();
+      const deliveryChannel: "email" | "whatsapp" | "both" =
+        req.body?.deliveryChannel === "whatsapp" || req.body?.deliveryChannel === "both"
+          ? req.body.deliveryChannel
+          : "email";
+      const rawWaNumber = typeof req.body?.whatsappNumber === "string" ? req.body.whatsappNumber.trim() : "";
+      const whatsappNumber = rawWaNumber ? normalizeWhatsappNumber(rawWaNumber) : null;
+      const whatsappWebhookUrl =
+        typeof req.body?.whatsappWebhookUrl === "string" && req.body.whatsappWebhookUrl.trim()
+          ? req.body.whatsappWebhookUrl.trim()
+          : null;
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Please enter a valid email address." });
+      }
+      if ((deliveryChannel === "whatsapp" || deliveryChannel === "both") && !isValidWhatsappNumber(whatsappNumber)) {
+        return res.status(400).json({ error: "Enter a valid WhatsApp E.164 number (e.g. +97798XXXXXXXX)." });
+      }
+
+      const sub = await upsertAlertSubscription({
+        email,
+        userUid: req.user?.uid || null,
+        categories,
+        cadence,
+        preferredLanguage,
+        countryFilter,
+        deliveryChannel,
+        whatsappNumber,
+        whatsappWebhookUrl,
+      });
+
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const unsubscribeUrl = `${origin}/api/alerts/unsubscribe?token=${sub.unsubscribeToken}`;
+      const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+      const waCaps = getWhatsappRelayCapabilities();
+      let deliveryMode = "saved_digest_queue";
+
+      if (smtpConfigured && (deliveryChannel === "email" || deliveryChannel === "both")) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: Number(process.env.SMTP_PORT) === 465,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS || "",
+            },
+          });
+
+          const isNeLang = preferredLanguage === "ne";
+          await transporter.sendMail({
+            from: `"NepalAI Trends Digest" <${process.env.SMTP_USER}>`,
+            to: sub.email,
+            subject: isNeLang
+              ? "सदस्यता सक्रिय: नेपाल एआई + ट्रेन्ड्स दैनिक इन्साइट्स"
+              : "Subscribed: Nepal AI + Trends Daily Insights",
+            text: `You are subscribed to ${sub.cadence} Nepal trend insights (${preferredLanguage}) for: ${sub.categories.join(", ")}.\nUnsubscribe anytime: ${unsubscribeUrl}`,
+            html: `<div style="font-family:'Plus Jakarta Sans',sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;">
+              <h2 style="margin:0 0 8px;">${isNeLang ? "नेपाल एआई + ट्रेन्ड्स दैनिक इन्साइट्स सक्रिय भयो" : "Nepal AI + Trends Daily Insights Active"}</h2>
+              <p style="font-size:14px;color:#334155;">You will receive <strong>${sub.cadence}</strong> AI-curated Nepal search alerts (${preferredLanguage}) for: <strong>${sub.categories.join(", ")}</strong>.</p>
+              <p><a href="${origin}/trending/nepal" style="color:#0891b2;font-weight:600;">Browse Live Nepal Trends →</a></p>
+              <p style="font-size:12px;color:#64748b;">Unsubscribe anytime: <a href="${unsubscribeUrl}">${unsubscribeUrl}</a></p>
+            </div>`,
+          });
+          deliveryMode = "smtp_confirmed";
+        } catch (smtpErr) {
+          console.warn("[Trend Alerts SMTP] Confirmation email skipped:", smtpErr);
+        }
+      }
+
+      let whatsappDispatch: Awaited<ReturnType<typeof dispatchWhatsappAlertMessage>> | null = null;
+      if ((deliveryChannel === "whatsapp" || deliveryChannel === "both") && whatsappNumber) {
+        whatsappDispatch = await dispatchWhatsappAlertMessage({
+          sourceType: "daily_digest",
+          referenceId: sub.id,
+          recipientNumber: whatsappNumber,
+          webhookOverrideUrl: whatsappWebhookUrl,
+          messageText: `NepalAI Trends Daily Insights active (${sub.cadence}) for: ${sub.categories.join(", ")}. Portal: ${origin}/trending/nepal`,
+          metadata: { event: "subscription_confirmed", categories: sub.categories },
+        });
+      }
+
+      return res.json({
+        success: true,
+        smtpConfigured,
+        ...waCaps,
+        deliveryMode,
+        whatsappDispatch,
+        subscription: {
+          id: sub.id,
+          email: sub.email,
+          categories: sub.categories,
+          cadence: sub.cadence,
+          preferredLanguage: sub.preferredLanguage || preferredLanguage,
+          countryFilter: sub.countryFilter,
+          deliveryChannel: sub.deliveryChannel || deliveryChannel,
+          whatsappNumber: sub.whatsappNumber || "",
+          whatsappWebhookUrl: sub.whatsappWebhookUrl || "",
+          isVerified: sub.isVerified,
+          unsubscribeUrl,
+        },
+      });
+    } catch (error: any) {
+      console.error("[Alerts Subscribe] Failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to save alert subscription" });
+    }
+  });
+
+  app.post("/api/alerts/unsubscribe", async (req, res) => {
+    try {
+      const email = String(req.body?.email || "").trim().toLowerCase();
+      const token = String(req.body?.token || "").trim();
+      if (token) {
+        const removed = await removeAlertSubscriptionByToken(token);
+        if (!removed) {
+          return res.status(404).json({ error: "Subscription not found." });
+        }
+        return res.json({ success: true, email: removed.email, status: "unsubscribed" });
+      }
+      if (!email) {
+        return res.status(400).json({ error: "Provide an email or token to unsubscribe." });
+      }
+      const updated = await deactivateAlertSubscriptionByEmail(email);
+      return res.json({
+        success: true,
+        email: updated?.email || email,
+        status: "paused",
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update subscription" });
+    }
+  });
+
+  app.get("/api/alerts/unsubscribe", async (req, res) => {
+    try {
+      const token = String(req.query.token || "").trim();
+      if (!token) {
+        return res.status(400).send("Missing unsubscribe token.");
+      }
+      const removed = await removeAlertSubscriptionByToken(token);
+      if (!removed) {
+        return res.status(404).send("Subscription not found or already unsubscribed.");
+      }
+      return res.status(200).send(`<!doctype html><html><body style="font-family:sans-serif;padding:40px;max-width:520px;margin:auto;"><h2>Unsubscribed from Nepal AI + Trends</h2><p>${removed.email} has been removed from trend email digests.</p><p><a href="/trending/nepal">Return to NepalAI Trends</a></p></body></html>`);
+    } catch {
+      return res.status(500).send("Failed to process unsubscribe request.");
+    }
+  });
+
+  // =========================================================================
+  // PHASE 3: SAVED BRIEFS VAULT, WATCHLISTS, DIGEST DISPATCH & AGENCY API v1
+  // =========================================================================
+
+  app.get("/api/trends/briefs", async (req, res) => {
+    try {
+      const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
+      const briefs = await listRecentContentBriefsFromDb(limit);
+      return res.json({ success: true, briefs });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load saved content briefs" });
+    }
+  });
+
+  app.post("/api/keywords/compare", async (req, res) => {
+    try {
+      const termA = String(req.body?.keywordA || "").trim();
+      const termB = String(req.body?.keywordB || "").trim();
+      const country = String(req.body?.country || "NP").toUpperCase();
+
+      if (termA.length < 2 || termB.length < 2) {
+        return res.status(400).json({ error: "Provide two keywords (at least 2 characters each) to compare." });
+      }
+
+      const resolveOne = async (term: string) => {
+        const normalized = normalizeKeyword(term);
+        const cached = await getCachedKeywordMetric(normalized, country);
+        if (cached) return cached;
+        const [analysis, comparative] = await Promise.all([
+          analyzeKeywordWithGemini(term),
+          fetchComparativeInterestSeries(term, country),
+        ]);
+        return saveKeywordAnalysisToDb({
+          analysis,
+          country,
+          interestScore: comparative.interestScore,
+          dataSource: comparative.dataSource,
+          interestSeries: comparative.series,
+        });
+      };
+
+      const [resultA, resultB] = await Promise.all([resolveOne(termA), resolveOne(termB)]);
+      return res.json({ success: true, keywordA: resultA, keywordB: resultB });
+    } catch (error: any) {
+      console.error("[Keyword Compare] Failed:", error);
+      return res.status(500).json({ error: error?.message || "Failed to compare keywords" });
+    }
+  });
+
+  app.get("/api/trends/watchlist", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.query.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const items = await listWatchlistFromDb(ownerKey);
+      return res.json({ success: true, ownerKey, items });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load watchlist" });
+    }
+  });
+
+  app.post("/api/trends/watchlist", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.body?.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const keyword = String(req.body?.keyword || "").trim();
+      if (keyword.length < 2) {
+        return res.status(400).json({ error: "Keyword must be at least 2 characters." });
+      }
+      const item = await addWatchlistItemToDb({
+        ownerKey,
+        keyword,
+        keywordNormalized: normalizeKeyword(keyword),
+        slug: typeof req.body?.slug === "string" ? req.body.slug : null,
+        category: typeof req.body?.category === "string" ? req.body.category : "technology-ai",
+        country: typeof req.body?.country === "string" ? req.body.country : "NP",
+        notes: typeof req.body?.notes === "string" ? req.body.notes : null,
+      });
+      return res.json({ success: true, item });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to track keyword" });
+    }
+  });
+
+  app.delete("/api/trends/watchlist/:id", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.query.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const removed = await removeWatchlistItemFromDb(req.params.id, ownerKey);
+      if (!removed) {
+        return res.status(404).json({ error: "Watchlist item not found" });
+      }
+      return res.json({ success: true, removedId: removed.id });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to remove watchlist item" });
+    }
+  });
+
+  app.post("/api/alerts/digest-preview", async (req, res) => {
+    try {
+      const categories =
+        Array.isArray(req.body?.categories) && req.body.categories.length > 0
+          ? req.body.categories.map(String)
+          : ["sports-npl", "technology-ai", "business-finance"];
+      const cadence = req.body?.cadence === "breaking" ? "breaking" : "daily";
+      const preferredLanguage: "en" | "ne" | "bilingual" =
+        req.body?.preferredLanguage === "en" || req.body?.preferredLanguage === "ne"
+          ? req.body.preferredLanguage
+          : "bilingual";
+      const recentTrends = await listTrendsFromDb({ country: "NP", limit: 30 });
+      const matched = recentTrends
+        .filter((t) => categories.includes(t.category))
+        .slice(0, 6);
+      const selected = matched.length > 0 ? matched : recentTrends.slice(0, 5);
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+
+      const digest = buildDigestEmailContent({
+        originUrl: origin,
+        cadence,
+        preferredLanguage,
+        categories,
+        trends: selected.map((t) => ({
+          slug: t.slug,
+          keyword: t.keyword,
+          category: t.category,
+          trafficBand: t.trafficBand,
+          trendScore: t.trendScore,
+          aiWhyTrending: t.aiWhyTrending,
+          relatedQueries: t.relatedQueries,
+          lastSeenAt: t.lastSeenAt,
+        })),
+        unsubscribeUrl: `${origin}/api/alerts/unsubscribe?token=preview`,
+      });
+
+      return res.json({
+        success: true,
+        matchedCount: selected.length,
+        preferredLanguage,
+        subject: digest.subject,
+        text: digest.text,
+        html: digest.html,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to generate digest preview" });
+    }
+  });
+
+  app.post("/api/alerts/send-test", async (req, res) => {
+    try {
+      const email = String(req.body?.email || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Enter a valid recipient email address." });
+      }
+      const categories =
+        Array.isArray(req.body?.categories) && req.body.categories.length > 0
+          ? req.body.categories.map(String)
+          : ["technology-ai", "business-finance"];
+      const cadence = req.body?.cadence === "breaking" ? "breaking" : "daily";
+      const preferredLanguage: "en" | "ne" | "bilingual" =
+        req.body?.preferredLanguage === "en" || req.body?.preferredLanguage === "ne"
+          ? req.body.preferredLanguage
+          : "bilingual";
+      const deliveryChannel: "email" | "whatsapp" | "both" =
+        req.body?.deliveryChannel === "whatsapp" || req.body?.deliveryChannel === "both"
+          ? req.body.deliveryChannel
+          : "email";
+      const rawWaNumber = typeof req.body?.whatsappNumber === "string" ? req.body.whatsappNumber.trim() : "";
+      const whatsappNumber = rawWaNumber ? normalizeWhatsappNumber(rawWaNumber) : null;
+      const whatsappWebhookUrl =
+        typeof req.body?.whatsappWebhookUrl === "string" && req.body.whatsappWebhookUrl.trim()
+          ? req.body.whatsappWebhookUrl.trim()
+          : null;
+
+      if ((deliveryChannel === "whatsapp" || deliveryChannel === "both") && !isValidWhatsappNumber(whatsappNumber)) {
+        return res.status(400).json({ error: "Enter a valid WhatsApp E.164 number (e.g. +97798XXXXXXXX)." });
+      }
+
+      const sub = await upsertAlertSubscription({
+        email,
+        categories,
+        cadence,
+        preferredLanguage,
+        countryFilter: "NP",
+        deliveryChannel,
+        whatsappNumber,
+        whatsappWebhookUrl,
+      });
+
+      const recentTrends = await listTrendsFromDb({ country: "NP", limit: 30 });
+      const matched = recentTrends.filter((t) => categories.includes(t.category)).slice(0, 6);
+      const selected = matched.length > 0 ? matched : recentTrends.slice(0, 5);
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const unsubscribeUrl = `${origin}/api/alerts/unsubscribe?token=${sub.unsubscribeToken}`;
+
+      const digest = buildDigestEmailContent({
+        originUrl: origin,
+        cadence,
+        preferredLanguage,
+        categories,
+        trends: selected.map((t) => ({
+          slug: t.slug,
+          keyword: t.keyword,
+          category: t.category,
+          trafficBand: t.trafficBand,
+          trendScore: t.trendScore,
+          aiWhyTrending: t.aiWhyTrending,
+          relatedQueries: t.relatedQueries,
+          lastSeenAt: t.lastSeenAt,
+        })),
+        unsubscribeUrl,
+      });
+
+      const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+      const waCaps = getWhatsappRelayCapabilities();
+      let delivered = false;
+      let smtpError: string | null = null;
+
+      if (smtpConfigured && (deliveryChannel === "email" || deliveryChannel === "both")) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: Number(process.env.SMTP_PORT) === 465,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS || "",
+            },
+          });
+          await transporter.sendMail({
+            from: `"NepalAI Trends Digest" <${process.env.SMTP_USER}>`,
+            to: sub.email,
+            subject: digest.subject,
+            text: digest.text,
+            html: digest.html,
+          });
+          await markAlertSubscriptionSent(sub.id);
+          delivered = true;
+        } catch (err: any) {
+          smtpError = err?.message || "SMTP transport failed";
+          console.warn("[Alerts Instant Send] SMTP error:", smtpError);
+        }
+      }
+
+      let whatsappDispatch: Awaited<ReturnType<typeof dispatchWhatsappAlertMessage>> | null = null;
+      if ((deliveryChannel === "whatsapp" || deliveryChannel === "both") && whatsappNumber) {
+        const waText = buildWhatsappDigestMessage({
+          originUrl: origin,
+          cadence,
+          preferredLanguage,
+          trends: selected.map((t) => ({
+            slug: t.slug,
+            keyword: t.keyword,
+            category: t.category,
+            trafficBand: t.trafficBand,
+            trendScore: t.trendScore,
+            aiWhyTrending: t.aiWhyTrending,
+            relatedQueries: t.relatedQueries,
+            lastSeenAt: t.lastSeenAt,
+          })),
+        });
+        whatsappDispatch = await dispatchWhatsappAlertMessage({
+          sourceType: "daily_digest",
+          referenceId: sub.id,
+          recipientNumber: whatsappNumber,
+          webhookOverrideUrl: whatsappWebhookUrl,
+          messageText: waText,
+          metadata: { categories, cadence, matchedCount: selected.length },
+        });
+      }
+
+      return res.json({
+        success: true,
+        smtpConfigured,
+        ...waCaps,
+        delivered,
+        whatsappDelivered: Boolean(whatsappDispatch?.delivered),
+        whatsappDispatch,
+        smtpError,
+        deliveryMode: delivered
+          ? whatsappDispatch?.delivered
+            ? "smtp_and_whatsapp_delivered"
+            : "smtp_delivered"
+          : whatsappDispatch?.delivered
+            ? "whatsapp_delivered"
+            : "saved_digest_queue",
+        matchedCount: selected.length,
+        subject: digest.subject,
+        text: digest.text,
+        unsubscribeUrl,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to send personalized insights" });
+    }
+  });
+
+  app.post("/api/alerts/dispatch-digest", async (req, res) => {
+    try {
+      const subscribers = await getActiveAlertSubscribersFromDb();
+      const recentTrends = await listTrendsFromDb({ country: "NP", limit: 40 });
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+      const transporter = hasSmtp
+        ? nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: Number(process.env.SMTP_PORT) === 465,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS || "",
+            },
+          })
+        : null;
+
+      let sentCount = 0;
+      let whatsappSentCount = 0;
+      let compiledCount = 0;
+
+      for (const sub of subscribers.slice(0, 25)) {
+        const matched = recentTrends
+          .filter((t) => (sub.categories || []).includes(t.category))
+          .slice(0, 6);
+        const picks = matched.length > 0 ? matched : recentTrends.slice(0, 5);
+        if (picks.length === 0) continue;
+        compiledCount++;
+
+        const unsubscribeUrl = `${origin}/api/alerts/unsubscribe?token=${sub.unsubscribeToken}`;
+        const preferredLang: "en" | "ne" | "bilingual" =
+          sub.preferredLanguage === "en" || sub.preferredLanguage === "ne"
+            ? sub.preferredLanguage
+            : "bilingual";
+        const channel = sub.deliveryChannel || "email";
+
+        const emailContent = buildDigestEmailContent({
+          originUrl: origin,
+          cadence: sub.cadence,
+          preferredLanguage: preferredLang,
+          categories: sub.categories || [],
+          trends: picks.map((t) => ({
+            slug: t.slug,
+            keyword: t.keyword,
+            category: t.category,
+            trafficBand: t.trafficBand,
+            trendScore: t.trendScore,
+            aiWhyTrending: t.aiWhyTrending,
+            relatedQueries: t.relatedQueries,
+            lastSeenAt: t.lastSeenAt,
+          })),
+          unsubscribeUrl,
+        });
+
+        if (transporter && (channel === "email" || channel === "both")) {
+          try {
+            await transporter.sendMail({
+              from: `"NepalAI Trends Digest" <${process.env.SMTP_USER}>`,
+              to: sub.email,
+              subject: emailContent.subject,
+              text: emailContent.text,
+              html: emailContent.html,
+            });
+            await markAlertSubscriptionSent(sub.id);
+            sentCount++;
+          } catch (mailErr) {
+            console.warn(`[Digest Dispatch] Failed sending to ${sub.email}:`, mailErr);
+          }
+        }
+
+        if ((channel === "whatsapp" || channel === "both") && sub.whatsappNumber) {
+          const waText = buildWhatsappDigestMessage({
+            originUrl: origin,
+            cadence: sub.cadence,
+            preferredLanguage: preferredLang,
+            trends: picks.map((t) => ({
+              slug: t.slug,
+              keyword: t.keyword,
+              category: t.category,
+              trafficBand: t.trafficBand,
+              trendScore: t.trendScore,
+              aiWhyTrending: t.aiWhyTrending,
+              relatedQueries: t.relatedQueries,
+              lastSeenAt: t.lastSeenAt,
+            })),
+          });
+          const waRes = await dispatchWhatsappAlertMessage({
+            sourceType: "daily_digest",
+            referenceId: sub.id,
+            recipientNumber: sub.whatsappNumber,
+            webhookOverrideUrl: sub.whatsappWebhookUrl,
+            messageText: waText,
+          });
+          if (waRes.delivered) whatsappSentCount++;
+        }
+      }
+
+      return res.json({
+        success: true,
+        subscribersTotal: subscribers.length,
+        digestsCompiled: compiledCount,
+        emailsDelivered: sentCount,
+        whatsappDelivered: whatsappSentCount,
+        smtpConfigured: hasSmtp,
+        ...getWhatsappRelayCapabilities(),
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to dispatch digest" });
+    }
+  });
+
+  app.post("/api/alerts/whatsapp/test", async (req, res) => {
+    try {
+      const whatsappNumber = normalizeWhatsappNumber(String(req.body?.whatsappNumber || ""));
+      if (!isValidWhatsappNumber(whatsappNumber)) {
+        return res.status(400).json({ error: "Provide a valid E.164 WhatsApp number (e.g. +97798XXXXXXXX)." });
+      }
+      const webhookOverrideUrl =
+        typeof req.body?.whatsappWebhookUrl === "string" && req.body.whatsappWebhookUrl.trim()
+          ? req.body.whatsappWebhookUrl.trim()
+          : null;
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+
+      const dispatch = await dispatchWhatsappAlertMessage({
+        sourceType: "test_ping",
+        recipientNumber: whatsappNumber,
+        webhookOverrideUrl,
+        messageText: `*NepalAI Trends Test Alert*\nYour WhatsApp Business webhook relay is linked for ${whatsappNumber}.\nPortal: ${origin}/trending/nepal`,
+        metadata: { test: true },
+      });
+
+      return res.json({
+        success: true,
+        ...getWhatsappRelayCapabilities(),
+        dispatch,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "WhatsApp test relay failed" });
+    }
+  });
+
+  app.get("/api/alerts/whatsapp/logs", async (_req, res) => {
+    try {
+      const logs = await listRecentWhatsappLogsFromDb(20);
+      return res.json({
+        success: true,
+        ...getWhatsappRelayCapabilities(),
+        logs,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load WhatsApp delivery logs" });
+    }
+  });
+
+  // Meta WhatsApp Business Cloud API Webhook Verification & Delivery Status Callback
+  app.get("/api/webhooks/whatsapp", (req, res) => {
+    const mode = String(req.query["hub.mode"] || "");
+    const token = String(req.query["hub.verify_token"] || "");
+    const challenge = String(req.query["hub.challenge"] || "");
+    const expectedToken = process.env.WHATSAPP_VERIFY_TOKEN?.trim();
+
+    if (mode === "subscribe" && expectedToken && token === expectedToken) {
+      return res.status(200).send(challenge);
+    }
+    return res.status(403).json({ error: "WhatsApp webhook verification failed." });
+  });
+
+  app.post("/api/webhooks/whatsapp", async (req, res) => {
+    try {
+      const signature = req.headers["x-hub-signature-256"] as string | undefined;
+      const rawPayload = JSON.stringify(req.body || {});
+      if (!verifyWhatsappWebhookSignature(rawPayload, signature)) {
+        return res.status(401).json({ error: "Invalid webhook signature" });
+      }
+
+      const entries = Array.isArray(req.body?.entry) ? req.body.entry : [];
+      for (const entry of entries) {
+        const changes = Array.isArray(entry?.changes) ? entry.changes : [];
+        for (const ch of changes) {
+          const val = ch?.value || {};
+          const statuses = Array.isArray(val.statuses) ? val.statuses : [];
+          for (const st of statuses) {
+            await recordWhatsappDeliveryLog({
+              sourceType: "webhook_callback",
+              referenceId: st.id ? String(st.id) : null,
+              recipientNumber: st.recipient_id ? `+${String(st.recipient_id).replace(/^\+/, "")}` : "meta_webhook",
+              webhookTarget: "meta_cloud_callback",
+              payloadPreview: `Meta delivery status: ${st.status || "unknown"} (msg ${st.id || "n/a"})`,
+              deliveryStatus: st.status === "failed" ? "failed" : "sent",
+              httpStatus: 200,
+              errorMessage: Array.isArray(st.errors) && st.errors[0]?.title ? String(st.errors[0].title) : null,
+            });
+          }
+        }
+      }
+      return res.status(200).json({ received: true });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Webhook processing failed" });
+    }
+  });
+
+  // =========================================================================
+  // KEYWORD VELOCITY THRESHOLD ALERTS + BACKGROUND EVALUATOR JOB
+  // =========================================================================
+
+  const runVelocityThresholdAlertJob = async (originOverride?: string, targetAlertId?: string) => {
+    const allActiveRules = await getActiveVelocityAlertsFromDb();
+    const activeRules = targetAlertId
+      ? allActiveRules.filter((r) => r.id === targetAlertId)
+      : allActiveRules;
+    const waCaps = getWhatsappRelayCapabilities();
+    if (activeRules.length === 0) {
+      return {
+        evaluatedRules: 0,
+        triggeredRules: 0,
+        emailsDelivered: 0,
+        whatsappDelivered: 0,
+        smtpConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+        ...waCaps,
+        matches: [] as Array<{
+          alertId: string;
+          email: string;
+          deliveryChannel: string;
+          minVelocityScore: number;
+          topKeyword: string;
+          topScore: number;
+          matchedCount: number;
+          delivered: boolean;
+          whatsappDelivered: boolean;
+        }>,
+      };
+    }
+
+    const activeTrends = await listActiveTrendsWithLatestDelta("NP", 60);
+    const matches = evaluateVelocityThresholdAlerts(activeRules, activeTrends);
+    const origin = (originOverride || process.env.APP_URL || "https://nepalai.tech").replace(/\/+$/, "");
+    const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+
+    const transporter = smtpConfigured
+      ? nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT) || 587,
+          secure: Number(process.env.SMTP_PORT) === 465,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS || "",
+          },
+        })
+      : null;
+
+    let emailsDelivered = 0;
+    let whatsappDelivered = 0;
+    const matchSummaries: Array<{
+      alertId: string;
+      email: string;
+      deliveryChannel: string;
+      minVelocityScore: number;
+      topKeyword: string;
+      topScore: number;
+      matchedCount: number;
+      delivered: boolean;
+      whatsappDelivered: boolean;
+    }> = [];
+
+    for (const m of matches) {
+      const top = m.matchedTrends[0];
+      const unsubscribeUrl = `${origin}/api/alerts/thresholds/unsubscribe?token=${m.alert.unsubscribeToken}`;
+      const channel = m.alert.deliveryChannel || "email";
+      const emailContent = buildVelocityThresholdEmailContent({
+        originUrl: origin,
+        alert: m.alert,
+        matchedTrends: m.matchedTrends,
+        unsubscribeUrl,
+      });
+
+      let delivered = false;
+      let waSent = false;
+
+      if (transporter && (channel === "email" || channel === "both")) {
+        try {
+          await transporter.sendMail({
+            from: `"NepalAI Velocity Alerts" <${process.env.SMTP_USER}>`,
+            to: m.alert.email,
+            subject: emailContent.subject,
+            text: emailContent.text,
+            html: emailContent.html,
+          });
+          emailsDelivered++;
+          delivered = true;
+        } catch (err) {
+          console.warn(`[Velocity Threshold Alert] SMTP error for ${m.alert.email}:`, err);
+        }
+      }
+
+      if ((channel === "whatsapp" || channel === "both") && m.alert.whatsappNumber) {
+        const waText = buildWhatsappThresholdMessage({
+          originUrl: origin,
+          alert: m.alert,
+          matchedTrends: m.matchedTrends,
+        });
+        const waRes = await dispatchWhatsappAlertMessage({
+          sourceType: "velocity_threshold",
+          referenceId: m.alert.id,
+          recipientNumber: m.alert.whatsappNumber,
+          webhookOverrideUrl: m.alert.whatsappWebhookUrl,
+          messageText: waText,
+          metadata: {
+            alertId: m.alert.id,
+            topKeyword: top.keyword,
+            topScore: top.trendScore,
+          },
+        });
+        if (waRes.delivered) {
+          whatsappDelivered++;
+          waSent = true;
+        }
+      }
+
+      if (delivered || waSent) {
+        await markVelocityAlertTriggered(m.alert.id, top.keyword, top.trendScore);
+      }
+
+      matchSummaries.push({
+        alertId: m.alert.id,
+        email: m.alert.email,
+        deliveryChannel: channel,
+        minVelocityScore: m.alert.minVelocityScore,
+        topKeyword: top.keyword,
+        topScore: top.trendScore,
+        matchedCount: m.matchedTrends.length,
+        delivered,
+        whatsappDelivered: waSent,
+      });
+    }
+
+    return {
+      evaluatedRules: activeRules.length,
+      triggeredRules: matches.length,
+      emailsDelivered,
+      whatsappDelivered,
+      smtpConfigured,
+      ...waCaps,
+      matches: matchSummaries,
+    };
+  };
+
+  app.get("/api/alerts/thresholds/unsubscribe", async (req, res) => {
+    try {
+      const token = String(req.query.token || "").trim();
+      if (!token) return res.status(400).send("Missing token.");
+      const removed = await deleteVelocityAlertByToken(token);
+      if (!removed) return res.status(404).send("Threshold alert rule not found or already removed.");
+      return res.status(200).send(`<!doctype html><html><body style="font-family:sans-serif;padding:40px;max-width:520px;margin:auto;"><h2>Velocity Threshold Alert Removed</h2><p>Alerts for ${removed.email} matching this rule have been disabled.</p><p><a href="/trending/nepal">Return to NepalAI Trends</a></p></body></html>`);
+    } catch {
+      return res.status(500).send("Failed to remove threshold alert.");
+    }
+  });
+
+  app.get("/api/alerts/thresholds", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.query.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const email = typeof req.query.email === "string" ? req.query.email : undefined;
+      const alerts = await listVelocityAlertsFromDb({ ownerKey, email });
+      return res.json({
+        success: true,
+        smtpConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+        ...getWhatsappRelayCapabilities(),
+        alerts,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load velocity threshold alerts" });
+    }
+  });
+
+  app.post("/api/alerts/thresholds", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const deliveryChannel: "email" | "whatsapp" | "both" =
+        req.body?.deliveryChannel === "whatsapp" || req.body?.deliveryChannel === "both"
+          ? req.body.deliveryChannel
+          : "email";
+      const rawWaNumber = typeof req.body?.whatsappNumber === "string" ? req.body.whatsappNumber.trim() : "";
+      const whatsappNumber = rawWaNumber ? normalizeWhatsappNumber(rawWaNumber) : null;
+      const whatsappWebhookUrl =
+        typeof req.body?.whatsappWebhookUrl === "string" && req.body.whatsappWebhookUrl.trim()
+          ? req.body.whatsappWebhookUrl.trim()
+          : null;
+
+      if ((deliveryChannel === "whatsapp" || deliveryChannel === "both") && !isValidWhatsappNumber(whatsappNumber)) {
+        return res.status(400).json({ error: "Enter a valid WhatsApp E.164 number (e.g. +97798XXXXXXXX)." });
+      }
+
+      const rawEmail = String(req.body?.email || "").trim();
+      const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail);
+      if (deliveryChannel !== "whatsapp" && !hasValidEmail) {
+        return res.status(400).json({ error: "Please enter a valid notification email." });
+      }
+      const email = hasValidEmail
+        ? rawEmail
+        : `wa_${(whatsappNumber || "user").replace(/\D/g, "")}@whatsapp.nepalai.tech`;
+
+      const ownerKey =
+        req.user?.uid ||
+        String(req.body?.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const minVelocityScore = Number(req.body?.minVelocityScore ?? 75);
+      if (Number.isNaN(minVelocityScore) || minVelocityScore < 10 || minVelocityScore > 100) {
+        return res.status(400).json({ error: "Velocity threshold must be between 10 and 100." });
+      }
+
+      const alert = await createVelocityAlertInDb({
+        email,
+        userUid: req.user?.uid || null,
+        ownerKey,
+        keywordFilter: typeof req.body?.keywordFilter === "string" ? req.body.keywordFilter : null,
+        category: typeof req.body?.category === "string" ? req.body.category : "all",
+        country: typeof req.body?.country === "string" ? req.body.country : "NP",
+        minVelocityScore,
+        minVelocityDelta: Number(req.body?.minVelocityDelta || 0),
+        deliveryChannel,
+        whatsappNumber,
+        whatsappWebhookUrl,
+        cooldownMinutes: Number(req.body?.cooldownMinutes || 180),
+      });
+
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const instantEval =
+        req.body?.triggerInstantCheck !== false
+          ? await runVelocityThresholdAlertJob(origin, alert.id).catch(() => null)
+          : null;
+
+      return res.status(201).json({
+        success: true,
+        smtpConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+        ...getWhatsappRelayCapabilities(),
+        alert,
+        instantEval,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to save velocity threshold alert" });
+    }
+  });
+
+  app.patch("/api/alerts/thresholds/:id", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.body?.ownerKey || req.query.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const updated = await updateVelocityAlertInDb(req.params.id, ownerKey, {
+        isActive: typeof req.body?.isActive === "boolean" ? req.body.isActive : undefined,
+        minVelocityScore:
+          typeof req.body?.minVelocityScore === "number" ? req.body.minVelocityScore : undefined,
+        minVelocityDelta:
+          typeof req.body?.minVelocityDelta === "number" ? req.body.minVelocityDelta : undefined,
+        category: typeof req.body?.category === "string" ? req.body.category : undefined,
+        keywordFilter:
+          req.body?.keywordFilter !== undefined ? (req.body.keywordFilter || null) : undefined,
+        deliveryChannel:
+          req.body?.deliveryChannel === "email" ||
+          req.body?.deliveryChannel === "whatsapp" ||
+          req.body?.deliveryChannel === "both"
+            ? req.body.deliveryChannel
+            : undefined,
+        whatsappNumber:
+          req.body?.whatsappNumber !== undefined ? req.body.whatsappNumber : undefined,
+        whatsappWebhookUrl:
+          req.body?.whatsappWebhookUrl !== undefined ? req.body.whatsappWebhookUrl : undefined,
+      });
+      if (!updated) {
+        return res.status(404).json({ error: "Threshold alert rule not found." });
+      }
+      return res.json({ success: true, alert: updated });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to update threshold alert" });
+    }
+  });
+
+  app.delete("/api/alerts/thresholds/:id", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const ownerKey =
+        req.user?.uid ||
+        String(req.query.ownerKey || req.headers["x-nepalai-session"] || "guest_nepalai");
+      const removed = await deleteVelocityAlertInDb(req.params.id, ownerKey);
+      if (!removed) {
+        return res.status(404).json({ error: "Threshold alert rule not found." });
+      }
+      return res.json({ success: true, removedId: removed.id });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to delete threshold alert" });
+    }
+  });
+
+  app.post("/api/alerts/thresholds/evaluate", async (req, res) => {
+    try {
+      const origin = (process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`).replace(/\/+$/, "");
+      const summary = await runVelocityThresholdAlertJob(origin);
+      return res.json({ success: true, ...summary });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to evaluate velocity threshold alerts" });
+    }
+  });
+
+  app.get("/api/trends/keys", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const keys = await listTrendApiKeysFromDb(req.user?.uid || null);
+      return res.json({ success: true, keys });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to load API keys" });
+    }
+  });
+
+  app.post("/api/trends/keys", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      const label = String(req.body?.label || "").trim();
+      if (label.length < 2) {
+        return res.status(400).json({ error: "Provide an application or newsroom label (at least 2 chars)." });
+      }
+      const planTier = req.body?.planTier === "agency" ? "agency" : "starter";
+      const created = await createTrendApiKeyInDb({
+        label,
+        userUid: req.user?.uid || null,
+        planTier,
+      });
+      return res.status(201).json({ success: true, ...created });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to provision API key" });
+    }
+  });
+
+  app.delete("/api/trends/keys/:id", async (req, res) => {
+    try {
+      const revoked = await revokeTrendApiKeyInDb(req.params.id);
+      if (!revoked) {
+        return res.status(404).json({ error: "API key not found" });
+      }
+      return res.json({ success: true, revoked });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "Failed to revoke API key" });
+    }
+  });
+
+  // Metered Developer & Media REST API v1
+  const authenticateTrendsV1 = async (req: express.Request, res: express.Response) => {
+    const authHeader = String(req.headers.authorization || "");
+    const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+    const rawKey = String(req.headers["x-api-key"] || bearer || "").trim();
+    if (!rawKey) {
+      res.status(401).json({
+        error: "Missing NepalAI Trends API key. Pass x-api-key or Authorization: Bearer nat_live_...",
+      });
+      return null;
+    }
+    const check = await verifyAndConsumeTrendApiKey(rawKey);
+    if (!check.ok || !check.key) {
+      res.status(403).json({ error: check.reason || "Invalid API key" });
+      return null;
+    }
+    res.setHeader("X-RateLimit-Limit", String(check.key.monthlyQuota));
+    res.setHeader(
+      "X-RateLimit-Remaining",
+      String(Math.max(0, check.key.monthlyQuota - check.key.requestCount))
+    );
+    return check.key;
+  };
+
+  app.get("/api/v1/trends/nepal", async (req, res) => {
+    try {
+      const apiKeyMeta = await authenticateTrendsV1(req, res);
+      if (!apiKeyMeta) return;
+      const category = typeof req.query.category === "string" ? req.query.category : "all";
+      const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
+      const items = await listTrendsFromDb({ country: "NP", category, limit });
+      return res.json({
+        apiVersion: "v1",
+        planTier: apiKeyMeta.planTier,
+        quotaUsed: apiKeyMeta.requestCount,
+        quotaLimit: apiKeyMeta.monthlyQuota,
+        count: items.length,
+        trends: items,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "API v1 trends error" });
+    }
+  });
+
+  app.get("/api/v1/keywords/explore", async (req, res) => {
+    try {
+      const apiKeyMeta = await authenticateTrendsV1(req, res);
+      if (!apiKeyMeta) return;
+      const keyword = String(req.query.q || "").trim();
+      const country = String(req.query.country || "NP").toUpperCase();
+      if (keyword.length < 2) {
+        return res.status(400).json({ error: "Query parameter ?q= must be at least 2 characters." });
+      }
+      const normalized = normalizeKeyword(keyword);
+      const cached = await getCachedKeywordMetric(normalized, country);
+      if (cached) {
+        return res.json({
+          apiVersion: "v1",
+          cached: true,
+          quotaUsed: apiKeyMeta.requestCount,
+          quotaLimit: apiKeyMeta.monthlyQuota,
+          analysis: cached,
+        });
+      }
+      const [analysis, comparative] = await Promise.all([
+        analyzeKeywordWithGemini(keyword),
+        fetchComparativeInterestSeries(keyword, country),
+      ]);
+      const saved = await saveKeywordAnalysisToDb({
+        analysis,
+        country,
+        interestScore: comparative.interestScore,
+        dataSource: comparative.dataSource,
+        interestSeries: comparative.series,
+      });
+      return res.json({
+        apiVersion: "v1",
+        cached: false,
+        quotaUsed: apiKeyMeta.requestCount,
+        quotaLimit: apiKeyMeta.monthlyQuota,
+        analysis: saved,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error?.message || "API v1 keyword error" });
+    }
+  });
+
+  // Schedule non-blocking 20-minute RSS ingestion cycle + Velocity Threshold Evaluator
+  setTimeout(() => {
+    syncNepalAndDiasporaTrends({ includeDiaspora: true, maxEnrichPerCycle: 6 })
+      .then(async (res) => {
+        lastSyncResult = res;
+        console.log(`[Trends Scheduler] Initial RSS sync: NP=${res.upsertedNp}, Diaspora=${res.upsertedDiaspora}`);
+        const evalRes = await runVelocityThresholdAlertJob();
+        if (evalRes.triggeredRules > 0) {
+          console.log(`[Velocity Alerts Job] Triggered=${evalRes.triggeredRules}, Delivered=${evalRes.emailsDelivered}`);
+        }
+      })
+      .catch((err) => console.warn("[Trends Scheduler] Initial RSS sync deferred:", err));
+  }, 2500).unref();
+
+  setInterval(() => {
+    syncNepalAndDiasporaTrends({ includeDiaspora: true, maxEnrichPerCycle: 8 })
+      .then(async (res) => {
+        lastSyncResult = res;
+        await runVelocityThresholdAlertJob();
+      })
+      .catch((err) => console.warn("[Trends Scheduler] Periodic RSS sync error:", err));
+  }, 20 * 60 * 1000).unref();
+
+  // Dedicated 10-minute background check comparing live keyword velocity against saved user thresholds
+  setInterval(() => {
+    runVelocityThresholdAlertJob().catch((err) =>
+      console.warn("[Velocity Alerts Scheduler] Background evaluation error:", err)
+    );
+  }, 10 * 60 * 1000).unref();
+
+  // Helper for server-side per-tool OpenGraph & Schema.org WebApplication injection
+  const escapeAttr = (str: string) =>
+    str
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+  const injectToolSeoIntoHtml = (
+    rawHtml: string,
+    tool: ToolSeoMetadata,
+    originUrl: string
+  ): string => {
+    const cleanOrigin = originUrl.replace(/\/+$/, "");
+    const toolUrl = `${cleanOrigin}/tools/${tool.slug}`;
+    const toolJsonLd = buildWebApplicationJsonLd(tool, cleanOrigin);
+
+    let html = rawHtml
+      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeAttr(tool.title)}</title>`)
+      .replace(
+        /<link rel="canonical" href="[^"]*"\s*\/?>/i,
+        `<link rel="canonical" href="${escapeAttr(toolUrl)}" />`
+      )
+      .replace(
+        /<meta name="description" content="[^"]*"\s*\/?>/i,
+        `<meta name="description" content="${escapeAttr(tool.description)}" />`
+      )
+      .replace(
+        /<meta name="keywords" content="[^"]*"\s*\/?>/i,
+        `<meta name="keywords" content="${escapeAttr(tool.keywords)}" />`
+      )
+      .replace(
+        /<meta property="og:url" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:url" content="${escapeAttr(toolUrl)}" />`
+      )
+      .replace(
+        /<meta property="og:title" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:title" content="${escapeAttr(tool.ogTitle)}" />`
+      )
+      .replace(
+        /<meta property="og:description" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:description" content="${escapeAttr(tool.ogDescription)}" />`
+      )
+      .replace(
+        /<meta name="twitter:title" content="[^"]*"\s*\/?>/i,
+        `<meta name="twitter:title" content="${escapeAttr(tool.ogTitle)}" />`
+      )
+      .replace(
+        /<meta name="twitter:description" content="[^"]*"\s*\/?>/i,
+        `<meta name="twitter:description" content="${escapeAttr(tool.ogDescription)}" />`
+      );
+
+    const jsonLdTag = `    <script id="nepalai-tool-jsonld" type="application/ld+json">\n    ${JSON.stringify(toolJsonLd, null, 2)}\n    </script>\n  </head>`;
+    html = html.replace(/<\/head>/i, jsonLdTag);
+    return html;
+  };
+
+  const injectTrendsSeoIntoHtml = (
+    rawHtml: string,
+    meta: TrendsSeoMeta,
+    originUrl: string
+  ): string => {
+    const cleanOrigin = originUrl.replace(/\/+$/, "");
+    const fullUrl = `${cleanOrigin}${meta.canonicalPath}`;
+
+    let html = rawHtml
+      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeAttr(meta.title)}</title>`)
+      .replace(
+        /<link rel="canonical" href="[^"]*"\s*\/?>/i,
+        `<link rel="canonical" href="${escapeAttr(fullUrl)}" />`
+      )
+      .replace(
+        /<meta name="description" content="[^"]*"\s*\/?>/i,
+        `<meta name="description" content="${escapeAttr(meta.description)}" />`
+      )
+      .replace(
+        /<meta name="keywords" content="[^"]*"\s*\/?>/i,
+        `<meta name="keywords" content="${escapeAttr(meta.keywords)}" />`
+      )
+      .replace(
+        /<meta property="og:type" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:type" content="${escapeAttr(meta.ogType)}" />`
+      )
+      .replace(
+        /<meta property="og:url" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:url" content="${escapeAttr(fullUrl)}" />`
+      )
+      .replace(
+        /<meta property="og:title" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:title" content="${escapeAttr(meta.ogTitle)}" />`
+      )
+      .replace(
+        /<meta property="og:description" content="[^"]*"\s*\/?>/i,
+        `<meta property="og:description" content="${escapeAttr(meta.ogDescription)}" />`
+      )
+      .replace(
+        /<meta name="twitter:title" content="[^"]*"\s*\/?>/i,
+        `<meta name="twitter:title" content="${escapeAttr(meta.ogTitle)}" />`
+      )
+      .replace(
+        /<meta name="twitter:description" content="[^"]*"\s*\/?>/i,
+        `<meta name="twitter:description" content="${escapeAttr(meta.ogDescription)}" />`
+      );
+
+    const jsonLdTag = `    <script id="nepalai-tool-jsonld" type="application/ld+json">\n    ${JSON.stringify(meta.jsonLd, null, 2)}\n    </script>\n  </head>`;
+    html = html.replace(/<\/head>/i, jsonLdTag);
+    return html;
+  };
+
+  // Vite middleware for development vs Production static serving
   if (process.env.NODE_ENV !== "production") {
     const isHmrDisabled = process.env.DISABLE_HMR === "true";
     const vite = await createViteServer({
@@ -2247,12 +4696,113 @@ Open Studio Admin Dashboard: ${STUDIO_ADMIN_URL}
       },
       appType: "spa",
     });
+
+    // Serve individual /tools/:slug (or ?tool=:slug) with server-injected OG & WebApplication Schema.org JSON-LD
+    app.get("/tools/:slug", async (req, res, next) => {
+      try {
+        const tool = getToolSeoBySlug(req.params.slug);
+        if (!tool) return next();
+
+        const indexPath = path.resolve(process.cwd(), "index.html");
+        const rawTemplate = fs.readFileSync(indexPath, "utf-8");
+        const originUrl =
+          process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`;
+        const transformed = await vite.transformIndexHtml(req.originalUrl, rawTemplate);
+        const enriched = injectToolSeoIntoHtml(transformed, tool, originUrl);
+        return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(enriched);
+      } catch (e) {
+        next(e);
+      }
+    });
+
+    // Serve /trending/* and /keywords/* routes with server-injected OpenGraph + NewsArticle/CollectionPage JSON-LD
+    app.get(["/trending/*", "/keywords/*"], async (req, res, next) => {
+      try {
+        const matched = resolveTrendsRouteFromPath(req.path);
+        if (!matched) return next();
+
+        const indexPath = path.resolve(process.cwd(), "index.html");
+        const rawTemplate = fs.readFileSync(indexPath, "utf-8");
+        const originUrl =
+          process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`;
+
+        let seoMeta: TrendsSeoMeta;
+        if (matched.view === "detail" && matched.slug) {
+          const detail = await getTrendDetailFromDb(matched.slug).catch(() => null);
+          seoMeta = detail
+            ? buildTrendDetailSeo(detail, originUrl)
+            : buildTrendsListingSeo({ view: "nepal" }, originUrl);
+        } else {
+          seoMeta = buildTrendsListingSeo(matched, originUrl);
+        }
+
+        const transformed = await vite.transformIndexHtml(req.originalUrl, rawTemplate);
+        const enriched = injectTrendsSeoIntoHtml(transformed, seoMeta, originUrl);
+        return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(enriched);
+      } catch (e) {
+        next(e);
+      }
+    });
+
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
+
+    app.get("/tools/:slug", (req, res, next) => {
+      try {
+        const tool = getToolSeoBySlug(req.params.slug);
+        const indexPath = path.join(distPath, "index.html");
+        if (!tool || !fs.existsSync(indexPath)) return next();
+
+        const rawHtml = fs.readFileSync(indexPath, "utf-8");
+        const originUrl =
+          process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`;
+        const enriched = injectToolSeoIntoHtml(rawHtml, tool, originUrl);
+        return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(enriched);
+      } catch (e) {
+        next(e);
+      }
+    });
+
+    app.get(["/trending/*", "/keywords/*"], async (req, res, next) => {
+      try {
+        const matched = resolveTrendsRouteFromPath(req.path);
+        const indexPath = path.join(distPath, "index.html");
+        if (!matched || !fs.existsSync(indexPath)) return next();
+
+        const rawHtml = fs.readFileSync(indexPath, "utf-8");
+        const originUrl =
+          process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`;
+
+        let seoMeta: TrendsSeoMeta;
+        if (matched.view === "detail" && matched.slug) {
+          const detail = await getTrendDetailFromDb(matched.slug).catch(() => null);
+          seoMeta = detail
+            ? buildTrendDetailSeo(detail, originUrl)
+            : buildTrendsListingSeo({ view: "nepal" }, originUrl);
+        } else {
+          seoMeta = buildTrendsListingSeo(matched, originUrl);
+        }
+
+        const enriched = injectTrendsSeoIntoHtml(rawHtml, seoMeta, originUrl);
+        return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(enriched);
+      } catch (e) {
+        next(e);
+      }
+    });
+
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const toolFromQuery = resolveToolFromUrl(req.path, req.originalUrl.split("?")[1] ? `?${req.originalUrl.split("?")[1]}` : "");
+      const indexPath = path.join(distPath, "index.html");
+      if (toolFromQuery && fs.existsSync(indexPath)) {
+        const rawHtml = fs.readFileSync(indexPath, "utf-8");
+        const originUrl =
+          process.env.APP_URL || `${req.protocol}://${req.get("host") || "nepalai.tech"}`;
+        const enriched = injectToolSeoIntoHtml(rawHtml, toolFromQuery, originUrl);
+        return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(enriched);
+      }
+      res.sendFile(indexPath);
     });
   }
 

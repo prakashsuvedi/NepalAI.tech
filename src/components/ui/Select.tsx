@@ -38,10 +38,10 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             disabled={disabled}
             aria-describedby={error ? errorId : hint ? hintId : undefined}
             aria-invalid={Boolean(error)}
-            className={`w-full appearance-none rounded-lg border bg-white dark:bg-[#0c101d] text-slate-900 dark:text-slate-100 text-sm py-2 pl-3 pr-10 min-h-[42px] transition-colors focus:outline-hidden cursor-pointer ${
+            className={`w-full appearance-none rounded-lg border bg-white dark:bg-[#0c101d] text-slate-950 dark:text-slate-100 text-sm py-2 pl-3 pr-10 min-h-[42px] transition-colors focus:outline-hidden cursor-pointer ${
               error
                 ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                : 'border-slate-300 dark:border-white/15 focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/30'
+                : 'border-slate-300 dark:border-white/15 focus:border-cyan-600 dark:focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/30'
             } disabled:bg-slate-100 dark:disabled:bg-white/[0.03] disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
             {...props}
           >

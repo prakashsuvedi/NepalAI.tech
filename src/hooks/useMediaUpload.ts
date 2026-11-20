@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getAuthHeaders } from '../services/studioAdminService';
 
 export interface UploadResult {
   fileKey: string;
@@ -27,16 +28,15 @@ export function useMediaUpload(options: UseMediaUploadOptions = {}) {
     setError(null);
 
     try {
-      // 1. Validate file size (15MB limit)
       if (file.size > 15 * 1024 * 1024) {
         throw new Error('File exceeds maximum size of 15MB.');
       }
 
-      // 2. Request pre-signed upload URL from backend
       setProgress(25);
+      const authHeaders = await getAuthHeaders();
       const presignedRes = await fetch('/api/storage/presigned-url', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type || 'image/jpeg',
@@ -53,7 +53,6 @@ export function useMediaUpload(options: UseMediaUploadOptions = {}) {
       const { uploadUrl, fileKey, publicUrl, isSimulated } = await presignedRes.json();
       setProgress(50);
 
-      // 3. Direct upload to Cloudflare R2 (or mock endpoint if unconfigured)
       const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         headers: {
@@ -96,9 +95,10 @@ export function useMediaUpload(options: UseMediaUploadOptions = {}) {
     setError(null);
 
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/storage/upload-direct', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           filename,
           contentType,

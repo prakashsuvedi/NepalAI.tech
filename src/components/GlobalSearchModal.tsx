@@ -17,7 +17,8 @@ import {
   Globe2,
   Cpu,
   FileText,
-  Bot
+  Bot,
+  TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ThemeMode, Language } from '../types';
@@ -26,11 +27,11 @@ import { CONSULTING_OFFERINGS } from '../data/consultingOfferings';
 import { FAQ_ITEMS } from '../data/faqData';
 import { TRANSLATIONS } from '../data/translations';
 
-export type SearchCategory = 'all' | 'tools' | 'consulting' | 'sections' | 'faqs';
+export type SearchCategory = 'all' | 'trends' | 'tools' | 'consulting' | 'sections' | 'faqs';
 
 interface SearchResultItem {
   id: string;
-  category: 'tool' | 'consulting' | 'section' | 'faq';
+  category: 'trend' | 'tool' | 'consulting' | 'section' | 'faq';
   titleEn: string;
   titleNe: string;
   descriptionEn: string;
@@ -38,8 +39,9 @@ interface SearchResultItem {
   badge?: string;
   extraInfo?: string;
   keywords: string[];
-  actionType: 'navigate' | 'consultation' | 'link' | 'faq';
+  actionType: 'navigate' | 'consultation' | 'link' | 'faq' | 'trends';
   targetId?: string;
+  trendsPath?: string;
   linkUrl?: string;
   consultingServiceTitle?: string;
 }
@@ -49,7 +51,9 @@ interface GlobalSearchModalProps {
   onClose: () => void;
   theme?: ThemeMode;
   language?: Language;
+  onSelectPage?: (page: any) => void;
   onNavigateSection?: (sectionId: string) => void;
+  onOpenTrendsRoute?: (path: string) => void;
   onOpenConsultation?: (serviceTitle?: string) => void;
   onOpenStackCalculator?: () => void;
   onOpenHamroAI?: () => void;
@@ -62,7 +66,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onClose,
   theme = 'dark',
   language = 'en',
+  onSelectPage: _onSelectPage,
   onNavigateSection,
+  onOpenTrendsRoute,
   onOpenConsultation,
   onOpenStackCalculator,
   onOpenHamroAI,
@@ -72,6 +78,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [liveTrends, setLiveTrends] = useState<Array<{ slug: string; keyword: string; category: string; trafficBand: string; aiWhyTrending?: string }>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -79,9 +86,106 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const isNepali = language === 'ne';
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
 
+  // Lazy load active live Nepal trends when Global Search opens
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    fetch('/api/trends/nepal?limit=10')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.trends)) {
+          setLiveTrends(data.trends);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
+
   // Build searchable index
   const allSearchItems = useMemo<SearchResultItem[]>(() => {
     const items: SearchResultItem[] = [];
+
+    // 0. Nepal AI + Trends Routes & Live Topics
+    const trendShortcuts: SearchResultItem[] = [
+      {
+        id: 'trend-hub-nepal',
+        category: 'trend',
+        titleEn: 'Trending Now Nepal (Live Search Pulse)',
+        titleNe: 'नेपालमा अहिले ट्रेन्डिङ (प्रत्यक्ष खोज)',
+        descriptionEn: 'Live top searches across 11 Nepal verticals with source-cited AI explainers.',
+        descriptionNe: '११ वर्गमा नेपालका ताजा खोज र प्रमाणित समाचार स्रोत सहितको व्याख्या।',
+        badge: 'Nepal AI + Trends',
+        keywords: ['trending', 'nepal', 'trends', 'google trends', 'rss', 'live', 'pulse'],
+        actionType: 'trends',
+        trendsPath: '/trending/nepal',
+      },
+      {
+        id: 'trend-keyword-explorer',
+        category: 'trend',
+        titleEn: 'Nepal Tri-Script Keyword Explorer (EN / Roman / नेपाली)',
+        titleNe: 'नेपाल त्रि-लिपि किबोर्ड एक्सप्लोरर',
+        descriptionEn: 'Expand English, Romanized Nepali, and Devanagari keywords with A-vs-B comparison and CSV export.',
+        descriptionNe: 'अंग्रेजी, रोमन नेपाली र देवनागरी किबोर्ड भेरिएन्ट तथा व्यावसायिक उद्देश्य।',
+        badge: 'Keywords',
+        keywords: ['keyword', 'seo', 'romanized', 'devanagari', 'compare', 'csv', 'ai jobs nepal'],
+        actionType: 'trends',
+        trendsPath: '/keywords/nepal',
+      },
+      {
+        id: 'trend-diaspora',
+        category: 'trend',
+        titleEn: 'Nepali Diaspora Trends (US, UK, UAE, AU, JP, CA)',
+        titleNe: 'नेपाली प्रवास ट्रेन्ड्स (६ देश)',
+        descriptionEn: 'Track Nepal-related search surges across the US, Australia, UK, UAE, Japan, and Canada.',
+        descriptionNe: 'विदेशमा रहेका नेपालीहरूको खोज र रेमिट्यान्स/यात्रा रुचि।',
+        badge: 'Diaspora',
+        keywords: ['diaspora', 'nrn', 'us', 'australia', 'uk', 'uae', 'japan', 'canada', 'remittance'],
+        actionType: 'trends',
+        trendsPath: '/trending/diaspora',
+      },
+      {
+        id: 'trend-business-kw',
+        category: 'trend',
+        titleEn: 'Nepal Business & Local-Service Keyword Packs',
+        titleNe: 'नेपाली व्यवसायिक किबोर्ड प्याक',
+        descriptionEn: 'High-intent local and NRN commercial keyword ideas for Nepali SMEs and marketers.',
+        descriptionNe: 'दन्त चिकित्सा, ट्रेकिङ, भुक्तानी र प्रवासी सेवाका लागि किबोर्ड।',
+        badge: 'Business SEO',
+        keywords: ['business keywords', 'commercial', 'dentist kathmandu', 'trekking', 'ecommerce'],
+        actionType: 'trends',
+        trendsPath: '/keywords/nepal/business',
+      },
+      {
+        id: 'trend-api-vault',
+        category: 'trend',
+        titleEn: 'Trends Briefs Vault, Watchlist & REST API v1',
+        titleNe: 'सेभ गरिएका ब्रिफ, वाचलिस्ट र API v1',
+        descriptionEn: 'Access saved bilingual SEO briefs, tracked keywords, digest previews, and REST API keys.',
+        descriptionNe: 'बचत गरिएका सामग्री योजना, डाइजेस्ट र डेभलपर एपीआई कुञ्जी।',
+        badge: 'Creator & API',
+        keywords: ['api', 'developer', 'briefs', 'watchlist', 'digest', 'vault'],
+        actionType: 'trends',
+        trendsPath: '/trending/api',
+      },
+    ];
+    items.push(...trendShortcuts);
+
+    liveTrends.forEach((tr) => {
+      items.push({
+        id: `live-trend-${tr.slug}`,
+        category: 'trend',
+        titleEn: tr.keyword,
+        titleNe: `${tr.keyword} (${tr.trafficBand})`,
+        descriptionEn: tr.aiWhyTrending || `Live Nepal search trend (${tr.trafficBand}) in ${tr.category}.`,
+        descriptionNe: tr.aiWhyTrending || `नेपालमा प्रत्यक्ष ट्रेन्डिङ (${tr.trafficBand})`,
+        badge: `Live · ${tr.trafficBand}`,
+        keywords: [tr.keyword.toLowerCase(), tr.category.toLowerCase(), tr.slug.toLowerCase(), 'trending'],
+        actionType: 'trends',
+        trendsPath: `/trending/nepal/${tr.slug}`,
+      });
+    });
 
     // 1. Navigation Sections & Pages
     const sections: SearchResultItem[] = [
@@ -312,7 +416,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     });
 
     return items;
-  }, []);
+  }, [liveTrends]);
 
   // Filtered items based on query and category
   const filteredResults = useMemo(() => {
@@ -321,6 +425,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     return allSearchItems.filter((item) => {
       // Category filter
       if (selectedCategory !== 'all') {
+        if (selectedCategory === 'trends' && item.category !== 'trend') return false;
         if (selectedCategory === 'tools' && item.category !== 'tool') return false;
         if (selectedCategory === 'consulting' && item.category !== 'consulting') return false;
         if (selectedCategory === 'sections' && item.category !== 'section') return false;
@@ -398,7 +503,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const handleSelectItem = (item: SearchResultItem) => {
     onClose();
 
-    if (item.actionType === 'consultation' && onOpenConsultation) {
+    if (item.actionType === 'trends' && item.trendsPath && onOpenTrendsRoute) {
+      onOpenTrendsRoute(item.trendsPath);
+    } else if (item.actionType === 'consultation' && onOpenConsultation) {
       onOpenConsultation(item.consultingServiceTitle || item.titleEn);
     } else if (item.targetId === 'admin-modal') {
       if (onOpenAdminPanel) {
@@ -420,6 +527,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   const getCategoryIcon = (cat: SearchResultItem['category']) => {
     switch (cat) {
+      case 'trend':
+        return TrendingUp;
       case 'tool':
         return Cpu;
       case 'consulting':
@@ -434,6 +543,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   const categories: { id: SearchCategory; labelEn: string; labelNe: string; count: number }[] = [
     { id: 'all', labelEn: 'All Results', labelNe: 'सबै नतिजाहरू', count: allSearchItems.length },
+    { id: 'trends', labelEn: 'Live Trends', labelNe: 'ताजा ट्रेन्ड्स', count: allSearchItems.filter(i => i.category === 'trend').length },
     { id: 'tools', labelEn: 'AI Tools', labelNe: 'एआई टुल्स', count: allSearchItems.filter(i => i.category === 'tool').length },
     { id: 'consulting', labelEn: 'Consulting', labelNe: 'परामर्श सेवा', count: allSearchItems.filter(i => i.category === 'consulting').length },
     { id: 'sections', labelEn: 'Sections', labelNe: 'पृष्ठ खण्डहरू', count: allSearchItems.filter(i => i.category === 'section').length },
@@ -477,7 +587,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         <div className={`relative flex items-center px-4 sm:px-6 py-4 border-b gap-3 ${
           isDark ? 'border-white/10' : 'border-slate-200'
         }`}>
-          <Search className="h-5 w-5 text-emerald-500 shrink-0" aria-hidden="true" />
+          <Search className="h-5 w-5 text-cyan-500 shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -489,7 +599,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 : 'Search verified AI tools, consulting services, FAQs, and sections... (e.g. eSewa, OCR, Sora)'
             }
             className={`w-full bg-transparent text-sm sm:text-base font-medium focus:outline-hidden ${
-              isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'
+              isDark ? 'text-white placeholder-slate-400' : 'text-slate-950 placeholder-slate-500'
             } ${isNepali ? "font-['Noto_Sans_Devanagari']" : ''}`}
             aria-label="Global search input"
           />
@@ -498,8 +608,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             <button
               type="button"
               onClick={() => setQuery('')}
-              className={`p-1 rounded-full transition-colors ${
-                isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+              className={`p-1 rounded-full transition-colors cursor-pointer ${
+                isDark ? 'text-slate-200 hover:text-white hover:bg-white/10' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
               }`}
               aria-label="Clear search query"
             >
@@ -507,8 +617,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             </button>
           )}
 
-          <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-mono ${
-            isDark ? 'bg-white/[0.06] border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+          <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md border text-xs font-mono ${
+            isDark ? 'bg-white/[0.06] border-white/15 text-slate-200' : 'bg-slate-100 border-slate-300 text-slate-800'
           }`}>
             <kbd className="font-sans">ESC</kbd>
             <span>to close</span>
@@ -517,8 +627,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`sm:hidden p-1.5 rounded-lg ${
-              isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+            className={`sm:hidden p-1.5 rounded-lg cursor-pointer ${
+              isDark ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-slate-950'
             }`}
             aria-label="Close search"
           >
@@ -536,21 +646,21 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                   selectedCategory === cat.id
                     ? isDark
-                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
-                      : 'bg-emerald-600 text-white font-bold shadow-xs'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                      : 'bg-cyan-600 text-white font-bold shadow-xs'
                     : isDark
-                    ? 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-950'
+                    ? 'bg-white/[0.05] text-slate-200 hover:bg-white/[0.1] hover:text-white'
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-950'
                 }`}
               >
                 <span>{isNepali ? cat.labelNe : cat.labelEn}</span>
-                <span className={`text-[10px] font-mono px-1 rounded ${
+                <span className={`text-xs font-mono px-1 rounded ${
                   selectedCategory === cat.id
-                    ? isDark ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-emerald-700/30 text-white font-bold'
-                    : isDark ? 'text-slate-400' : 'text-slate-500'
+                    ? isDark ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-cyan-700/30 text-white font-bold'
+                    : isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
                   {cat.count}
                 </span>
@@ -560,10 +670,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
           {/* Quick Language Toggle inside Search */}
           {onSelectLanguage && (
-            <div className={`hidden md:flex items-center gap-1 text-[11px] font-mono shrink-0 ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
+            <div className={`hidden md:flex items-center gap-1 text-xs font-mono shrink-0 ${
+              isDark ? 'text-slate-200' : 'text-slate-700'
             }`}>
-              <Globe2 className="h-3 w-3 text-emerald-500" />
+              <Globe2 className="h-3.5 w-3.5 text-cyan-500" />
               <button
                 type="button"
                 onClick={() => onSelectLanguage(language === 'en' ? 'ne' : 'en')}
@@ -579,10 +689,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
         {/* Popular Tags Strip when query is empty */}
         {!query && (
-          <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px] ${
-            isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200'
+          <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-xs ${
+            isDark ? 'bg-white/[0.02] border-white/10' : 'bg-slate-50 border-slate-200'
           }`}>
-            <span className={`shrink-0 font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            <span className={`shrink-0 font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               {isNepali ? 'लोकप्रिय खोज:' : 'Trending in Nepal:'}
             </span>
             {popularPills.map((pill, pIdx) => (
@@ -592,8 +702,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 onClick={() => setQuery(pill.query)}
                 className={`px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors cursor-pointer ${
                   isDark
-                    ? 'bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 border-white/10 text-slate-300'
-                    : 'bg-white hover:bg-emerald-50 hover:text-emerald-800 border-slate-300 text-slate-700 shadow-2xs'
+                    ? 'bg-white/[0.05] hover:bg-cyan-500/20 hover:text-cyan-200 border-white/15 text-slate-200'
+                    : 'bg-white hover:bg-cyan-50 hover:text-cyan-900 border-slate-300 text-slate-800 shadow-2xs'
                 }`}
               >
                 {isNepali ? pill.labelNe : pill.labelEn}
@@ -603,13 +713,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         )}
 
         {/* Unified AI Engine Query Bridges: Hamro AI, Perplexity, ChatGPT, Claude, DeepSeek */}
-        <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px] ${
-          isDark ? 'bg-emerald-500/[0.03] border-emerald-500/15' : 'bg-emerald-50/70 border-emerald-200'
+        <div className={`px-4 sm:px-6 py-2 border-b flex items-center gap-2 overflow-x-auto scrollbar-none text-xs ${
+          isDark ? 'bg-cyan-500/[0.05] border-cyan-500/20' : 'bg-cyan-50/70 border-cyan-200'
         }`}>
           <span className={`shrink-0 font-mono font-bold flex items-center gap-1 ${
-            isDark ? 'text-emerald-400' : 'text-emerald-800'
+            isDark ? 'text-cyan-300' : 'text-cyan-800'
           }`}>
-            <Sparkles className="h-3 w-3" /> AI Engines:
+            <Sparkles className="h-3.5 w-3.5" /> AI Engines:
           </span>
 
           {onOpenHamroAI && (
@@ -619,13 +729,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 onClose();
                 onOpenHamroAI();
               }}
-              className={`px-2.5 py-1 rounded-lg border transition-all font-semibold flex items-center gap-1 shrink-0 cursor-pointer shadow-xs ${
+              className={`px-2.5 py-1 rounded-lg border transition-colors font-semibold flex items-center gap-1 shrink-0 cursor-pointer shadow-xs ${
                 isDark
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
-                  : 'bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700'
+                  ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-200 hover:bg-cyan-500/30'
+                  : 'bg-cyan-600 border-cyan-700 text-white hover:bg-cyan-700'
               }`}
             >
-              <Bot className="h-3 w-3" />
+              <Bot className="h-3.5 w-3.5" />
               <span>{isNepali ? 'हाम्रो एआई च्याट' : 'Hamro AI Chat'}</span>
             </button>
           )}
@@ -634,56 +744,56 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             href={`https://www.perplexity.ai/search?q=${encodeURIComponent(query ? query + ' in Nepal context' : 'Nepal AI sovereign tools NRB compliance')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 shrink-0 ${
               isDark
-                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+                ? 'bg-white/[0.05] border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                : 'bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
             }`}
           >
             <span>Perplexity Pro</span>
-            <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+            <ExternalLink className="h-3 w-3" />
           </a>
 
           <a
             href={`https://chatgpt.com/?q=${encodeURIComponent(query ? query : 'Nepal AI enterprise consulting')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 shrink-0 ${
               isDark
-                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+                ? 'bg-white/[0.05] border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                : 'bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
             }`}
           >
             <span>ChatGPT</span>
-            <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+            <ExternalLink className="h-3 w-3" />
           </a>
 
           <a
             href={`https://claude.ai/new?q=${encodeURIComponent(query ? query : 'Architecture for sovereign LLM in Nepal')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 shrink-0 ${
               isDark
-                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+                ? 'bg-white/[0.05] border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                : 'bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
             }`}
           >
             <span>Claude 3.7</span>
-            <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+            <ExternalLink className="h-3 w-3" />
           </a>
 
           <a
             href={`https://chat.deepseek.com/?q=${encodeURIComponent(query ? query : 'DeepSeek R1 reasoning')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 shrink-0 ${
               isDark
-                ? 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08]'
-                : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
+                ? 'bg-white/[0.05] border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1]'
+                : 'bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100 shadow-2xs'
             }`}
           >
             <span>DeepSeek R1</span>
-            <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+            <ExternalLink className="h-3 w-3" />
           </a>
         </div>
 
@@ -695,13 +805,15 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         >
           {filteredResults.length === 0 ? (
             <div className="py-12 text-center space-y-3">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/10 text-slate-400">
+              <div className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl border ${
+                isDark ? 'bg-white/[0.04] border-white/15 text-slate-200' : 'bg-slate-100 border-slate-300 text-slate-700'
+              }`}>
                 <Search className="h-6 w-6" />
               </div>
-              <p className="text-sm font-semibold text-slate-300">
+              <p className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                 {isNepali ? `"${query}" को लागि कुनै नतिजा फेला परेन` : `No matches found for "${query}"`}
               </p>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <p className={`text-xs max-w-sm mx-auto ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 {isNepali
                   ? 'कृपया अन्य नेपाली वा अंग्रेजी शब्दहरू (उदा: eSewa, OCR, HamroAI, Consulting) प्रयोग गर्नुहोस्।'
                   : 'Try searching for general keywords like eSewa, Devanagari, Cloud, NRB, or Consulting.'}
@@ -720,23 +832,23 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                   aria-selected={isSelected}
                   onClick={() => handleSelectItem(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  className={`p-3 rounded-2xl transition-all cursor-pointer flex items-start justify-between gap-3 group ${
+                  className={`p-3 rounded-2xl transition-colors cursor-pointer flex items-start justify-between gap-3 group ${
                     isSelected
                       ? isDark
-                        ? 'bg-emerald-500/15 border border-emerald-500/40 text-white'
-                        : 'bg-emerald-50 border border-emerald-300 text-slate-900'
+                        ? 'bg-cyan-500/15 border border-cyan-500/50 text-white'
+                        : 'bg-cyan-50 border border-cyan-400 text-slate-950'
                       : isDark
-                      ? 'hover:bg-white/[0.04] border border-transparent text-slate-200'
-                      : 'hover:bg-slate-50 border border-transparent text-slate-800'
+                      ? 'hover:bg-white/[0.05] border border-transparent text-slate-100'
+                      : 'hover:bg-slate-50 border border-transparent text-slate-900'
                   }`}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className={`p-2 rounded-xl mt-0.5 shrink-0 ${
                       isSelected
-                        ? 'bg-emerald-500 text-slate-950 font-bold'
+                        ? 'bg-cyan-600 text-white font-bold'
                         : isDark
-                        ? 'bg-white/[0.05] text-emerald-400 border border-white/10'
-                        : 'bg-slate-100 text-emerald-700'
+                        ? 'bg-white/[0.06] text-cyan-300 border border-white/15'
+                        : 'bg-slate-100 text-cyan-700'
                     }`}>
                       <IconComp className="h-4 w-4" aria-hidden="true" />
                     </div>
@@ -748,20 +860,20 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                         </span>
 
                         {item.badge && (
-                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                          <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${
                             isSelected
-                              ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                              ? isDark ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-200' : 'bg-cyan-100 border-cyan-300 text-cyan-900'
                               : isDark
-                              ? 'bg-white/[0.04] border-white/10 text-slate-400'
-                              : 'bg-slate-100 border-slate-200 text-slate-600'
+                              ? 'bg-white/[0.06] border-white/15 text-slate-200'
+                              : 'bg-slate-100 border-slate-300 text-slate-700'
                           }`}>
                             {item.badge}
                           </span>
                         )}
 
                         {item.extraInfo && (
-                          <span className={`text-[11px] font-mono font-semibold ${
-                            isDark ? 'text-emerald-400' : 'text-emerald-700'
+                          <span className={`text-xs font-mono font-semibold ${
+                            isDark ? 'text-cyan-300' : 'text-cyan-700'
                           }`}>
                             {item.extraInfo}
                           </span>
@@ -770,8 +882,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
                       <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${
                         isSelected
-                          ? isDark ? 'text-slate-200' : 'text-slate-700'
-                          : isDark ? 'text-slate-300' : 'text-slate-600'
+                          ? isDark ? 'text-slate-100' : 'text-slate-800'
+                          : isDark ? 'text-slate-200' : 'text-slate-700'
                       } ${isNepali ? "font-['Mukta']" : ''}`}>
                         {isNepali ? item.descriptionNe : item.descriptionEn}
                       </p>
@@ -780,14 +892,14 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
                   {/* Action Pill */}
                   <div className="shrink-0 self-center pl-2">
-                    <div className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg transition-all ${
+                    <div className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${
                       isSelected
                         ? isDark
-                          ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                          : 'bg-emerald-600 text-white shadow-sm'
-                        : isDark ? 'text-slate-400 opacity-0 group-hover:opacity-100' : 'text-slate-500 opacity-0 group-hover:opacity-100'
+                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                          : 'bg-cyan-600 text-white shadow-sm'
+                        : isDark ? 'text-slate-300 opacity-0 group-hover:opacity-100' : 'text-slate-700 opacity-0 group-hover:opacity-100'
                     }`}>
-                      <span className="text-[11px] hidden sm:inline">
+                      <span className="text-xs hidden sm:inline">
                         {item.actionType === 'consultation'
                           ? isNepali ? 'परामर्श लिनुहोस्' : 'Book Scope'
                           : isNepali ? 'खोल्नुहोस्' : 'Jump to'}
@@ -802,34 +914,34 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Footer Shortcut Helper Bar */}
-        <div className={`px-4 sm:px-6 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono ${
-          isDark ? 'border-white/10 text-slate-400 bg-white/[0.01]' : 'border-slate-200 text-slate-600 bg-slate-50'
+        <div className={`px-4 sm:px-6 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono ${
+          isDark ? 'border-white/10 text-slate-300 bg-white/[0.02]' : 'border-slate-200 text-slate-700 bg-slate-50'
         }`}>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
-                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              <kbd className={`px-1.5 py-0.5 rounded text-xs border ${
+                isDark ? 'bg-white/10 border-white/15 text-slate-200' : 'bg-white border-slate-300 text-slate-800 shadow-2xs'
               }`}>↑</kbd>
-              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
-                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              <kbd className={`px-1.5 py-0.5 rounded text-xs border ${
+                isDark ? 'bg-white/10 border-white/15 text-slate-200' : 'bg-white border-slate-300 text-slate-800 shadow-2xs'
               }`}>↓</kbd>
               <span>navigate</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
-                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              <kbd className={`px-1.5 py-0.5 rounded text-xs border ${
+                isDark ? 'bg-white/10 border-white/15 text-slate-200' : 'bg-white border-slate-300 text-slate-800 shadow-2xs'
               }`}>↵</kbd>
               <span>select</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className={`px-1.5 py-0.5 rounded text-[10px] border ${
-                isDark ? 'bg-white/10 border-white/10 text-slate-300' : 'bg-white border-slate-300 text-slate-700 shadow-2xs'
+              <kbd className={`px-1.5 py-0.5 rounded text-xs border ${
+                isDark ? 'bg-white/10 border-white/15 text-slate-200' : 'bg-white border-slate-300 text-slate-800 shadow-2xs'
               }`}>esc</kbd>
               <span>close</span>
             </span>
           </div>
 
-          <div className={`font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700 font-semibold'}`}>
+          <div className={`font-semibold ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
             <span>nepalai.tech Global Command Palette</span>
           </div>
         </div>
