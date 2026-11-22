@@ -20,6 +20,7 @@ import {
   findSarkariWorkflow,
 } from '../../utils/sarkariNavigatorEngine';
 import { exportSarkariChecklistPdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 interface SarkariCounterNavigatorProps {
   isDark: boolean;
@@ -34,6 +35,7 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
   const [customSituation, setCustomSituation] = useState<string>('');
   const [customAnswer, setCustomAnswer] = useState<string>('');
+  const [customAnswerGen, setCustomAnswerGen] = useState<number>(0);
   const [isAsking, setIsAsking] = useState<boolean>(false);
 
   const activeWorkflow: SarkariWorkflow = findSarkariWorkflow(selectedId);
@@ -82,6 +84,7 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
       const data = await res.json();
       if (res.ok && data?.answer) {
         setCustomAnswer(data.answer);
+        setCustomAnswerGen((n) => n + 1);
         return;
       }
       throw new Error('Fallback guide');
@@ -91,6 +94,7 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
           ? `${activeWorkflow.titleNe} को लागि: ${activeWorkflow.counterSteps.map((s) => `${s.counterNameNe} — ${s.actionNe}`).join(' | ')}`
           : `For ${activeWorkflow.titleEn}: Verify ${activeWorkflow.requiredDocs.filter((d) => d.mandatory).map((d) => d.labelEn).join(', ')} at ${activeWorkflow.officeEn}.`
       );
+      setCustomAnswerGen((n) => n + 1);
     } finally {
       setIsAsking(false);
     }
@@ -154,7 +158,11 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
       </div>
 
       {/* Office, Fee & Time Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <ReactiveResultPanel
+        resultKey={`strip-${selectedId}`}
+        direction="up"
+        className="grid grid-cols-1 md:grid-cols-3 gap-3"
+      >
         <div className={`p-3.5 rounded-xl border ${isDark ? 'border-white/15 bg-white/[0.03]' : 'border-slate-300 bg-white'}`}>
           <span className={`text-xs font-bold flex items-center gap-1.5 mb-1 ${isDark ? 'text-indigo-300' : 'text-indigo-800'}`}>
             <Building2 className="h-3.5 w-3.5" />
@@ -184,7 +192,7 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
             {isNe ? activeWorkflow.estimatedTimeNe : activeWorkflow.estimatedTimeEn}
           </p>
         </div>
-      </div>
+      </ReactiveResultPanel>
 
       {/* Main Split: Interactive Checklist + Counter-by-Counter Sequence */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -301,7 +309,10 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
         </div>
 
         {/* Right: Room-by-Room Sequence + Rejection Traps + Custom Question */}
-        <div className="lg:col-span-7 space-y-4">
+        <ReactiveResultPanel
+          resultKey={`wf-${selectedId}`}
+          className="lg:col-span-7 space-y-4"
+        >
           {/* Counter Sequence */}
           <div className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${isDark ? 'bg-[#060a14] border-white/15' : 'bg-white border-slate-300 shadow-xs'}`}>
             <span className={`text-xs sm:text-sm font-bold block ${isDark ? 'text-white' : 'text-slate-950'}`}>
@@ -372,14 +383,18 @@ export const SarkariCounterNavigator: React.FC<SarkariCounterNavigatorProps> = (
               </button>
             </div>
             {customAnswer && (
-              <div className={`mt-3 p-3 rounded-xl border text-xs leading-relaxed ${
-                isDark ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-100' : 'border-indigo-200 bg-indigo-50 text-indigo-950'
-              }`}>
+              <ReactiveResultPanel
+                resultKey={`ans-${customAnswerGen}`}
+                direction="up"
+                className={`mt-3 p-3 rounded-xl border text-xs leading-relaxed ${
+                  isDark ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-100' : 'border-indigo-200 bg-indigo-50 text-indigo-950'
+                }`}
+              >
                 {customAnswer}
-              </div>
+              </ReactiveResultPanel>
             )}
           </div>
-        </div>
+        </ReactiveResultPanel>
       </div>
     </div>
   );

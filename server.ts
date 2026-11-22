@@ -256,7 +256,7 @@ async function startServer() {
       throw new Error("GEMINI_API_KEY is not configured");
     }
 
-    const candidateModels = ["gemini-2.5-flash", "gemini-2.5-pro"];
+    const candidateModels = ["gemini-4-hydrogen", "gemini-2.5-flash"];
     let lastError: any = null;
 
     for (const model of candidateModels) {

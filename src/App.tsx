@@ -33,7 +33,7 @@ import { CommercePortal } from './components/commerce/CommercePortal';
 import { ConsultingOffering, HeroConfig, ThemeMode, Language, AppPage } from './types';
 import { CONSULTING_OFFERINGS } from './data/consultingOfferings';
 import { DEFAULT_HERO_CONFIG } from './data/defaultHeroConfig';
-import { Bot } from 'lucide-react';
+import { Bot, X } from 'lucide-react';
 import {
   resolveToolFromUrl,
   getToolSeoByTab,
@@ -703,16 +703,38 @@ export default function App() {
         {/* Floating Quick Action Button & Back to Top */}
         <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 pointer-events-none">
           <div className="pointer-events-auto flex flex-col items-end gap-2">
-            <button
+            <motion.button
               type="button"
-              onClick={() => setIsHamroAIOpen(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-lg shadow-cyan-950/20 transition-all cursor-pointer min-h-[44px]"
-              aria-label={language === 'ne' ? 'हाम्रो AI च्याट खोल्नुहोस्' : 'Open Hamro AI Chat'}
+              onClick={() => setIsHamroAIOpen((prev) => !prev)}
+              initial={{ opacity: 0, scale: 0.85, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-2xl font-bold text-xs shadow-lg transition-colors cursor-pointer min-h-[44px] border ${
+                isHamroAIOpen
+                  ? 'bg-slate-900 hover:bg-slate-800 text-white border-cyan-500/40 shadow-cyan-950/30'
+                  : 'bg-cyan-600 hover:bg-cyan-500 text-white border-cyan-400/40 shadow-cyan-950/25'
+              }`}
+              aria-expanded={isHamroAIOpen}
+              aria-label={
+                isHamroAIOpen
+                  ? language === 'ne' ? 'हाम्रो AI च्याट बन्द गर्नुहोस्' : 'Close Hamro AI Chat'
+                  : language === 'ne' ? 'हाम्रो AI च्याट खोल्नुहोस्' : 'Open Hamro AI Chat'
+              }
               title={language === 'ne' ? 'हाम्रो AI च्याट' : 'Hamro AI Chat'}
             >
-              <Bot className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="hidden sm:inline">{language === 'ne' ? 'हाम्रो AI च्याट' : 'Hamro AI Chat'}</span>
-            </button>
+              {isHamroAIOpen ? (
+                <X className="h-4 w-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <Bot className="h-4 w-4 shrink-0" aria-hidden="true" />
+              )}
+              <span className="hidden sm:inline">
+                {isHamroAIOpen
+                  ? language === 'ne' ? 'च्याट बन्द' : 'Close Chat'
+                  : language === 'ne' ? 'हाम्रो AI च्याट' : 'Hamro AI Chat'}
+              </span>
+            </motion.button>
             <BackToTop theme={theme} language={language} className="static" />
           </div>
         </div>
@@ -772,19 +794,23 @@ export default function App() {
             onOpenTrendsRoute={handleOpenTrendsRoute}
             onOpenConsultation={handleOpenConsultation}
             onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
+            onOpenHamroAI={() => setIsHamroAIOpen(true)}
           />
         )}
 
-        {isHamroAIOpen && (
-          <HamroAIChatModal
-            isOpen={isHamroAIOpen}
-            onClose={() => setIsHamroAIOpen(false)}
-            theme={theme}
-            language={language}
-            onOpenConsultation={handleOpenConsultation}
-            onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
-          />
-        )}
+        <AnimatePresence>
+          {isHamroAIOpen && (
+            <HamroAIChatModal
+              key="hamro-ai-popup"
+              isOpen={isHamroAIOpen}
+              onClose={() => setIsHamroAIOpen(false)}
+              theme={theme}
+              language={language}
+              onOpenConsultation={handleOpenConsultation}
+              onOpenStackCalculator={() => setIsStackCalculatorOpen(true)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Authentication & Identity Modal */}
         <AuthModal

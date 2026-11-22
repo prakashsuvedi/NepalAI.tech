@@ -19,7 +19,8 @@ import {
   Building2,
   Check,
   ShoppingBag,
-  TrendingUp
+  TrendingUp,
+  Bot
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ThemeMode, Language, AppPage } from '../types';
@@ -57,6 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenConsultation,
   onOpenStackCalculator,
   onOpenSearch,
+  onOpenHamroAI,
   onOpenAuth,
   selectedStackCount,
 }) => {
@@ -239,6 +241,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                   })}
 
                   <div className="my-1 border-t border-slate-200 dark:border-slate-800" />
+
+                  {/* Hamro AI Chat Pop-Up Launcher */}
+                  {onOpenHamroAI && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        onOpenHamroAI();
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors text-left cursor-pointer ${
+                        isDark
+                          ? 'text-cyan-300 hover:bg-cyan-500/15'
+                          : 'text-cyan-800 hover:bg-cyan-50'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Bot className="h-3.5 w-3.5 text-cyan-500" />
+                        <span>{isNe ? 'हाम्रो एआई च्याट' : 'HamroAI Chat'}</span>
+                      </span>
+                      <span className="text-[10px] font-mono opacity-80">Studio</span>
+                    </button>
+                  )}
 
                   {/* External Studio Link */}
                   <a
@@ -722,6 +746,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {selectedStackCount} tools
                 </span>
               </button>
+
+              {/* HamroAI Chat Pop-Up Launcher */}
+              {onOpenHamroAI && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenHamroAI();
+                  }}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold min-h-[44px] cursor-pointer ${
+                    isDark
+                      ? 'border-cyan-500/35 bg-cyan-500/10 text-cyan-200'
+                      : 'border-cyan-300 bg-cyan-50 text-cyan-900'
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Bot className="h-4 w-4 text-cyan-500" />
+                    <span>{isNe ? 'हाम्रो एआई च्याट (पप-अप)' : 'HamroAI Chat Assistant'}</span>
+                  </span>
+                  <span className="text-[10px] font-mono font-bold uppercase">Open</span>
+                </button>
+              )}
 
               {/* Studio External Link */}
               <a

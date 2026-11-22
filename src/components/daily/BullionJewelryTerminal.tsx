@@ -26,6 +26,7 @@ import {
   simulateGoldInvestment
 } from '../../utils/nepalBullionCalculator';
 import { exportBullionQuotePdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 export interface BullionJewelryTerminalProps {
   theme?: ThemeMode;
@@ -60,6 +61,7 @@ export const BullionJewelryTerminal: React.FC<BullionJewelryTerminalProps> = ({
     isLive: false,
   });
   const [isSyncingBullion, setIsSyncingBullion] = useState(false);
+  const [bullionSyncGen, setBullionSyncGen] = useState(0);
 
   const syncFenegosidaRates = useCallback(async (forceRefresh = false, activeType: BullionType = bullionType) => {
     setIsSyncingBullion(true);
@@ -81,6 +83,9 @@ export const BullionJewelryTerminal: React.FC<BullionJewelryTerminalProps> = ({
           if (activeType === 'chhapawal_gold') setCustomRate(next.chhapawalGoldPerTola);
           else if (activeType === 'tejabi_gold') setCustomRate(next.tejabiGoldPerTola);
           else setCustomRate(next.silverPerTola);
+          if (forceRefresh) {
+            setBullionSyncGen((n) => n + 1);
+          }
         }
       }
     } catch {
@@ -620,7 +625,10 @@ https://nepalai.tech/#daily-tools
           </div>
 
           {/* Right Column: Transparent Bill & Customer Protection Card */}
-          <div className="lg:col-span-5 space-y-4">
+          <ReactiveResultPanel
+            resultKey={`bullion-bill-${bullionType}-${inputMode}-${makingChargeType}-${includeLuxuryTax}-${includeVat}-${bullionSyncGen}`}
+            className="lg:col-span-5 space-y-4"
+          >
             <div className={`p-5 rounded-3xl border shadow-lg space-y-5 ${
               isDark ? 'bg-slate-900/90 border-cyan-500/35' : 'bg-white border-cyan-300'
             }`}>
@@ -736,7 +744,7 @@ https://nepalai.tech/#daily-tools
                 </p>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
 
@@ -850,7 +858,11 @@ https://nepalai.tech/#daily-tools
           </div>
 
           {/* Comparison Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 tabular-nums">
+          <ReactiveResultPanel
+            resultKey={`bullion-invest-${investType}-${investYears}`}
+            direction="up"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 tabular-nums"
+          >
             {/* Gold */}
             <div className={`p-4 rounded-2xl border space-y-2 ${
               isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50/70 border-amber-200'
@@ -910,7 +922,7 @@ https://nepalai.tech/#daily-tools
                 Net Profit: +रू {investResult.fdNetProfitNpr.toLocaleString()}
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
 
@@ -919,7 +931,10 @@ https://nepalai.tech/#daily-tools
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl border ${
           isDark ? 'bg-slate-900/70 border-white/15' : 'bg-white border-slate-200 shadow-xs'
         }`}>
-          <div className="space-y-4">
+          <ReactiveResultPanel
+            resultKey="bullion-converter-panel"
+            className="space-y-4"
+          >
             <h4 className={`text-sm font-bold font-display ${isDark ? 'text-white' : 'text-slate-950'}`}>
               {isNe ? 'तौल रूपान्तरक (Interactive Weight Converter)' : 'Interactive Nepali Bullion Weight Converter'}
             </h4>
@@ -957,7 +972,7 @@ https://nepalai.tech/#daily-tools
                 <span className={`font-bold ${isDark ? 'text-cyan-300' : 'text-cyan-800'}`}>{convTroyOz} oz</span>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
 
           <div className={`space-y-3 p-4 rounded-2xl border text-xs ${
             isDark ? 'bg-slate-950 border-white/15' : 'bg-slate-50 border-slate-200'

@@ -26,6 +26,7 @@ import {
   exportKhataCsv,
 } from '../../utils/khataEngine';
 import { exportKhataLedgerPdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 interface KhataBillSnapperProps {
   isDark: boolean;
@@ -44,6 +45,7 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
   const [photoMimeType, setPhotoMimeType] = useState<string>('image/jpeg');
   const [photoFileName, setPhotoFileName] = useState<string>('');
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
+  const [khataGen, setKhataGen] = useState<number>(0);
 
   const [senderShopName, setSenderShopName] = useState<string>('');
   const [esewaId, setEsewaId] = useState<string>('');
@@ -119,6 +121,7 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
       const data = await response.json();
       if (response.ok && data?.ledgerRecord) {
         setActiveRecord(reconcileKhataLedger(data.ledgerRecord));
+        setKhataGen((n) => n + 1);
         showToast(
           'success',
           isNe ? 'हिसाब तयार भयो!' : 'Ledger Extracted cleanly!',
@@ -130,6 +133,7 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
     } catch {
       const local = parseHandwrittenKhataText(textToParse, { ledgerMode: targetMode, language });
       setActiveRecord(local);
+      setKhataGen((n) => n + 1);
       showToast(
         'success',
         isNe ? 'हिसाब तयार भयो' : 'Ledger Reconciled',
@@ -415,7 +419,10 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
         </div>
 
         {/* Right: Clean Editable Ledger & Actions */}
-        <div className="lg:col-span-7 space-y-4">
+        <ReactiveResultPanel
+          resultKey={`${ledgerMode}-${khataGen}`}
+          className="lg:col-span-7 space-y-4"
+        >
           <div className={`p-4 sm:p-5 rounded-2xl border ${isDark ? 'bg-[#060a14] border-white/15' : 'bg-white border-slate-300 shadow-xs'}`}>
             {/* Party & Payment Settings */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-4 border-b border-slate-500/20">
@@ -734,6 +741,7 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
                       onClick={() => {
                         setActiveRecord(rec);
                         setLedgerMode(rec.ledgerMode);
+                        setKhataGen((n) => n + 1);
                       }}
                       className="text-left cursor-pointer min-w-0 flex-1"
                     >
@@ -777,7 +785,7 @@ export const KhataBillSnapper: React.FC<KhataBillSnapperProps> = ({ isDark, lang
               </div>
             </div>
           )}
-        </div>
+        </ReactiveResultPanel>
       </div>
     </div>
   );

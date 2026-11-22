@@ -21,6 +21,7 @@ import {
   analyzeContractRiskFallback,
 } from '../../utils/contractRiskEngine';
 import { exportContractRiskPdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 interface ContractRiskScannerProps {
   isDark: boolean;
@@ -37,6 +38,7 @@ export const ContractRiskScanner: React.FC<ContractRiskScannerProps> = ({ isDark
   const [photoMimeType, setPhotoMimeType] = useState<string>('image/jpeg');
   const [photoFileName, setPhotoFileName] = useState<string>('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [riskGen, setRiskGen] = useState<number>(0);
 
   const [report, setReport] = useState<ContractRiskReport>(() =>
     analyzeContractRiskFallback({
@@ -89,6 +91,7 @@ export const ContractRiskScanner: React.FC<ContractRiskScannerProps> = ({ isDark
       const data = await response.json();
       if (response.ok && data?.report) {
         setReport(data.report);
+        setRiskGen((n) => n + 1);
         showToast(
           data.report.riskLevel === 'high' ? 'info' : 'success',
           isNe ? `जोखिम जाँच पूरा: ${data.report.safetyScore}/100` : `Risk Scan Complete: ${data.report.safetyScore}/100`,
@@ -104,6 +107,7 @@ export const ContractRiskScanner: React.FC<ContractRiskScannerProps> = ({ isDark
         language,
       });
       setReport(fallback);
+      setRiskGen((n) => n + 1);
       showToast(
         fallback.riskLevel === 'high' ? 'info' : 'success',
         isNe ? `सुरक्षा स्कोर: ${fallback.safetyScore}/100` : `Safety Score: ${fallback.safetyScore}/100`,
@@ -291,7 +295,10 @@ export const ContractRiskScanner: React.FC<ContractRiskScannerProps> = ({ isDark
         </div>
 
         {/* Right: Safety Score & Plain Explanation */}
-        <div className="lg:col-span-7 space-y-4">
+        <ReactiveResultPanel
+          resultKey={`${docType}-${riskGen}`}
+          className="lg:col-span-7 space-y-4"
+        >
           {/* Safety Banner */}
           <div className={`p-4 sm:p-5 rounded-2xl border ${scoreColors}`}>
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -464,7 +471,7 @@ export const ContractRiskScanner: React.FC<ContractRiskScannerProps> = ({ isDark
                 : 'Note: Educational Nepal contract awareness check; consult a licensed advocate for high-value legal filings.'}
             </p>
           </div>
-        </div>
+        </ReactiveResultPanel>
       </div>
     </div>
   );

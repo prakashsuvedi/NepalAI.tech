@@ -21,6 +21,7 @@ import {
   simulateHighwayRoute 
 } from '../../utils/nepalEvCalculator';
 import { exportEvTaxPdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 export interface EvMobilityCalculatorProps {
   theme?: ThemeMode;
@@ -239,7 +240,10 @@ Verified via: nepalai.tech
           </div>
 
           {/* Results Summary Card */}
-          <div className="lg:col-span-6">
+          <ReactiveResultPanel
+            resultKey={`ev-tax-${vehicleCategory}-${expiryMonthsLate}`}
+            className="lg:col-span-6"
+          >
             <div className={`rounded-2xl p-6 border flex flex-col justify-between h-full ${
               isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
             }`}>
@@ -309,7 +313,7 @@ Verified via: nepalai.tech
                 </div>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
 
@@ -388,7 +392,10 @@ Verified via: nepalai.tech
           </div>
 
           {/* Savings Result */}
-          <div className="lg:col-span-6">
+          <ReactiveResultPanel
+            resultKey={`ev-charge-${timeOfDay}`}
+            className="lg:col-span-6"
+          >
             <div className={`rounded-2xl p-6 border flex flex-col justify-between h-full ${
               isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
             }`}>
@@ -440,7 +447,7 @@ Verified via: nepalai.tech
                 <span>NEA off-peak night charging reduces your running cost to under रू १.८० per kilometer.</span>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
 
@@ -474,9 +481,13 @@ Verified via: nepalai.tech
             ))}
           </div>
 
-          <div className={`rounded-2xl p-6 border ${
-            isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
-          }`}>
+          <ReactiveResultPanel
+            resultKey={`ev-route-${selectedRoute}`}
+            direction="up"
+            className={`rounded-2xl p-6 border ${
+              isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
+            }`}
+          >
             <h4 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-950'}`}>{routeResult.name}</h4>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-xs">
               <div className={`rounded-xl p-3 border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'}`}>
@@ -511,7 +522,7 @@ Verified via: nepalai.tech
                 ))}
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
     </div>

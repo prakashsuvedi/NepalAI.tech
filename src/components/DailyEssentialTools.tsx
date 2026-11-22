@@ -74,6 +74,7 @@ import { KhataBillSnapper } from './daily/KhataBillSnapper';
 import { ContractRiskScanner } from './daily/ContractRiskScanner';
 import { HealthReportTranslator } from './daily/HealthReportTranslator';
 import { SarkariCounterNavigator } from './daily/SarkariCounterNavigator';
+import { ReactiveResultPanel } from './ui/ReactiveResultPanel';
 import { exportFxAuditPdf, exportTaxComputationPdf, exportOfficialLetterPdf } from '../utils/pdfExport';
 import { LETTER_STARTER_PROMPTS, VOICE_SAMPLE_SCENARIOS, buildSovereignLetterDraft } from '../utils/letterDrafter';
 
@@ -206,6 +207,7 @@ export const DailyEssentialTools: React.FC<DailyEssentialToolsProps> = ({
   const maxMonthsOnCard = effectiveMonthlyUsd > 0 ? Math.floor(500 / effectiveMonthlyUsd) : 12;
 
   const [nrbPublishedAt, setNrbPublishedAt] = useState<string>('');
+  const [fxSyncGen, setFxSyncGen] = useState<number>(0);
 
   // Live NRB Fetch
   const fetchLiveNrbForex = async (forceRefresh = false) => {
@@ -225,6 +227,7 @@ export const DailyEssentialTools: React.FC<DailyEssentialToolsProps> = ({
         const modeLabel = data.live ? 'NRB Live API' : 'NRB Benchmark';
         setLastRateSync(`${modeLabel} (${data.publishedAt || 'Today'}) • रू ${freshRate}/USD`);
         if (forceRefresh) {
+          setFxSyncGen((n) => n + 1);
           showToast('NRB Forex Synced', `Rate: 1 USD = रू ${freshRate}`, 'success', 2500);
         }
       }
@@ -326,6 +329,7 @@ Generated via Nepal AI Hub • Sovereign AI & Local Rails (nepalai.tech)
     estimatedFee?: string;
     checklist?: string[];
   } | null>(null);
+  const [letterGen, setLetterGen] = useState<number>(0);
 
   // Voice-to-Official-PDF state & refs
   const [voiceSpeechLang, setVoiceSpeechLang] = useState<'ne-NP' | 'en-US'>('ne-NP');
@@ -511,6 +515,7 @@ Generated via Nepal AI Hub • Sovereign AI & Local Rails (nepalai.tech)
       setLetterSubject(tpl.subject);
       setLetterReason(tpl.reason);
     }
+    setLetterGen((n) => n + 1);
   };
 
   const handleRomanFieldInput = (
@@ -570,6 +575,7 @@ Generated via Nepal AI Hub • Sovereign AI & Local Rails (nepalai.tech)
             : null
         );
         setViewPreetiFont(false);
+        setLetterGen((n) => n + 1);
         showToast(
           isNe ? 'पत्र ड्राफ्ट तयार भयो' : 'AI Letter Ready',
           isNe ? 'तल हेरेर सिधै PDF सेभ वा प्रिन्ट गर्नुहोस्।' : 'Review below and click Save PDF or Print.',
@@ -601,6 +607,7 @@ Generated via Nepal AI Hub • Sovereign AI & Local Rails (nepalai.tech)
         checklist: localDraft.checklist,
       });
       setViewPreetiFont(false);
+      setLetterGen((n) => n + 1);
       showToast(
         isNe ? 'पत्र ड्राफ्ट तयार भयो' : 'Letter Draft Ready',
         isNe ? 'सिधै सम्पादन, PDF सेभ वा प्रिन्ट गर्न सक्नुहुन्छ।' : 'Ready to edit, Save PDF, or Print.',
@@ -638,6 +645,7 @@ Generated via Nepal AI Hub • Sovereign AI & Local Rails (nepalai.tech)
       checklist: draft.checklist,
     });
     setViewPreetiFont(false);
+    setLetterGen((n) => n + 1);
     showToast(
       isNe ? 'आवाजबाट पत्र तयार भयो!' : 'Voice Converted to Official PDF Letter',
       isNe ? 'सिधै PDF सेभ वा प्रिन्ट गर्न सक्नुहुन्छ।' : 'Ready to Save PDF, Print, or Edit below.',
@@ -1062,6 +1070,7 @@ ____________________
   const [ocrViewMode, setOcrViewMode] = useState<'cards' | 'raw_json'>('cards');
   const [isOcrProcessing, setIsOcrProcessing] = useState<boolean>(false);
   const [extractedOcrResult, setExtractedOcrResult] = useState<any>(null);
+  const [ocrGen, setOcrGen] = useState<number>(0);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1145,6 +1154,7 @@ ____________________
       if (res.ok) {
         const json = await res.json();
         setExtractedOcrResult(json.extractedData);
+        setOcrGen((n) => n + 1);
         showToast('OCR Extracted Successfully', 'Structured JSON generated via Sovereign Pipeline', 'success', 2500);
       }
     } catch {
@@ -1241,6 +1251,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
   const [landBigha, setLandBigha] = useState<number>(0);
   const [landKattha, setLandKattha] = useState<number>(1);
   const [landDhur, setLandDhur] = useState<number>(0);
+  const [landPresetGen, setLandPresetGen] = useState<number>(0);
 
   const convertedLand: LandUnitResult = landInputMode === 'ropani'
     ? convertFromRopaniSystem(landRopani, landAana, landPaisa, landDaam)
@@ -1283,6 +1294,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
     count: 20,
   });
   const [isRefreshingKalimati, setIsRefreshingKalimati] = useState<boolean>(false);
+  const [produceGen, setProduceGen] = useState<number>(0);
 
   const fetchLiveKalimati = async (forceRefresh = false) => {
     setIsRefreshingKalimati(true);
@@ -1302,6 +1314,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
           count: Number(data.count) || 20,
         });
         if (forceRefresh) {
+          setProduceGen((n) => n + 1);
           showToast('Kalimati Rates Synced', `Loaded ${data.count || 20} commodities (${data.publishedAt || 'Today'})`, 'success', 2500);
         }
       }
@@ -1887,7 +1900,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                           </div>
                         </div>
 
-                        <div className="lg:col-span-6">
+                        <ReactiveResultPanel
+                          resultKey={`fx-curr-${selectedCurrency}-${fxSyncGen}`}
+                          className="lg:col-span-6"
+                        >
                           {(() => {
                             const activeRate = nrbRates[selectedCurrency] || nrbRates.USD;
                             const grossNpr = (currencyInputAmount / activeRate.unit) * activeRate.mid;
@@ -1931,7 +1947,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                               </div>
                             );
                           })()}
-                        </div>
+                        </ReactiveResultPanel>
                       </div>
 
                       {/* Complete NRB Forex Rates Table */}
@@ -2106,7 +2122,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                       </div>
 
                       {/* Right Column: Financial Outflow Matrix */}
-                      <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
+                      <ReactiveResultPanel
+                        resultKey={`fx-sub-${selectedAiPreset}-${billingCycle}-${includeCardSpread}-${includeDstTax}-${fxSyncGen}`}
+                        className="lg:col-span-5 flex flex-col justify-between space-y-4"
+                      >
                         
                         <div className={`p-5 rounded-2xl border ${
                           isDark ? 'bg-[#0c1322] border-cyan-500/35' : 'bg-white border-cyan-300 shadow-sm'
@@ -2182,7 +2201,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
 
                         </div>
 
-                      </div>
+                      </ReactiveResultPanel>
 
                     </div>
                   )}
@@ -2701,7 +2720,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                     </div>
 
                     {/* Editable Preview Document Box */}
-                    <div className="lg:col-span-7">
+                    <ReactiveResultPanel
+                      resultKey={`letter-preview-${letterTemplate}-${letterGen}-${viewPreetiFont ? 'preeti' : 'uni'}`}
+                      className="lg:col-span-7"
+                    >
                       <div className={`rounded-2xl border p-5 sm:p-6 ${
                         isDark ? 'bg-[#060913] border-white/15 text-slate-100' : 'bg-white border-slate-300 text-slate-950 shadow-xs'
                       }`}>
@@ -2804,7 +2826,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                           </div>
                         )}
                       </div>
-                    </div>
+                    </ReactiveResultPanel>
                   </div>
                 </div>
               )}
@@ -2891,7 +2913,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                       </div>
                     </div>
 
-                    <div className="lg:col-span-6 flex flex-col justify-between">
+                    <ReactiveResultPanel
+                      resultKey={`voice-synth-${selectedAccent}`}
+                      className="lg:col-span-6 flex flex-col justify-between"
+                    >
                       <div className={`p-6 rounded-2xl border text-center space-y-4 ${
                         isDark ? 'bg-[#060a14] border-white/15' : 'bg-slate-50 border-slate-300 shadow-xs'
                       }`}>
@@ -2958,7 +2983,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </ReactiveResultPanel>
                   </div>
                 </div>
               )}
@@ -3116,7 +3141,11 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                         </div>
 
                         {extractedOcrResult ? (
-                          <div className="space-y-3 text-xs">
+                          <ReactiveResultPanel
+                            resultKey={`ocr-out-${selectedDocType}-${ocrGen}-${ocrViewMode}`}
+                            direction="up"
+                            className="space-y-3 text-xs"
+                          >
                             {ocrViewMode === 'cards' ? (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
                                 {Object.entries(extractedOcrResult).map(([key, val]) => (
@@ -3166,7 +3195,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                                 <span>Copy JSON</span>
                               </button>
                             </div>
-                          </div>
+                          </ReactiveResultPanel>
                         ) : (
                           <div className={`py-12 text-center text-xs space-y-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                             <Scan className="h-8 w-8 mx-auto text-cyan-500" />
@@ -3327,7 +3356,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                     </div>
 
                     {/* Output Card & Slab Breakdown */}
-                    <div className="lg:col-span-7">
+                    <ReactiveResultPanel
+                      resultKey={`tax-out-${taxStatus}-${taxTrack}-${dashainBonus}-${ssfEnrolled}-${singleFemaleRebate}`}
+                      className="lg:col-span-7"
+                    >
                       <div className={`p-5 rounded-2xl border ${
                         isDark ? 'bg-[#0c1322] border-cyan-500/35' : 'bg-white border-cyan-300 shadow-sm'
                       }`}>
@@ -3403,7 +3435,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </ReactiveResultPanel>
                   </div>
                 </div>
               )}
@@ -3513,7 +3545,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                                 <button
                                   key={i}
                                   type="button"
-                                  onClick={() => setLandSqFtInput(item.sqft)}
+                                  onClick={() => {
+                                    setLandSqFtInput(item.sqft);
+                                    setLandPresetGen((n) => n + 1);
+                                  }}
                                   className={`p-2 rounded-lg border font-medium transition-colors cursor-pointer ${
                                     isDark
                                       ? 'border-white/10 bg-white/[0.03] hover:bg-white/[0.07] text-slate-200'
@@ -3639,7 +3674,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                         )}
                       </div>
 
-                      <div className="lg:col-span-7">
+                      <ReactiveResultPanel
+                        resultKey={`land-out-${landInputMode}-${landPresetGen}`}
+                        className="lg:col-span-7"
+                      >
                         <div className={`p-5 rounded-2xl border space-y-4 ${
                           isDark ? 'bg-[#060a14] border-cyan-500/35' : 'bg-slate-50 border-cyan-300 shadow-xs'
                         }`}>
@@ -3685,7 +3723,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </ReactiveResultPanel>
                     </div>
                   ) : (
                     <div className="mt-6 space-y-5">
@@ -3806,7 +3844,10 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                         </div>
 
                         {/* Cost Summary Box */}
-                        <div className="md:col-span-5 flex flex-col justify-between">
+                        <ReactiveResultPanel
+                          resultKey={`produce-out-${selectedProduce}-${unit}-${produceGen}`}
+                          className="md:col-span-5 flex flex-col justify-between"
+                        >
                           <div className={`p-5 rounded-2xl border space-y-4 ${
                             isDark ? 'bg-[#0c1322] border-cyan-500/35' : 'bg-white border-cyan-300 shadow-sm'
                           }`}>
@@ -3848,7 +3889,7 @@ Generated via Nepal AI Hub • IRD Tax Engine (nepalai.tech)
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </ReactiveResultPanel>
                       </div>
                     </div>
                   )}

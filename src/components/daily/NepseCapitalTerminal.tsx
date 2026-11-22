@@ -20,6 +20,7 @@ import {
   calculateBookCloseAdjustments 
 } from '../../utils/nepseCalculator';
 import { exportNepseTradePdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 export interface NepseCapitalTerminalProps {
   theme?: ThemeMode;
@@ -245,7 +246,10 @@ Calculated via: nepalai.tech Capital Terminal
           </div>
 
           {/* Trade Output Breakdown */}
-          <div className="lg:col-span-7">
+          <ReactiveResultPanel
+            resultKey={`nepse-${subTab}-${holdingPeriod}`}
+            className="lg:col-span-7"
+          >
             <div className={`rounded-2xl p-6 border flex flex-col justify-between h-full ${
               isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
             }`}>
@@ -354,7 +358,7 @@ Calculated via: nepalai.tech Capital Terminal
                 </div>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
 
@@ -415,7 +419,10 @@ Calculated via: nepalai.tech Capital Terminal
           </div>
 
           {/* Adjustment Results */}
-          <div className="lg:col-span-6">
+          <ReactiveResultPanel
+            resultKey={`nepse-book-close-${subTab}`}
+            className="lg:col-span-6"
+          >
             <div className={`rounded-2xl p-6 border flex flex-col justify-between h-full ${
               isDark ? 'border-cyan-900/50 bg-[#080d1a]' : 'border-slate-300 bg-slate-50'
             }`}>
@@ -451,7 +458,7 @@ Calculated via: nepalai.tech Capital Terminal
                 <span>Adjusted price reflects initial opening baseline on the trading day following book closure.</span>
               </div>
             </div>
-          </div>
+          </ReactiveResultPanel>
         </div>
       )}
     </div>

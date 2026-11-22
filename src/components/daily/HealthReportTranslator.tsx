@@ -24,6 +24,7 @@ import {
   translateHealthReportFallback,
 } from '../../utils/healthTranslatorEngine';
 import { exportHealthGuidePdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 interface HealthReportTranslatorProps {
   isDark: boolean;
@@ -41,6 +42,7 @@ export const HealthReportTranslator: React.FC<HealthReportTranslatorProps> = ({ 
   const [photoFileName, setPhotoFileName] = useState<string>('');
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [healthGen, setHealthGen] = useState<number>(0);
 
   const [report, setReport] = useState<HealthTranslationReport>(() =>
     translateHealthReportFallback({
@@ -101,6 +103,7 @@ export const HealthReportTranslator: React.FC<HealthReportTranslatorProps> = ({ 
       const data = await response.json();
       if (response.ok && data?.report) {
         setReport(data.report);
+        setHealthGen((n) => n + 1);
         showToast(
           'success',
           isNe ? 'सरल नेपाली विवरण तयार भयो!' : 'Health Guide Ready!',
@@ -116,6 +119,7 @@ export const HealthReportTranslator: React.FC<HealthReportTranslatorProps> = ({ 
         language,
       });
       setReport(fallback);
+      setHealthGen((n) => n + 1);
       showToast(
         'success',
         isNe ? 'सरल विवरण तयार भयो' : 'Translated Cleanly',
@@ -323,7 +327,10 @@ export const HealthReportTranslator: React.FC<HealthReportTranslatorProps> = ({ 
         </div>
 
         {/* Right: Parent-Friendly Nepali Guide + Audio + Morning/Day/Night Chart */}
-        <div className="lg:col-span-7 space-y-4">
+        <ReactiveResultPanel
+          resultKey={`${mode}-${healthGen}`}
+          className="lg:col-span-7 space-y-4"
+        >
           {/* Warm Summary + Big Nepali Audio CTA */}
           <div className={`p-4 sm:p-5 rounded-2xl border ${
             isDark ? 'bg-teal-950/30 border-teal-500/40' : 'bg-teal-50 border-teal-300 shadow-xs'
@@ -523,7 +530,7 @@ export const HealthReportTranslator: React.FC<HealthReportTranslatorProps> = ({ 
               ? 'मेडिकल जानकारी: यो टुलले रिपोर्ट र औषधिको समय बुझ्न मात्र मद्दत गर्छ; औषधि परिवर्तन वा उपचारका लागि सधैँ आफ्नो डाक्टरको सल्लाह मान्नुहोस्।'
               : 'Medical Note: Educational explanation tool only; never change prescribed doses without consulting your doctor or pharmacist.'}
           </p>
-        </div>
+        </ReactiveResultPanel>
       </div>
     </div>
   );

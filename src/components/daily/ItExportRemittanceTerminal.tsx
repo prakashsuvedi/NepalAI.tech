@@ -15,6 +15,7 @@ import {
 import { ThemeMode, Language } from '../../types';
 import { calculateItExportRemittance } from '../../utils/nepalItExportEngine';
 import { exportItExportDeclarationPdf } from '../../utils/pdfExport';
+import { ReactiveResultPanel } from '../ui/ReactiveResultPanel';
 
 export interface ItExportRemittanceTerminalProps {
   theme?: ThemeMode;
@@ -41,6 +42,7 @@ export const ItExportRemittanceTerminal: React.FC<ItExportRemittanceTerminalProp
   
   const [copiedLetter, setCopiedLetter] = useState(false);
   const [letterLang, setLetterLang] = useState<'ne' | 'en'>('ne');
+  const [rateSyncGen, setRateSyncGen] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -49,6 +51,7 @@ export const ItExportRemittanceTerminal: React.FC<ItExportRemittanceTerminalProp
       .then((data) => {
         if (active && data?.rates?.USD?.buy) {
           setNrbBuyRateNpr(Number(data.rates.USD.buy));
+          setRateSyncGen((n) => n + 1);
         }
       })
       .catch(() => {});
@@ -273,7 +276,10 @@ export const ItExportRemittanceTerminal: React.FC<ItExportRemittanceTerminalProp
         </div>
 
         {/* Remittance Output & Bank Letter */}
-        <div className="lg:col-span-7 space-y-4">
+        <ReactiveResultPanel
+          resultKey={`it-export-${entityType}-${letterLang}-${rateSyncGen}`}
+          className="lg:col-span-7 space-y-4"
+        >
           {/* Conversion Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className={`rounded-xl p-3 border text-center ${
@@ -373,7 +379,7 @@ export const ItExportRemittanceTerminal: React.FC<ItExportRemittanceTerminalProp
             <ShieldCheck className={`h-4 w-4 shrink-0 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
             <span>As per Finance Act 2081/82, 5% TDS deducted under Section 95Ka is the final withholding tax; no further return surcharge applies to individual IT export freelancers.</span>
           </div>
-        </div>
+        </ReactiveResultPanel>
       </div>
     </div>
   );
