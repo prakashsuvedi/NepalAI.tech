@@ -11,6 +11,7 @@ import {
 import { Language, ThemeMode } from '../../types';
 import { TREND_CATEGORIES } from '../../utils/trendsEngine';
 import { fetchSharedJson } from '../../utils/officialFeedsClient';
+import { getCuratedNepalTrendsFallback, safeFetchJson } from '../../utils/trendsFallback';
 
 export interface LiveTrendSummary {
   id: string;
@@ -94,14 +95,16 @@ export const TrendingHomepageStrip: React.FC<TrendingHomepageStripProps> = ({
     setLoading(true);
     setErrorMsg(null);
     try {
-      const resp = await fetch(
+      const res = await safeFetchJson<{ success?: boolean; trends?: LiveTrendSummary[] }>(
         `/api/trends/nepal?limit=6&category=${encodeURIComponent(category)}`
       );
-      if (!resp.ok) throw new Error('Unable to load live Nepal trends');
-      const data = await resp.json();
-      setTrends(Array.isArray(data.trends) ? data.trends : []);
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Unable to load trends right now.');
+      if (res.ok && res.data && Array.isArray(res.data.trends) && res.data.trends.length > 0) {
+        setTrends(res.data.trends);
+      } else {
+        setTrends(getCuratedNepalTrendsFallback({ category, limit: 6 }));
+      }
+    } catch {
+      setTrends(getCuratedNepalTrendsFallback({ category, limit: 6 }));
     } finally {
       setLoading(false);
     }
@@ -172,7 +175,7 @@ export const TrendingHomepageStrip: React.FC<TrendingHomepageStripProps> = ({
   const handleRefreshFeed = async () => {
     setSyncing(true);
     try {
-      await fetch('/api/trends/ingest', {
+      await safeFetchJson('/api/trends/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ includeDiaspora: false }),

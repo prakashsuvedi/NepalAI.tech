@@ -90,14 +90,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     let active = true;
-    fetch('/api/trends/nepal?limit=10')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (active && Array.isArray(data?.trends)) {
-          setLiveTrends(data.trends);
+    import('../utils/trendsFallback').then(({ safeFetchJson, getCuratedNepalTrendsFallback }) => {
+      safeFetchJson<{ trends?: any[] }>('/api/trends/nepal?limit=10').then((res) => {
+        if (!active) return;
+        if (res.ok && Array.isArray(res.data?.trends) && res.data.trends.length > 0) {
+          setLiveTrends(res.data.trends);
+        } else {
+          setLiveTrends(getCuratedNepalTrendsFallback({ limit: 8 }));
         }
-      })
-      .catch(() => {});
+      });
+    });
     return () => {
       active = false;
     };

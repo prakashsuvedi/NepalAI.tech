@@ -37,6 +37,13 @@ import {
   buildTrendDetailSeo,
   applyClientTrendsSeo,
 } from '../../utils/trendsSeo';
+import {
+  getCuratedDiasporaTrendsFallback,
+  getCuratedKeywordExploreFallback,
+  getCuratedNepalTrendsFallback,
+  getCuratedTrendDetailFallback,
+  safeFetchJson,
+} from '../../utils/trendsFallback';
 import { useToast } from '../../context/ToastContext';
 import { TrendsD3VelocityChart } from './TrendsD3VelocityChart';
 import { DailyInsightsSubscription } from './DailyInsightsSubscription';
@@ -250,34 +257,43 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
       applyClientTrendsSeo(buildTrendsListingSeo(route, window.location.origin));
       setLoadingList(true);
       setListError(null);
-      fetch(
+      safeFetchJson<{ success?: boolean; trends?: TrendItemDto[] }>(
         `/api/trends/nepal?category=${encodeURIComponent(cat)}&search=${encodeURIComponent(
           searchText
         )}&limit=50`
       )
-        .then((r) => r.json())
-        .then((data) => {
-          if (!data.success) throw new Error(data.error || 'Failed to load trends');
-          setTrends(data.trends || []);
+        .then((res) => {
+          if (res.ok && res.data?.success && Array.isArray(res.data.trends)) {
+            setTrends(res.data.trends);
+          } else {
+            setTrends(getCuratedNepalTrendsFallback({ category: cat, search: searchText, limit: 50 }) as TrendItemDto[]);
+          }
         })
-        .catch((err) => setListError(err?.message || 'Unable to load Nepal trends'))
+        .catch(() => {
+          setTrends(getCuratedNepalTrendsFallback({ category: cat, search: searchText, limit: 50 }) as TrendItemDto[]);
+        })
         .finally(() => setLoadingList(false));
     } else if (route.view === 'diaspora') {
       applyClientTrendsSeo(buildTrendsListingSeo(route, window.location.origin));
       setLoadingList(true);
       setListError(null);
-      fetch(
+      safeFetchJson<{ success?: boolean; trends?: TrendItemDto[]; partners?: DiasporaPartnerSlotDto[] }>(
         `/api/trends/diaspora?country=${encodeURIComponent(diasporaCountry)}&search=${encodeURIComponent(
           searchText
         )}`
       )
-        .then((r) => r.json())
-        .then((data) => {
-          if (!data.success) throw new Error(data.error || 'Failed to load diaspora trends');
-          setTrends(data.trends || []);
-          setDiasporaPartners(Array.isArray(data.partners) ? data.partners : []);
+        .then((res) => {
+          if (res.ok && res.data?.success && Array.isArray(res.data.trends)) {
+            setTrends(res.data.trends);
+            setDiasporaPartners(Array.isArray(res.data.partners) ? res.data.partners : []);
+          } else {
+            setTrends(getCuratedDiasporaTrendsFallback(diasporaCountry, searchText) as TrendItemDto[]);
+            setDiasporaPartners([]);
+          }
         })
-        .catch((err) => setListError(err?.message || 'Unable to load diaspora trends'))
+        .catch(() => {
+          setTrends(getCuratedDiasporaTrendsFallback(diasporaCountry, searchText) as TrendItemDto[]);
+        })
         .finally(() => setLoadingList(false));
     }
   }, [route.view, route.category, searchText, diasporaCountry]);
@@ -288,20 +304,27 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
       setLoadingDetail(true);
       setDetailError(null);
       setActiveBrief(null);
-      fetch(`/api/trends/detail/${encodeURIComponent(route.slug)}`)
-        .then((r) => {
-          if (!r.ok) throw new Error('Trend explainer not found');
-          return r.json();
-        })
-        .then((data) => {
-          const tr: TrendItemDto = data.trend;
+      safeFetchJson<{ trend?: TrendItemDto }>(
+        `/api/trends/detail/${encodeURIComponent(route.slug)}`
+      )
+        .then((res) => {
+          const tr: TrendItemDto =
+            res.ok && res.data?.trend
+              ? res.data.trend
+              : (getCuratedTrendDetailFallback(route.slug!) as TrendItemDto);
           setDetail(tr);
           if (tr.briefs && tr.briefs.length > 0) {
             setActiveBrief(tr.briefs[0].outlineJson);
           }
           applyClientTrendsSeo(buildTrendDetailSeo(tr, window.location.origin));
         })
-        .catch((err) => setDetailError(err?.message || 'Trend not found'))
+        .catch(() => {
+          const tr = getCuratedTrendDetailFallback(route.slug!) as TrendItemDto;
+          setDetail(tr);
+          if (tr.briefs && tr.briefs.length > 0) {
+            setActiveBrief(tr.briefs[0].outlineJson);
+          }
+        })
         .finally(() => setLoadingDetail(false));
     }
   }, [route.view, route.slug]);
@@ -316,10 +339,9 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
     } else if (route.view === 'business-keywords') {
       applyClientTrendsSeo(buildTrendsListingSeo(route, window.location.origin));
       setBizLoading(true);
-      fetch('/api/keywords/business')
-        .then((r) => r.json())
-        .then((data) => {
-          setBizPacks(Array.isArray(data.packs) ? data.packs : []);
+      safeFetchJson<{ packs?: BusinessPackDto[] }>('/api/keywords/business')
+        .then((res) => {
+          setBizPacks(Array.isArray(res.data?.packs) ? res.data.packs : []);
         })
         .catch(() => setBizPacks([]))
         .finally(() => setBizLoading(false));
@@ -336,13 +358,13 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
     try {
       const owner = getSessionOwnerKey();
       const [wRes, bRes, kRes] = await Promise.all([
-        fetch(`/api/trends/watchlist?ownerKey=${encodeURIComponent(owner)}`).then((r) => r.json()),
-        fetch('/api/trends/briefs?limit=15').then((r) => r.json()),
-        fetch('/api/trends/keys').then((r) => r.json()),
+        safeFetchJson(`/api/trends/watchlist?ownerKey=${encodeURIComponent(owner)}`),
+        safeFetchJson('/api/trends/briefs?limit=15'),
+        safeFetchJson('/api/trends/keys'),
       ]);
-      if (Array.isArray(wRes?.items)) setWatchlist(wRes.items);
-      if (Array.isArray(bRes?.briefs)) setSavedBriefs(bRes.briefs);
-      if (Array.isArray(kRes?.keys)) setApiKeys(kRes.keys);
+      if (Array.isArray(wRes.data?.items)) setWatchlist(wRes.data.items);
+      if (Array.isArray(bRes.data?.briefs)) setSavedBriefs(bRes.data.briefs);
+      if (Array.isArray(kRes.data?.keys)) setApiKeys(kRes.data.keys);
     } catch {
       // Ignore transient errors cleanly
     } finally {
@@ -441,32 +463,33 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
     setKwError(null);
     try {
       if (compareTerm && compareTerm.trim().length >= 2) {
-        const resp = await fetch('/api/keywords/compare', {
+        const res = await safeFetchJson<any>('/api/keywords/compare', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ keywordA: clean, keywordB: compareTerm.trim(), country: 'NP' }),
         });
-        const data = await resp.json();
-        if (!resp.ok || !data.success) {
-          throw new Error(data.error || 'Keyword comparison failed');
+        if (res.ok && res.data?.success) {
+          setKwResult(res.data.keywordA);
+          setKwResultB(res.data.keywordB);
+        } else {
+          setKwResult(getCuratedKeywordExploreFallback(clean));
+          setKwResultB(getCuratedKeywordExploreFallback(compareTerm.trim()));
         }
-        setKwResult(data.keywordA);
-        setKwResultB(data.keywordB);
       } else {
         setKwResultB(null);
-        const resp = await fetch('/api/keywords/explore', {
+        const res = await safeFetchJson<any>('/api/keywords/explore', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ keyword: clean, country: 'NP' }),
         });
-        const data = await resp.json();
-        if (!resp.ok || !data.success) {
-          throw new Error(data.error || 'Keyword analysis failed');
+        if (res.ok && res.data?.success) {
+          setKwResult(res.data.analysis);
+        } else {
+          setKwResult(getCuratedKeywordExploreFallback(clean));
         }
-        setKwResult(data.analysis);
       }
-    } catch (err: any) {
-      setKwError(err?.message || 'Failed to explore keyword');
+    } catch {
+      setKwResult(getCuratedKeywordExploreFallback(clean));
     } finally {
       setKwLoading(false);
     }
@@ -475,30 +498,35 @@ export const NepalTrendsPortal: React.FC<NepalTrendsPortalProps> = ({
   const handleSyncLiveRss = async () => {
     setSyncingRss(true);
     try {
-      const resp = await fetch('/api/trends/ingest', {
+      const res = await safeFetchJson<any>('/api/trends/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ includeDiaspora: true }),
       });
-      const data = await resp.json();
-      if (data.success) {
+      if (res.ok && res.data?.success) {
         showToast(
           isNe
             ? 'Google Trends RSS फिड सफलतापूर्वक अपडेट भयो।'
             : 'Live Google Trends RSS synchronized.',
           'success'
         );
-        // Re-fetch current list view
         const cat = route.view === 'category' && route.category ? route.category : 'all';
         const listUrl =
           route.view === 'diaspora'
             ? `/api/trends/diaspora?country=${encodeURIComponent(diasporaCountry)}`
             : `/api/trends/nepal?category=${encodeURIComponent(cat)}`;
-        const refreshed = await fetch(listUrl).then((r) => r.json());
-        if (refreshed.trends) setTrends(refreshed.trends);
+        const refreshed = await safeFetchJson<any>(listUrl);
+        if (refreshed.data?.trends) setTrends(refreshed.data.trends);
+      } else {
+        showToast(
+          isNe
+            ? 'स्थानीय क्युरेटेड ट्रेन्ड स्न्यापसट लोड गरिएको छ।'
+            : 'Loaded curated Nepal Trends snapshot.',
+          'info'
+        );
       }
     } catch {
-      showToast('Failed to sync RSS feed.', 'error');
+      showToast('Loaded curated Nepal Trends snapshot.', 'info');
     } finally {
       setSyncingRss(false);
     }

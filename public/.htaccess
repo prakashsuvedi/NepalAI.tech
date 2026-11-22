@@ -11,6 +11,10 @@
   # RewriteCond %{HTTPS} off
   # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+  # Never rewrite /api/* routes to index.html on static hosting
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule ^ - [R=404,L]
+
   # Deliver static files directly if they exist
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d

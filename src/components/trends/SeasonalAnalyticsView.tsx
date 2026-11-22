@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, Search, ArrowUpRight, Sparkles, Compass } from 'lucide-react';
 import { Language, ThemeMode } from '../../types';
 import { TrendVelocityPoint, SEASONAL_PILLARS } from '../../utils/trendsEngine';
+import { getCuratedSeasonalFallback, safeFetchJson } from '../../utils/trendsFallback';
 import { TrendsD3VelocityChart } from './TrendsD3VelocityChart';
 import { SeasonalNepalTrendsMap } from './SeasonalNepalTrendsMap';
 
@@ -64,20 +65,23 @@ export const SeasonalAnalyticsView: React.FC<SeasonalAnalyticsViewProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch(
+      const res = await safeFetchJson<any>(
         `/api/trends/seasonal?pillar=${encodeURIComponent(pillar)}&search=${encodeURIComponent(search)}`
       );
-      const data = await resp.json();
-      if (!resp.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load seasonal demand analytics');
-      }
+      const data =
+        res.ok && res.data?.success
+          ? res.data
+          : getCuratedSeasonalFallback(pillar, search);
       setCurvePoints(Array.isArray(data.curvePoints) ? data.curvePoints : []);
       setBenchmarks(Array.isArray(data.benchmarks) ? data.benchmarks : []);
       setRisingLiveTrends(Array.isArray(data.risingLiveTrends) ? data.risingLiveTrends : []);
       setTrendsApiConfigured(Boolean(data.trendsApiConfigured));
       setLiveApiEnrichedCount(Number(data.liveApiEnrichedCount || 0));
-    } catch (err: any) {
-      setError(err?.message || 'Unable to load seasonal analytics');
+    } catch {
+      const fallback = getCuratedSeasonalFallback(pillar, search);
+      setCurvePoints(fallback.curvePoints);
+      setBenchmarks(fallback.benchmarks);
+      setRisingLiveTrends(fallback.risingLiveTrends);
     } finally {
       setLoading(false);
     }

@@ -43,17 +43,20 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
           type="button"
           onClick={handleInstallClick}
           aria-label="Install NepalAI Web Application"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer shadow-xs min-h-[36px] ${className}`}
+          title="Install NepalAI App"
+          className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 dark:text-cyan-200 dark:border-cyan-500/40 transition-colors cursor-pointer shadow-xs min-h-[36px] whitespace-nowrap shrink-0 ${className}`}
         >
           {justInstalled ? (
             <>
-              <Check className="h-3.5 w-3.5 text-cyan-400" />
+              <Check className="h-3.5 w-3.5 text-cyan-700 dark:text-cyan-300 shrink-0" />
               <span>Installed</span>
             </>
           ) : (
             <>
-              <Download className="h-3.5 w-3.5 text-cyan-400" />
-              <span>Install App</span>
+              <Download className="h-3.5 w-3.5 text-cyan-700 dark:text-cyan-300 shrink-0" />
+              <span>
+                Install<span className="hidden xl:inline"> App</span>
+              </span>
             </>
           )}
         </button>

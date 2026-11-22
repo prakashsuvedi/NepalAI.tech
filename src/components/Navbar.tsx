@@ -126,34 +126,35 @@ export const Navbar: React.FC<NavbarProps> = ({
       }`}
       role="banner"
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 xl:gap-4 px-3 sm:px-5 lg:px-6 overflow-x-clip">
         
         {/* Brand Logo Zone */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center shrink-0">
           <button
             type="button"
             onClick={() => handlePageSelect('home')}
             className="flex items-center rounded-lg cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-500 whitespace-nowrap shrink-0"
             aria-label="nepalai.tech Home"
           >
-            <NepalAILogo theme={theme} size="md" showDevanagariTag={true} />
+            <NepalAILogo theme={theme} size="md" showDevanagariTag={false} />
           </button>
         </div>
 
         {/* Desktop Navigation Links Zone — Clean Editorial Typography with Active Bottom Rule */}
         <nav
-          className="hidden lg:flex items-center gap-1 xl:gap-2"
+          className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 min-w-0"
           role="navigation"
           aria-label="Main page navigation"
         >
           {primaryPages.map((page) => {
             const isActive = currentPage === page.id;
+            const label = isNe ? page.labelNe : page.labelEn;
             return (
               <button
                 key={page.id}
                 type="button"
                 onClick={() => handlePageSelect(page.id)}
-                className={`relative px-2.5 xl:px-3 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[40px] flex items-center ${
+                className={`relative px-2 xl:px-2.5 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[38px] flex items-center ${
                   isActive
                     ? isDark
                       ? 'text-cyan-300'
@@ -164,10 +165,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span>{isNe ? page.labelNe : page.labelEn}</span>
+                {!isNe && page.id === 'command-center' ? (
+                  <span>
+                    Command<span className="hidden xl:inline"> Center</span>
+                  </span>
+                ) : !isNe && page.id === 'daily' ? (
+                  <span>
+                    <span className="hidden xl:inline">Daily </span>Utilities
+                  </span>
+                ) : (
+                  <span>{label}</span>
+                )}
                 {isActive && (
                   <span
-                    className="absolute inset-x-2.5 -bottom-[13px] h-[2px] bg-gradient-to-r from-rose-600 via-cyan-600 to-cyan-500 dark:from-rose-400 dark:via-cyan-400 dark:to-cyan-300"
+                    className="absolute inset-x-2 -bottom-[14px] h-[2px] bg-gradient-to-r from-rose-600 via-cyan-600 to-cyan-500 dark:from-rose-400 dark:via-cyan-400 dark:to-cyan-300"
                     aria-hidden="true"
                   />
                 )}
@@ -180,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setMoreOpen(!moreOpen)}
-              className={`relative px-2.5 xl:px-3 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[40px] flex items-center gap-1 ${
+              className={`relative px-2 xl:px-2.5 py-2 text-[13px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[38px] flex items-center gap-1 ${
                 isSecondaryActive
                   ? isDark
                     ? 'text-cyan-300'
@@ -312,14 +323,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         {/* Desktop Action Zone: Search, Language, Theme, Auth & Primary CTA */}
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <div className="hidden lg:flex items-center gap-1.5 shrink-0">
           
           {/* Global Search */}
           {onOpenSearch && (
             <button
               type="button"
               onClick={onOpenSearch}
-              className={`flex items-center justify-center rounded-lg border px-2.5 py-1.5 text-xs cursor-pointer min-h-[38px] min-w-[38px] transition-colors ${
+              className={`flex items-center justify-center rounded-lg border px-2 py-1.5 text-xs cursor-pointer min-h-[36px] min-w-[36px] transition-colors ${
                 isDark
                   ? 'border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-cyan-500/40'
                   : 'border-slate-200/90 bg-white text-slate-700 hover:text-slate-950 hover:border-cyan-500/50'
@@ -333,7 +344,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Language Toggle (Compact EN / नेपाली switch) */}
           <div
-            className={`flex items-center rounded-lg border p-0.5 text-xs min-h-[38px] shrink-0 ${
+            className={`flex items-center rounded-lg border p-0.5 text-xs min-h-[36px] shrink-0 ${
               isDark ? 'border-slate-800 bg-slate-900/70' : 'border-slate-200/90 bg-white'
             }`}
             role="group"
@@ -342,7 +353,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('en')}
-              className={`px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[30px] cursor-pointer whitespace-nowrap ${
+              className={`px-1.5 xl:px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[28px] cursor-pointer whitespace-nowrap ${
                 language === 'en'
                   ? isDark
                     ? 'bg-cyan-500 text-slate-950 font-bold'
@@ -358,7 +369,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onSelectLanguage('ne')}
-              className={`px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[30px] cursor-pointer whitespace-nowrap ${
+              className={`px-1.5 xl:px-2 py-1 rounded-md text-xs font-semibold transition-colors min-h-[28px] cursor-pointer whitespace-nowrap ${
                 language === 'ne'
                   ? isDark
                     ? 'bg-cyan-500 text-slate-950 font-bold'
@@ -369,7 +380,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
               aria-pressed={language === 'ne'}
             >
-              नेपाली
+              <span className="xl:hidden">ने</span>
+              <span className="hidden xl:inline">नेपाली</span>
             </button>
           </div>
 
@@ -380,7 +392,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onToggleTheme}
-            className={`p-2 rounded-lg border transition-colors text-xs cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shrink-0 ${
+            className={`p-1.5 rounded-lg border transition-colors text-xs cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0 ${
               isDark
                 ? 'border-slate-800 bg-slate-900/60 text-amber-300 hover:text-white hover:border-slate-700'
                 : 'border-slate-200/90 bg-white text-slate-700 hover:text-slate-950 hover:border-slate-300'
@@ -502,7 +514,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => onOpenAuth?.('signin')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors min-h-[38px] cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors min-h-[36px] cursor-pointer whitespace-nowrap shrink-0 ${
                 isDark
                   ? 'border-slate-800 bg-slate-900/60 hover:border-cyan-500/40 text-slate-200 hover:text-white'
                   : 'border-slate-200/90 bg-white hover:border-cyan-600/50 text-slate-800 hover:text-slate-950'
@@ -517,10 +529,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => onOpenConsultation()}
-            className="flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 px-3.5 py-2 text-xs font-bold text-white transition-colors shadow-xs cursor-pointer min-h-[38px] whitespace-nowrap shrink-0"
+            className="flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow-xs cursor-pointer min-h-[36px] whitespace-nowrap shrink-0"
           >
-            <span>{t.nav.bookConsultation}</span>
-            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+            {isNe ? (
+              <span>{t.nav.bookConsultation}</span>
+            ) : (
+              <span>
+                <span className="hidden xl:inline">Book </span>Consultation
+              </span>
+            )}
+            <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           </button>
         </div>
 

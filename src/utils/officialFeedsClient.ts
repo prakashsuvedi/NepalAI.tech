@@ -1,6 +1,8 @@
 // Shared client-side fetch coalescing for official Nepal feeds (NRB, FENEGOSIDA, Kalimati)
 // Prevents duplicate concurrent HTTP calls when multiple homepage sections mount simultaneously.
 
+import { resolveApiUrl } from './trendsFallback';
+
 const CLIENT_TTL_MS = 60_000;
 
 interface CachedEntry<T> {
@@ -23,10 +25,15 @@ export async function fetchSharedJson<T = any>(url: string): Promise<T | null> {
     return entry.inFlight as Promise<T | null>;
   }
 
-  const promise = fetch(url)
+  const promise = fetch(resolveApiUrl(url))
     .then(async (res) => {
       if (!res.ok) return null;
-      const json = (await res.json()) as T;
+      const contentType = res.headers.get('content-type') || '';
+      const text = await res.text();
+      if (text.trim().startsWith('<') || contentType.toLowerCase().includes('text/html')) {
+        return null;
+      }
+      const json = JSON.parse(text) as T;
       cache[url] = { fetchedAt: Date.now(), data: json, inFlight: null };
       return json;
     })
