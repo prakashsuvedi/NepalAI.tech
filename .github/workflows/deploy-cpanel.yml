@@ -11,6 +11,8 @@ jobs:
   build-and-deploy:
     name: Build & Deploy via cPanel API Token
     runs-on: ubuntu-latest
+    env:
+      USE_FTP_DEPLOY: ${{ secrets.FTP_SERVER != '' }}
 
     steps:
       - name: 📥 Checkout repository code
@@ -35,7 +37,7 @@ jobs:
           ls -lh deploy.zip
 
       - name: 🚀 Deploy to cPanel via FTPS / FTP (Fail-safe Direct Sync)
-        if: ${{ secrets.FTP_SERVER != '' }}
+        if: env.USE_FTP_DEPLOY == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -45,7 +47,7 @@ jobs:
           local-dir: ./dist/
 
       - name: 🚀 Deploy to cPanel via UAPI Token
-        if: ${{ secrets.FTP_SERVER == '' }}
+        if: env.USE_FTP_DEPLOY != 'true'
         env:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
